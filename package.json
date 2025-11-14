@@ -1,0 +1,10 @@
+{
+  "name": "jambgenius",
+  "version": "1.0.0",
+  "description": "JAMB Mock System - Nigeria's Premier Exam Preparation Platform",
+  "scripts": {
+    "dev": "python3 -m http.server 5000",
+    "build": "node build.js",
+    "start": "cd dist && python3 -m http.server 5000"
+  }
+}
