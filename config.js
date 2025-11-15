@@ -19,7 +19,7 @@ const CONFIG = {
   },
   
   recaptcha: {
-    siteKey: "6LdRG7QrAAAAAGVmW6QKF9Jb9HcnsXMG3u_5FXKe"
+    siteKey: "6LeYDQ0sAAAAAMZqdDi7tLbAG31ZFHSHAGYRwX9F"
   },
   
   pricing: {
