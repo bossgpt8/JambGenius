@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Performance Analytics | JambGenius 💯</title>
+        <meta
+            name="description"
+            content="Track your JAMB preparation progress and performance"
+        />
+
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="suppress-tailwind-warning.js"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        colors: {
+                            primary: {
+                                50: "#eff6ff",
+                                100: "#dbeafe",
+                                500: "#3b82f6",
+                                600: "#2563eb",
+                                700: "#1d4ed8",
+                            },
+                        },
+                        fontFamily: {
+                            sans: ["Inter", "system-ui", "sans-serif"],
+                        },
+                    },
+                },
+            };
+        </script>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
+        <script src="config.js"></script>
+        <script src="content-protection.js"></script>
+        <script type="module">
+            import "./firebase-init.js";
+            import "./auth-state.js";
+            import "./auth-modal.js";
+        </script>
+    </head>
+    <body class="bg-gray-50 font-sans">
+        <nav
+            class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50"
+        >
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center space-x-8">
+                        <a
+                            href="index.html"
+                            class="flex-shrink-0 flex items-center"
+                        >
+                            <i
+                                class="fas fa-graduation-cap text-2xl text-primary-600 mr-2"
+                            ></i>
+                            <span class="text-xl font-bold text-gray-900"
+                                >JambGenius 💯</span
+                            >
+                        </a>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <a
+                            href="daily-challenge.html"
+                            class="text-gray-600 hover:text-primary-600 transition-colors"
+                        >
+                            <i class="fas fa-trophy mr-2"></i>Daily Challenge
+                        </a>
+                        <a
+                            href="index.html"
+                            class="text-gray-600 hover:text-primary-600 transition-colors"
+                        >
+                            <i class="fas fa-arrow-left mr-2"></i>Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="mb-8">
+                <h1 class="text-4xl font-bold text-gray-900 mb-2">
+                    Performance Analytics
+                </h1>
+                <p class="text-gray-600">
+                    Track your progress and identify areas for improvement
+                </p>
+            </div>
+
+            <!-- Overall Stats -->
+            <div class="grid md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-xl p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                        <div
+                            class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"
+                        >
+                            <i class="fas fa-book text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div
+                        class="text-3xl font-bold text-gray-900"
+                        id="totalSessions"
+                    >
+                        0
+                    </div>
+                    <div class="text-sm text-gray-600">Total Sessions</div>
+                </div>
+
+                <div class="bg-white rounded-xl p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                        <div
+                            class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"
+                        >
+                            <i class="fas fa-check text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div
+                        class="text-3xl font-bold text-gray-900"
+                        id="avgAccuracy"
+                    >
+                        0%
+                    </div>
+                    <div class="text-sm text-gray-600">Average Accuracy</div>
+                </div>
+
+                <div class="bg-white rounded-xl p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                        <div
+                            class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center"
+                        >
+                            <i
+                                class="fas fa-question text-purple-600 text-xl"
+                            ></i>
+                        </div>
+                    </div>
+                    <div
+                        class="text-3xl font-bold text-gray-900"
+                        id="totalQuestions"
+                    >
+                        0
+                    </div>
+                    <div class="text-sm text-gray-600">Questions Answered</div>
+                </div>
+
+                <div class="bg-white rounded-xl p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                        <div
+                            class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center"
+                        >
+                            <i class="fas fa-fire text-orange-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-900" id="streak">
+                        0
+                    </div>
+                    <div class="text-sm text-gray-600">Day Streak</div>
+                </div>
+            </div>
+
+            <!-- Subject Performance -->
+            <div class="bg-white rounded-xl p-6 shadow-sm mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                    Subject Performance
+                </h2>
+                <div id="subjectStats" class="space-y-4">
+                    <!-- Subject stats will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Recent Sessions -->
+            <div class="bg-white rounded-xl p-6 shadow-sm mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                    Recent Sessions
+                </h2>
+                <div id="recentSessions" class="space-y-3">
+                    <!-- Recent sessions will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Bookmarked Questions -->
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">
+                        Bookmarked Questions
+                    </h2>
+                    <span
+                        class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold"
+                        id="bookmarkCount"
+                        >0</span
+                    >
+                </div>
+                <div id="bookmarkedList" class="space-y-3">
+                    <!-- Bookmarks will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Load analytics data
+            const sessions = JSON.parse(
+                localStorage.getItem("jambgenius_sessions") || "[]",
+            );
+            const bookmarks = JSON.parse(
+                localStorage.getItem("jambgenius_bookmarks") || "[]",
+            );
+
+            // Calculate overall stats
+            const totalSessions = sessions.length;
+            const totalQuestions = sessions.reduce(
+                (sum, s) => sum + s.answered,
+                0,
+            );
+            const totalCorrect = sessions.reduce(
+                (sum, s) => sum + s.correct,
+                0,
+            );
+            const avgAccuracy =
+                totalQuestions > 0
+                    ? Math.round((totalCorrect / totalQuestions) * 100)
+                    : 0;
+
+            // Calculate streak
+            function calculateStreak() {
+                if (sessions.length === 0) return 0;
+
+                const dates = sessions.map((s) =>
+                    new Date(s.date).toDateString(),
+                );
+                const uniqueDates = [...new Set(dates)].sort(
+                    (a, b) => new Date(b) - new Date(a),
+                );
+
+                let streak = 0;
+                const today = new Date().toDateString();
+                const yesterday = new Date(
+                    Date.now() - 86400000,
+                ).toDateString();
+
+                if (uniqueDates[0] === today || uniqueDates[0] === yesterday) {
+                    streak = 1;
+                    for (let i = 1; i < uniqueDates.length; i++) {
+                        const current = new Date(uniqueDates[i]);
+                        const previous = new Date(uniqueDates[i - 1]);
+                        const diffDays = Math.floor(
+                            (previous - current) / 86400000,
+                        );
+
+                        if (diffDays === 1) {
+                            streak++;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+
+                return streak;
+            }
+
+            // Display overall stats
+            document.getElementById("totalSessions").textContent =
+                totalSessions;
+            document.getElementById("avgAccuracy").textContent =
+                `${avgAccuracy}%`;
+            document.getElementById("totalQuestions").textContent =
+                totalQuestions;
+            document.getElementById("streak").textContent = calculateStreak();
+
+            // Subject performance
+            const subjectData = {};
+            sessions.forEach((session) => {
+                if (!subjectData[session.subject]) {
+                    subjectData[session.subject] = {
+                        total: 0,
+                        correct: 0,
+                        sessions: 0,
+                    };
+                }
+                subjectData[session.subject].total += session.answered;
+                subjectData[session.subject].correct += session.correct;
+                subjectData[session.subject].sessions++;
+            });
+
+            const subjectStatsContainer =
+                document.getElementById("subjectStats");
+            if (Object.keys(subjectData).length === 0) {
+                subjectStatsContainer.innerHTML =
+                    '<p class="text-gray-500 text-center py-8">No practice sessions yet. Start practicing to see your performance!</p>';
+            } else {
+                Object.entries(subjectData).forEach(([subject, data]) => {
+                    const accuracy = Math.round(
+                        (data.correct / data.total) * 100,
+                    );
+                    const div = document.createElement("div");
+                    div.className = "border-l-4 border-primary-500 pl-4";
+                    div.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <div>
+                            <div class="font-semibold text-gray-900 capitalize">${subject}</div>
+                            <div class="text-sm text-gray-600">${data.sessions} session${data.sessions > 1 ? "s" : ""} • ${data.total} questions</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold ${accuracy >= 70 ? "text-green-600" : accuracy >= 50 ? "text-yellow-600" : "text-red-600"}">${accuracy}%</div>
+                            <div class="text-sm text-gray-600">${data.correct}/${data.total}</div>
+                        </div>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="h-2 rounded-full ${accuracy >= 70 ? "bg-green-600" : accuracy >= 50 ? "bg-yellow-600" : "bg-red-600"}" style="width: ${accuracy}%"></div>
+                    </div>
+                `;
+                    subjectStatsContainer.appendChild(div);
+                });
+            }
+
+            // Recent sessions
+            const recentSessionsContainer =
+                document.getElementById("recentSessions");
+            if (sessions.length === 0) {
+                recentSessionsContainer.innerHTML =
+                    '<p class="text-gray-500 text-center py-8">No practice sessions yet</p>';
+            } else {
+                const recent = sessions.slice(-10).reverse();
+                recent.forEach((session) => {
+                    const div = document.createElement("div");
+                    div.className =
+                        "flex justify-between items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors";
+                    div.innerHTML = `
+                    <div>
+                        <div class="font-semibold text-gray-900 capitalize">${session.subject}</div>
+                        <div class="text-sm text-gray-600">
+                            ${session.mode === "timed" ? '<i class="fas fa-clock mr-1"></i>Timed' : '<i class="fas fa-infinity mr-1"></i>Free'} • 
+                            ${new Date(session.date).toLocaleDateString()}
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-lg font-bold ${session.percentage >= 70 ? "text-green-600" : session.percentage >= 50 ? "text-yellow-600" : "text-red-600"}">${session.percentage}%</div>
+                        <div class="text-sm text-gray-600">${session.correct}/${session.answered}</div>
+                    </div>
+                `;
+                    recentSessionsContainer.appendChild(div);
+                });
+            }
+
+            // Bookmarked questions
+            document.getElementById("bookmarkCount").textContent =
+                bookmarks.length;
+            const bookmarkedListContainer =
+                document.getElementById("bookmarkedList");
+            if (bookmarks.length === 0) {
+                bookmarkedListContainer.innerHTML =
+                    '<p class="text-gray-500 text-center py-8">No bookmarked questions yet. Click the bookmark icon during practice to save questions for later review.</p>';
+            } else {
+                bookmarkedListContainer.innerHTML = `
+                <p class="text-gray-600 mb-4">You have ${bookmarks.length} bookmarked question${bookmarks.length > 1 ? "s" : ""} saved for review.</p>
+                <a href="practice-mode-subjects.html" class="inline-block bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold">
+                    <i class="fas fa-book-open mr-2"></i>Practice Bookmarked Questions
+                </a>
+            `;
+            }
+        </script>
+    </body>
+</html>

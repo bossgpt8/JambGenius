@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Challenge | JambGenius 💯</title>
+    <meta name="description" content="Complete daily JAMB practice challenges and build your streak">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="suppress-tailwind-warning.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="supabaseClient.js"></script>
+    <script src="content-protection.js"></script>
+    <script type="module">
+        import './firebase-init.js';
+        import './auth-state.js';
+        import './auth-modal.js';
+    </script>
+</head>
+<body class="bg-gray-50 font-sans">
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <a href="index.html" class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-graduation-cap text-2xl text-primary-600 mr-2"></i>
+                        <span class="text-xl font-bold text-gray-900">JambGenius 💯</span>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="analytics.html" class="text-gray-600 hover:text-primary-600 transition-colors">
+                        <i class="fas fa-chart-line mr-2"></i>Analytics
+                    </a>
+                    <a href="index.html" class="text-gray-600 hover:text-primary-600 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="inline-block bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-6 py-2 rounded-full font-bold text-sm mb-4">
+                <i class="fas fa-trophy mr-2"></i>DAILY CHALLENGE
+            </div>
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">Today's Challenge</h1>
+            <p class="text-gray-600">Answer 10 questions and build your streak!</p>
+        </div>
+
+        <!-- Streak Counter -->
+        <div class="bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl p-8 text-white shadow-xl mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-sm font-semibold mb-2">YOUR STREAK</div>
+                    <div class="text-6xl font-bold" id="streakCount">0</div>
+                    <div class="text-sm mt-2" id="streakLabel">days in a row</div>
+                </div>
+                <div class="text-8xl">🔥</div>
+            </div>
+        </div>
+
+        <!-- Challenge Status -->
+        <div id="challengeStatus" class="bg-white rounded-xl shadow-sm p-8 mb-8">
+            <!-- Will be filled by JavaScript -->
+        </div>
+
+        <!-- Challenge Interface -->
+        <div id="challengeInterface" class="hidden">
+            <div class="bg-white rounded-xl shadow-sm p-8 mb-6">
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="text-sm font-semibold text-gray-500">Question <span id="questionNum">1</span>/10</div>
+                        <div class="bg-primary-100 text-primary-700 px-3 py-1 rounded-full text-sm font-semibold" id="subjectBadge">English</div>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900" id="questionText"></h2>
+                </div>
+
+                <div id="optionsContainer" class="space-y-3">
+                </div>
+
+                <div id="feedback" class="hidden mt-6 p-4 rounded-lg">
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <div class="text-sm text-gray-600">
+                    Score: <span class="font-bold text-gray-900" id="score">0/10</span>
+                </div>
+                <button id="nextBtn" class="px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-semibold">
+                    Next <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Completion Modal -->
+        <div id="completionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+                <div class="text-center">
+                    <div class="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-trophy text-5xl text-yellow-500"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-4">Challenge Complete!</h2>
+                    <div class="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl p-6 mb-6">
+                        <div class="text-5xl font-bold text-primary-600 mb-2" id="finalScore">0/10</div>
+                        <div class="text-gray-600 mb-2">Today's Score</div>
+                        <div class="text-2xl font-bold text-orange-600">🔥 <span id="newStreak">1</span> Day Streak!</div>
+                    </div>
+                    <div class="space-y-3">
+                        <a href="analytics.html" class="block w-full bg-primary-600 text-white py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold">
+                            View Analytics
+                        </a>
+                        <a href="practice-mode-subjects.html" class="block w-full bg-white border-2 border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-50 transition-colors font-semibold">
+                            Continue Practicing
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUBJECTS = ['english', 'mathematics', 'physics', 'chemistry', 'biology'];
+        const MOCK_QUESTIONS = {
+            english: { id: 1, subject: 'english', question: 'Choose the correct option: She _____ to school every day.', option_a: 'go', option_b: 'goes', option_c: 'going', option_d: 'gone', correct_answer: 'B', explanation: 'Use "goes" for third person singular.' },
+            mathematics: { id: 1, subject: 'mathematics', question: 'Solve: 5 + 3 × 2 = ?', option_a: '16', option_b: '11', option_c: '10', option_d: '13', correct_answer: 'B', explanation: 'BODMAS: 3 × 2 = 6, then 5 + 6 = 11' },
+            physics: { id: 1, subject: 'physics', question: 'What is the SI unit of energy?', option_a: 'Watt', option_b: 'Joule', option_c: 'Newton', option_d: 'Kelvin', correct_answer: 'B', explanation: 'The Joule (J) is the SI unit of energy.' },
+            chemistry: { id: 1, subject: 'chemistry', question: 'The atomic number represents:', option_a: 'Number of neutrons', option_b: 'Number of protons', option_c: 'Atomic mass', option_d: 'Number of electrons', correct_answer: 'B', explanation: 'Atomic number equals number of protons.' },
+            biology: { id: 1, subject: 'biology', question: 'Which organelle controls cell activities?', option_a: 'Mitochondria', option_b: 'Nucleus', option_c: 'Ribosome', option_d: 'Vacuole', correct_answer: 'B', explanation: 'The nucleus contains DNA and controls all cell activities.' }
+        };
+
+        let challengeQuestions = [];
+        let currentQuestionIndex = 0;
+        let correctCount = 0;
+        let answered = false;
+
+        // Check if challenge is complete today
+        function isChallengeCompleteToday() {
+            const challenges = JSON.parse(localStorage.getItem('jambgenius_challenges') || '[]');
+            const today = new Date().toDateString();
+            return challenges.some(c => new Date(c.date).toDateString() === today);
+        }
+
+        // Calculate streak
+        function calculateStreak() {
+            const challenges = JSON.parse(localStorage.getItem('jambgenius_challenges') || '[]');
+            if (challenges.length === 0) return 0;
+            
+            const dates = challenges.map(c => new Date(c.date).toDateString());
+            const uniqueDates = [...new Set(dates)].sort((a, b) => new Date(b) - new Date(a));
+            
+            let streak = 0;
+            const today = new Date().toDateString();
+            const yesterday = new Date(Date.now() - 86400000).toDateString();
+            
+            if (uniqueDates[0] === today || uniqueDates[0] === yesterday) {
+                streak = 1;
+                for (let i = 1; i < uniqueDates.length; i++) {
+                    const current = new Date(uniqueDates[i]);
+                    const previous = new Date(uniqueDates[i - 1]);
+                    const diffDays = Math.floor((previous - current) / 86400000);
+                    
+                    if (diffDays === 1) {
+                        streak++;
+                    } else {
+                        break;
+                    }
+                }
+            }
+            
+            return streak;
+        }
+
+        // Initialize
+        const streak = calculateStreak();
+        document.getElementById('streakCount').textContent = streak;
+        document.getElementById('streakLabel').textContent = streak === 1 ? 'day in a row' : 'days in a row';
+
+        if (isChallengeCompleteToday()) {
+            document.getElementById('challengeStatus').innerHTML = `
+                <div class="text-center py-12">
+                    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-check text-4xl text-green-600"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Challenge Complete!</h2>
+                    <p class="text-gray-600 mb-6">You've completed today's challenge. Come back tomorrow for a new one!</p>
+                    <div class="bg-gray-50 rounded-xl p-4 inline-block">
+                        <div class="text-sm text-gray-600">Next challenge in:</div>
+                        <div class="text-2xl font-bold text-gray-900" id="countdown">Loading...</div>
+                    </div>
+                </div>
+            `;
+            
+            // Countdown to next challenge
+            function updateCountdown() {
+                const now = new Date();
+                const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+                const diff = tomorrow - now;
+                
+                const hours = Math.floor(diff / 3600000);
+                const minutes = Math.floor((diff % 3600000) / 60000);
+                const seconds = Math.floor((diff % 60000) / 1000);
+                
+                document.getElementById('countdown').textContent = 
+                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+            
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        } else {
+            document.getElementById('challengeStatus').innerHTML = `
+                <div class="text-center py-12">
+                    <div class="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-play text-4xl text-primary-600"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Ready for Today's Challenge?</h2>
+                    <p class="text-gray-600 mb-6">Answer 10 random questions from different subjects</p>
+                    <button id="startBtn" class="bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition-colors font-bold text-lg">
+                        <i class="fas fa-rocket mr-2"></i>Start Challenge
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('startBtn').addEventListener('click', startChallenge);
+        }
+
+        async function startChallenge() {
+            // Generate 10 random questions from different subjects
+            challengeQuestions = [];
+            for (let i = 0; i < 10; i++) {
+                const subject = SUBJECTS[Math.floor(Math.random() * SUBJECTS.length)];
+                const mockQ = MOCK_QUESTIONS[subject];
+                challengeQuestions.push({
+                    ...mockQ,
+                    id: `challenge_${i}`,
+                    subject
+                });
+            }
+            
+            document.getElementById('challengeStatus').classList.add('hidden');
+            document.getElementById('challengeInterface').classList.remove('hidden');
+            
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            answered = false;
+            const question = challengeQuestions[currentQuestionIndex];
+            
+            document.getElementById('questionNum').textContent = currentQuestionIndex + 1;
+            document.getElementById('subjectBadge').textContent = capitalizeFirst(question.subject);
+            document.getElementById('questionText').textContent = question.question;
+            document.getElementById('feedback').classList.add('hidden');
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            ['A', 'B', 'C', 'D'].forEach(opt => {
+                const div = document.createElement('div');
+                div.className = 'option-btn p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-all';
+                div.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center mr-3 font-semibold">${opt}</div>
+                        <div class="flex-1">${question[`option_${opt.toLowerCase()}`]}</div>
+                    </div>
+                `;
+                div.addEventListener('click', () => selectAnswer(opt));
+                optionsContainer.appendChild(div);
+            });
+        }
+
+        function selectAnswer(option) {
+            if (answered) return;
+            answered = true;
+            
+            const question = challengeQuestions[currentQuestionIndex];
+            const isCorrect = option === question.correct_answer;
+            
+            if (isCorrect) correctCount++;
+            
+            document.getElementById('score').textContent = `${correctCount}/10`;
+            
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.style.pointerEvents = 'none';
+            });
+            
+            const feedback = document.getElementById('feedback');
+            feedback.classList.remove('hidden');
+            
+            if (isCorrect) {
+                feedback.className = 'mt-6 p-4 rounded-lg bg-green-50 border-2 border-green-200';
+                feedback.innerHTML = `
+                    <div class="flex items-start space-x-3">
+                        <i class="fas fa-check-circle text-2xl text-green-600"></i>
+                        <div>
+                            <div class="font-semibold text-green-900">Correct!</div>
+                            <div class="text-green-800">${question.explanation}</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                feedback.className = 'mt-6 p-4 rounded-lg bg-red-50 border-2 border-red-200';
+                feedback.innerHTML = `
+                    <div class="flex items-start space-x-3">
+                        <i class="fas fa-times-circle text-2xl text-red-600"></i>
+                        <div>
+                            <div class="font-semibold text-red-900">Incorrect</div>
+                            <div class="text-red-800">Correct answer: <strong>${question.correct_answer}</strong></div>
+                            <div class="text-red-700">${question.explanation}</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (!answered) {
+                alert('Please select an answer first');
+                return;
+            }
+            
+            if (currentQuestionIndex < challengeQuestions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                completeChallenge();
+            }
+        });
+
+        function completeChallenge() {
+            // Save challenge
+            const challenges = JSON.parse(localStorage.getItem('jambgenius_challenges') || '[]');
+            challenges.push({
+                date: new Date().toISOString(),
+                score: correctCount,
+                total: 10
+            });
+            localStorage.setItem('jambgenius_challenges', JSON.stringify(challenges));
+            
+            const newStreak = calculateStreak();
+            
+            // Update streak banner
+            document.getElementById('streakCount').textContent = newStreak;
+            document.getElementById('streakLabel').textContent = newStreak === 1 ? 'day in a row' : 'days in a row';
+            
+            // Hide interface and show completion status
+            document.getElementById('challengeInterface').classList.add('hidden');
+            document.getElementById('challengeStatus').classList.remove('hidden');
+            document.getElementById('challengeStatus').innerHTML = `
+                <div class="text-center py-12">
+                    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-check text-4xl text-green-600"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Challenge Complete!</h2>
+                    <p class="text-gray-600 mb-6">You've completed today's challenge. Come back tomorrow for a new one!</p>
+                    <div class="bg-gray-50 rounded-xl p-4 inline-block">
+                        <div class="text-sm text-gray-600">Next challenge in:</div>
+                        <div class="text-2xl font-bold text-gray-900" id="countdown">Loading...</div>
+                    </div>
+                </div>
+            `;
+            
+            // Start countdown timer after DOM update
+            setTimeout(() => {
+                function updateCountdown() {
+                    const now = new Date();
+                    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+                    const diff = tomorrow - now;
+                    
+                    const hours = Math.floor(diff / 3600000);
+                    const minutes = Math.floor((diff % 3600000) / 60000);
+                    const seconds = Math.floor((diff % 60000) / 1000);
+                    
+                    const countdownEl = document.getElementById('countdown');
+                    if (countdownEl) {
+                        countdownEl.textContent = 
+                            `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                    }
+                }
+                
+                updateCountdown();
+                setInterval(updateCountdown, 1000);
+            }, 100);
+            
+            // Show completion modal
+            document.getElementById('finalScore').textContent = `${correctCount}/10`;
+            document.getElementById('newStreak').textContent = newStreak;
+            document.getElementById('completionModal').classList.remove('hidden');
+        }
+
+        function capitalizeFirst(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Mode - Select Subjects | JambGenius 💯</title>
+    <meta name="description" content="Choose 4 subjects for your full JAMB mock exam experience.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="suppress-tailwind-warning.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="config.js"></script>
+    <script src="content-protection.js"></script>
+    <script type="module">
+        import './firebase-init.js';
+        import './auth-state.js';
+        import './auth-modal.js';
+    </script>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Navigation Header -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <a href="index.html" class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-graduation-cap text-2xl text-primary-600 mr-2"></i>
+                        <span class="text-xl font-bold text-gray-900">JambGenius 💯</span>
+                    </a>
+                    <div class="hidden md:flex items-center space-x-8">
+                        <a href="index.html" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Home</a>
+                        <a href="study-tips.html" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Study Tips</a>
+                        <a href="jamb-syllabus.html" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">JAMB Syllabus</a>
+                        <a href="chatroom.html" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Community Chat</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div id="userSection" class="hidden items-center space-x-4">
+                        <span id="userName" class="text-gray-700 font-medium"></span>
+                        <button id="signOutBtn" class="text-gray-600 hover:text-red-600 transition-colors">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                    <button id="authBtn" class="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium">
+                        Sign In
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-purple-50 to-blue-50 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <a href="index.html" class="text-gray-600 hover:text-primary-600 transition-colors">
+                            <i class="fas fa-arrow-left mr-2"></i>Back to Home
+                        </a>
+                    </div>
+                    <h1 class="text-4xl font-bold text-gray-900 mb-2">Exam Mode</h1>
+                    <p class="text-xl text-gray-600">Select 4 subjects for your full JAMB simulation</p>
+                </div>
+                <div class="hidden md:block">
+                    <div class="bg-white rounded-xl p-6 shadow-lg">
+                        <i class="fas fa-stopwatch text-5xl text-purple-600"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Subject Selection -->
+    <div class="max-w-7xl mx-auto px-4 py-12">
+        <!-- Selection Progress -->
+        <div class="mb-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-gray-900">Choose Your Subjects</h2>
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl font-bold text-primary-600" id="selectedCount">0</span>
+                    <span class="text-gray-600">/ 4 subjects selected</span>
+                </div>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3">
+                <div id="progressBar" class="bg-primary-600 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <p class="text-sm text-gray-600 mt-4">
+                <i class="fas fa-info-circle text-primary-600 mr-1"></i>
+                Select Use of English (mandatory) and 3 other subjects
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Use of English (Mandatory) -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-primary-500 cursor-pointer selected" data-subject="english" data-mandatory="true">
+                <div class="flex flex-col items-center text-center relative">
+                    <div class="absolute top-0 right-0">
+                        <i class="fas fa-check-circle text-2xl text-primary-600"></i>
+                    </div>
+                    <div class="w-16 h-16 bg-red-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-book-open text-3xl text-red-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Use of English</h3>
+                    <span class="text-xs bg-red-100 text-red-600 px-3 py-1 rounded-full font-semibold">MANDATORY</span>
+                    <p class="text-sm text-gray-600 mt-3">60 Questions</p>
+                </div>
+            </div>
+
+            <!-- Mathematics -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="mathematics">
+                <div class="flex flex-col items-center text-center relative">
+                    <div class="absolute top-0 right-0 hidden check-icon">
+                        <i class="fas fa-check-circle text-2xl text-primary-600"></i>
+                    </div>
+                    <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-calculator text-3xl text-blue-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Mathematics</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">SCIENCE</span>
+                    <p class="text-sm text-gray-600 mt-3">40 Questions</p>
+                </div>
+            </div>
+
+            <!-- Physics -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="physics">
+                <div class="flex flex-col items-center text-center relative">
+                    <div class="absolute top-0 right-0 hidden check-icon">
+                        <i class="fas fa-check-circle text-2xl text-primary-600"></i>
+                    </div>
+                    <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-atom text-3xl text-purple-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Physics</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">SCIENCE</span>
+                    <p class="text-sm text-gray-600 mt-3">40 Questions</p>
+                </div>
+            </div>
+
+            <!-- Chemistry -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="chemistry">
+                <div class="flex flex-col items-center text-center relative">
+                    <div class="absolute top-0 right-0 hidden check-icon">
+                        <i class="fas fa-check-circle text-2xl text-primary-600"></i>
+                    </div>
+                    <div class="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-flask text-3xl text-green-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Chemistry</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">SCIENCE</span>
+                    <p class="text-sm text-gray-600 mt-3">40 Questions</p>
+                </div>
+            </div>
+
+            <!-- Biology -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="biology">
+                <div class="flex flex-col items-center text-center relative">
+                    <div class="absolute top-0 right-0 hidden check-icon">
+                        <i class="fas fa-check-circle text-2xl text-primary-600"></i>
+                    </div>
+                    <div class="w-16 h-16 bg-teal-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-dna text-3xl text-teal-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Biology</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">SCIENCE</span>
+                    <p class="text-sm text-gray-600 mt-3">40 Questions</p>
+                </div>
+            </div>
+
+            <!-- Government -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="government">
+                <div class="flex flex-col items-center text-center relative">
+                    <div class="absolute top-0 right-0 hidden check-icon">
+                        <i class="fas fa-check-circle text-2xl text-primary-600"></i>
+                    </div>
+                    <div class="w-16 h-16 bg-yellow-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-landmark text-3xl text-yellow-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Government</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">ARTS</span>
+                    <p class="text-sm text-gray-600 mt-3">40 Questions</p>
+                </div>
+            </div>
+
+            <!-- Economics -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="economics">
+                <div class="flex flex-col items-center text-center relative">
+                    <div class="absolute top-0 right-0 hidden check-icon">
+                        <i class="fas fa-check-circle text-2xl text-primary-600"></i>
+                    </div>
+                    <div class="w-16 h-16 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-line text-3xl text-orange-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Economics</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">COMMERCIAL</span>
+                    <p class="text-sm text-gray-600 mt-3">40 Questions</p>
+                </div>
+            </div>
+
+            <!-- Commerce -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="commerce">
+                <div class="flex flex-col items-center text-center relative">
+                    <div class="absolute top-0 right-0 hidden check-icon">
+                        <i class="fas fa-check-circle text-2xl text-primary-600"></i>
+                    </div>
+                    <div class="w-16 h-16 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-shopping-cart text-3xl text-indigo-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Commerce</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">COMMERCIAL</span>
+                    <p class="text-sm text-gray-600 mt-3">40 Questions</p>
+                </div>
+            </div>
+
+            <!-- Literature in English -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="literature">
+                <div class="flex flex-col items-center text-center relative">
+                    <div class="absolute top-0 right-0 hidden check-icon">
+                        <i class="fas fa-check-circle text-2xl text-primary-600"></i>
+                    </div>
+                    <div class="w-16 h-16 bg-pink-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-book text-3xl text-pink-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Literature in English</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">ARTS</span>
+                    <p class="text-sm text-gray-600 mt-3">40 Questions</p>
+                </div>
+            </div>
+
+            <!-- Geography -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="geography">
+                <div class="flex flex-col items-center text-center relative">
+                    <div class="absolute top-0 right-0 hidden check-icon">
+                        <i class="fas fa-check-circle text-2xl text-primary-600"></i>
+                    </div>
+                    <div class="w-16 h-16 bg-cyan-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-globe-africa text-3xl text-cyan-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Geography</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">ARTS</span>
+                    <p class="text-sm text-gray-600 mt-3">40 Questions</p>
+                </div>
+            </div>
+
+            <!-- CRS -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="crs">
+                <div class="flex flex-col items-center text-center relative">
+                    <div class="absolute top-0 right-0 hidden check-icon">
+                        <i class="fas fa-check-circle text-2xl text-primary-600"></i>
+                    </div>
+                    <div class="w-16 h-16 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-cross text-3xl text-amber-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">CRS</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">ARTS</span>
+                    <p class="text-sm text-gray-600 mt-3">40 Questions</p>
+                </div>
+            </div>
+
+            <!-- Civic Education -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="civic">
+                <div class="flex flex-col items-center text-center relative">
+                    <div class="absolute top-0 right-0 hidden check-icon">
+                        <i class="fas fa-check-circle text-2xl text-primary-600"></i>
+                    </div>
+                    <div class="w-16 h-16 bg-lime-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-users text-3xl text-lime-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Civic Education</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">ARTS</span>
+                    <p class="text-sm text-gray-600 mt-3">40 Questions</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Start Exam Button -->
+        <div class="mt-12 text-center">
+            <button id="startExamBtn" class="bg-gray-300 text-gray-500 px-12 py-4 rounded-lg font-bold text-lg cursor-not-allowed" disabled>
+                <i class="fas fa-lock mr-2"></i>
+                Select 4 Subjects to Start
+            </button>
+            <p class="text-sm text-gray-600 mt-4">
+                <i class="fas fa-clock text-primary-600 mr-1"></i>
+                180 questions • 2 hours • 400 marks
+            </p>
+        </div>
+
+        <!-- Info Box -->
+        <div class="mt-12 bg-purple-50 border border-purple-200 rounded-xl p-6">
+            <div class="flex items-start space-x-4">
+                <i class="fas fa-exclamation-triangle text-3xl text-purple-600 mt-1"></i>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Exam Mode Features</h3>
+                    <ul class="space-y-2 text-gray-700">
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check text-purple-600"></i>
+                            <span>Full JAMB simulation with 180 questions</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check text-purple-600"></i>
+                            <span>2-hour time limit (just like the real exam)</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check text-purple-600"></i>
+                            <span>Results shown only at the end</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check text-purple-600"></i>
+                            <span>Performance saved to your profile</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center text-gray-400">
+                <p>&copy; 2025 JambGenius 💯. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc, runTransaction } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const app = initializeApp(CONFIG.firebase);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        async function checkExamCredits() {
+            const user = auth.currentUser;
+            if (!user) {
+                return 0;
+            }
+
+            try {
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                if (userDoc.exists()) {
+                    return userDoc.data().examCredits || 0;
+                }
+            } catch (error) {
+                console.error('Error checking exam credits:', error);
+            }
+
+            return 0;
+        }
+
+        async function consumeExamCredit() {
+            const user = auth.currentUser;
+            if (!user) {
+                return false;
+            }
+
+            try {
+                const userDocRef = doc(db, 'users', user.uid);
+                
+                const result = await runTransaction(db, async (transaction) => {
+                    const userDoc = await transaction.get(userDocRef);
+                    
+                    if (!userDoc.exists()) {
+                        throw new Error('User document does not exist');
+                    }
+
+                    const currentCredits = userDoc.data().examCredits || 0;
+                    if (currentCredits <= 0) {
+                        throw new Error('No exam credits available');
+                    }
+
+                    transaction.update(userDocRef, {
+                        examCredits: currentCredits - 1,
+                        lastExamStartedAt: new Date().toISOString()
+                    });
+
+                    return true;
+                });
+
+                return result;
+            } catch (error) {
+                console.error('Error consuming exam credit:', error);
+                return false;
+            }
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            const userSection = document.getElementById('userSection');
+            const userName = document.getElementById('userName');
+            const authBtn = document.getElementById('authBtn');
+            const signOutBtn = document.getElementById('signOutBtn');
+
+            if (user) {
+                userSection.classList.remove('hidden');
+                userSection.classList.add('flex');
+                authBtn.classList.add('hidden');
+                userName.textContent = user.displayName || user.email.split('@')[0];
+
+                if (signOutBtn) {
+                    signOutBtn.addEventListener('click', async () => {
+                        if (confirm('Are you sure you want to sign out?')) {
+                            await signOut(auth);
+                            window.location.href = 'index.html';
+                        }
+                    });
+                }
+            } else {
+                userSection.classList.add('hidden');
+                userSection.classList.remove('flex');
+                authBtn.classList.remove('hidden');
+
+                if (authBtn) {
+                    authBtn.addEventListener('click', () => {
+                        window.location.href = 'index.html#auth';
+                    });
+                }
+            }
+
+            const credits = await checkExamCredits();
+            
+            if (credits <= 0) {
+                if (confirm('You need to purchase an exam credit (₦1,000 per exam). Would you like to proceed to payment?')) {
+                    window.location.href = 'exam-payment.html';
+                } else {
+                    window.location.href = 'index.html';
+                }
+            }
+        });
+
+        const subjectCards = document.querySelectorAll('.subject-card');
+        const selectedCount = document.getElementById('selectedCount');
+        const progressBar = document.getElementById('progressBar');
+        const startExamBtn = document.getElementById('startExamBtn');
+        const selectedSubjects = new Set(['english']); // English is pre-selected
+
+        function updateUI() {
+            const count = selectedSubjects.size;
+            selectedCount.textContent = count;
+            progressBar.style.width = `${(count / 4) * 100}%`;
+
+            // Enable/disable start button
+            if (count === 4) {
+                startExamBtn.disabled = false;
+                startExamBtn.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+                startExamBtn.classList.add('bg-primary-600', 'text-white', 'hover:bg-primary-700', 'cursor-pointer');
+                startExamBtn.innerHTML = '<i class="fas fa-rocket mr-2"></i>Start Full Mock Exam';
+            } else {
+                startExamBtn.disabled = true;
+                startExamBtn.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+                startExamBtn.classList.remove('bg-primary-600', 'text-white', 'hover:bg-primary-700', 'cursor-pointer');
+                startExamBtn.innerHTML = `<i class="fas fa-lock mr-2"></i>Select ${4 - count} More Subject${4 - count > 1 ? 's' : ''}`;
+            }
+        }
+
+        subjectCards.forEach(card => {
+            const subject = card.dataset.subject;
+            const isMandatory = card.dataset.mandatory === 'true';
+            const checkIcon = card.querySelector('.check-icon');
+
+            card.addEventListener('click', () => {
+                if (isMandatory) return; // Can't deselect mandatory subject
+
+                if (selectedSubjects.has(subject)) {
+                    // Deselect
+                    selectedSubjects.delete(subject);
+                    card.classList.remove('selected', 'border-primary-500');
+                    card.classList.add('border-transparent');
+                    checkIcon.classList.add('hidden');
+                } else {
+                    // Select (only if less than 4 selected)
+                    if (selectedSubjects.size < 4) {
+                        selectedSubjects.add(subject);
+                        card.classList.add('selected', 'border-primary-500');
+                        card.classList.remove('border-transparent');
+                        checkIcon.classList.remove('hidden');
+                    }
+                }
+
+                updateUI();
+            });
+        });
+
+        startExamBtn.addEventListener('click', async () => {
+            if (selectedSubjects.size === 4) {
+                const credits = await checkExamCredits();
+                
+                if (credits <= 0) {
+                    if (confirm('You have no exam credits remaining. Would you like to purchase another exam (₦1,000)?')) {
+                        window.location.href = 'exam-payment.html';
+                    }
+                    return;
+                }
+
+                if (confirm(`You have ${credits} exam credit${credits > 1 ? 's' : ''} remaining. Starting the exam will consume 1 credit. Continue?`)) {
+                    const consumed = await consumeExamCredit();
+                    if (consumed) {
+                        const subjects = Array.from(selectedSubjects).join(',');
+                        window.location.href = `exam.html?subjects=${subjects}`;
+                    } else {
+                        alert('Failed to start exam. Please try again or contact support.');
+                    }
+                }
+            }
+        });
+
+        // Initialize UI
+        updateUI();
+    </script>
+</body>
+</html>

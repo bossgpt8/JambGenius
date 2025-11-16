@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Tips & Strategies - JambGenius 💯</title>
+    <meta name="description" content="Proven strategies and expert advice to help you study more effectively and achieve excellent JAMB scores.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="suppress-tailwind-warning.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="config.js"></script>
+    <script src="content-protection.js"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Navigation Header -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <a href="index.html" class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-graduation-cap text-2xl text-primary-600 mr-2"></i>
+                        <span class="text-xl font-bold text-gray-900">JambGenius 💯</span>
+                    </a>
+                    <div class="hidden md:flex items-center space-x-8">
+                        <a href="index.html" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Home</a>
+                        <a href="study-tips.html" class="text-primary-600 font-medium">Study Tips</a>
+                        <a href="jamb-syllabus.html" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">JAMB Syllabus</a>
+                        <a href="chatroom.html" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Community Chat</a>
+                        <a href="help-center.html" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Help Center</a>
+                        <a href="contact-us.html" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Contact Us</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="profile.html" class="profile-link hidden text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                        <i class="fas fa-user-circle mr-1"></i>Profile
+                    </a>
+                    <div id="userSection" class="hidden items-center space-x-3">
+                        <img id="userAvatar" src="" alt="User" class="w-8 h-8 rounded-full">
+                        <span id="userName" class="text-gray-700 font-medium"></span>
+                        <button id="signOutBtn" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                    <button id="authBtn" class="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium">
+                        Sign In
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-primary-50 to-blue-100 py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">Study Tips & Strategies</h1>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Proven strategies and expert advice to help you study more effectively and achieve excellent JAMB scores
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 py-16">
+        <!-- General Study Strategies -->
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">General Study Strategies</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Time Management -->
+                <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-shadow border border-gray-100">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-clock text-primary-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Time Management</h3>
+                    </div>
+                    <ul class="space-y-3">
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-check text-primary-600 mt-1"></i>
+                            <span class="text-gray-700">Create a realistic daily study schedule and stick to it</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-check text-primary-600 mt-1"></i>
+                            <span class="text-gray-700">Use the Pomodoro Technique: 25 minutes focused study, 5-minute break</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-check text-primary-600 mt-1"></i>
+                            <span class="text-gray-700">Allocate more time to your weaker subjects</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-check text-primary-600 mt-1"></i>
+                            <span class="text-gray-700">Set specific time limits for each subject during practice sessions</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Effective Learning Techniques -->
+                <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-shadow border border-gray-100">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-lightbulb text-green-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Effective Learning Techniques</h3>
+                    </div>
+                    <ul class="space-y-3">
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-check text-green-600 mt-1"></i>
+                            <span class="text-gray-700">Active recall: Test yourself without looking at notes</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-check text-green-600 mt-1"></i>
+                            <span class="text-gray-700">Spaced repetition: Review topics at increasing intervals</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-check text-green-600 mt-1"></i>
+                            <span class="text-gray-700">Create mind maps to visualize connections between topics</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-check text-green-600 mt-1"></i>
+                            <span class="text-gray-700">Teach concepts to someone else to reinforce understanding</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Goal Setting & Tracking -->
+                <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-shadow border border-gray-100">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-check-circle text-purple-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Goal Setting & Tracking</h3>
+                    </div>
+                    <ul class="space-y-3">
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-check text-purple-600 mt-1"></i>
+                            <span class="text-gray-700">Set SMART goals (Specific, Measurable, Achievable, Relevant, Time-bound)</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-check text-purple-600 mt-1"></i>
+                            <span class="text-gray-700">Track your progress with our Performance Analytics</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-check text-purple-600 mt-1"></i>
+                            <span class="text-gray-700">Set weekly targets for practice questions completed</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-check text-purple-600 mt-1"></i>
+                            <span class="text-gray-700">Celebrate small wins to maintain motivation</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Subject-Specific Strategies -->
+                <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-shadow border border-gray-100">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-book text-yellow-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Subject-Specific Strategies</h3>
+                    </div>
+                    <ul class="space-y-3">
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-check text-yellow-600 mt-1"></i>
+                            <span class="text-gray-700">English: Read newspapers daily to improve comprehension</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-check text-yellow-600 mt-1"></i>
+                            <span class="text-gray-700">Mathematics: Practice calculations without calculator regularly</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-check text-yellow-600 mt-1"></i>
+                            <span class="text-gray-700">Sciences: Focus on understanding concepts, not memorization</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-check text-yellow-600 mt-1"></i>
+                            <span class="text-gray-700">Use past questions to identify frequently tested topics</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Exam Success Strategies -->
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Exam Success Strategies</h2>
+            <div class="space-y-6">
+                <!-- Pre-Exam Preparation -->
+                <div class="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-calendar-check text-primary-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900">Pre-Exam Preparation</h3>
+                            <p class="text-gray-600">Final weeks before your JAMB examination</p>
+                        </div>
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-4 mt-6">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-arrow-right text-green-600 mt-1"></i>
+                            <span class="text-gray-700">Review your weakest topics identified through practice tests</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-arrow-right text-green-600 mt-1"></i>
+                            <span class="text-gray-700">Take full mock exams under timed conditions</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-arrow-right text-green-600 mt-1"></i>
+                            <span class="text-gray-700">Prepare all required documents and exam materials</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-arrow-right text-green-600 mt-1"></i>
+                            <span class="text-gray-700">Get adequate sleep and maintain a healthy routine</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exam Day Strategy -->
+                <div class="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-stopwatch text-green-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900">Exam Day Strategy</h3>
+                            <p class="text-gray-600">Maximize your performance during the actual exam</p>
+                        </div>
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-4 mt-6">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-arrow-right text-primary-600 mt-1"></i>
+                            <span class="text-gray-700">Arrive early to avoid stress and settle in comfortably</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-arrow-right text-primary-600 mt-1"></i>
+                            <span class="text-gray-700">Read all instructions carefully before starting</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-arrow-right text-primary-600 mt-1"></i>
+                            <span class="text-gray-700">Answer easy questions first to build confidence</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-arrow-right text-primary-600 mt-1"></i>
+                            <span class="text-gray-700">Manage your time: don't spend too long on difficult questions</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question Answering Techniques -->
+                <div class="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-brain text-purple-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900">Question Answering Techniques</h3>
+                            <p class="text-gray-600">Smart approaches to tackling JAMB questions</p>
+                        </div>
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-4 mt-6">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-arrow-right text-purple-600 mt-1"></i>
+                            <span class="text-gray-700">Eliminate obviously wrong options first</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-arrow-right text-purple-600 mt-1"></i>
+                            <span class="text-gray-700">Look for keywords and context clues in questions</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-arrow-right text-purple-600 mt-1"></i>
+                            <span class="text-gray-700">For calculations, estimate answers to verify your work</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-arrow-right text-purple-600 mt-1"></i>
+                            <span class="text-gray-700">Trust your first instinct if you're unsure between two options</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Maintain the Right Mindset -->
+        <section class="mb-16">
+            <div class="bg-gradient-to-br from-primary-50 to-purple-50 rounded-2xl p-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+                    Maintain the Right Mindset
+                </h2>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-primary-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-bullseye text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">Stay Focused</h3>
+                        <p class="text-gray-700">
+                            Keep your end goal in mind. Every study session brings you closer to your dream university.
+                        </p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-green-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-smile text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">Think Positive</h3>
+                        <p class="text-gray-700">
+                            Believe in yourself. With consistent effort and smart studying, you can achieve excellent scores.
+                        </p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-users text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">Get Support</h3>
+                        <p class="text-gray-700">
+                            Join study groups, seek help when needed, and lean on family and friends for encouragement.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="bg-gradient-to-r from-primary-600 to-primary-700 rounded-2xl p-12 text-center">
+            <h2 class="text-3xl font-bold text-white mb-4">Ready to Put These Tips into Practice?</h2>
+            <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+                Start your JAMB preparation journey today with our comprehensive practice tests and mock exams.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="index.html" class="bg-white text-primary-600 px-8 py-4 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-lg inline-block">
+                    Start Practicing Now
+                </a>
+                <a href="jamb-syllabus.html" class="border-2 border-white text-white px-8 py-4 rounded-lg hover:bg-white hover:text-primary-600 transition-colors font-semibold text-lg inline-block">
+                    View JAMB Syllabus
+                </a>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-graduation-cap text-2xl text-primary-500 mr-2"></i>
+                        <span class="text-xl font-bold">JambGenius 💯</span>
+                    </div>
+                    <p class="text-gray-400">Nigeria's premier JAMB UTME preparation platform</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="index.html" class="hover:text-white transition-colors">Home</a></li>
+                        <li><a href="study-tips.html" class="hover:text-white transition-colors">Study Tips</a></li>
+                        <li><a href="jamb-syllabus.html" class="hover:text-white transition-colors">JAMB Syllabus</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Support</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="help-center.html" class="hover:text-white transition-colors">Help Center</a></li>
+                        <li><a href="contact-us.html" class="hover:text-white transition-colors">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Follow Us</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-facebook text-2xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-twitter text-2xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-instagram text-2xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 JambGenius. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script type="module">
+        import './firebase-init.js';
+        import './auth-state.js';
+        import './auth-modal.js';
+    </script>
+</body>
+</html>

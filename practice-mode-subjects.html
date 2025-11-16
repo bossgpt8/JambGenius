@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practice Mode - Select Subject | JambGenius 💯</title>
+    <meta name="description" content="Choose a subject to practice JAMB questions at your own pace.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="suppress-tailwind-warning.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="config.js"></script>
+    <script src="content-protection.js"></script>
+    <script type="module">
+        import './firebase-init.js';
+        import './auth-state.js';
+        import './auth-modal.js';
+    </script>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Navigation Header -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <a href="index.html" class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-graduation-cap text-2xl text-primary-600 mr-2"></i>
+                        <span class="text-xl font-bold text-gray-900">JambGenius 💯</span>
+                    </a>
+                    <div class="hidden md:flex items-center space-x-8">
+                        <a href="index.html" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Home</a>
+                        <a href="study-tips.html" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Study Tips</a>
+                        <a href="jamb-syllabus.html" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">JAMB Syllabus</a>
+                        <a href="chatroom.html" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Community Chat</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div id="userSection" class="hidden items-center space-x-4">
+                        <span id="userName" class="text-gray-700 font-medium"></span>
+                        <button id="signOutBtn" class="text-gray-600 hover:text-red-600 transition-colors">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                    <button id="authBtn" class="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium">
+                        Sign In
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-green-50 to-blue-50 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <a href="index.html" class="text-gray-600 hover:text-primary-600 transition-colors">
+                            <i class="fas fa-arrow-left mr-2"></i>Back to Home
+                        </a>
+                    </div>
+                    <h1 class="text-4xl font-bold text-gray-900 mb-2">Practice Mode</h1>
+                    <p class="text-xl text-gray-600">Select a subject to practice at your own pace</p>
+                </div>
+                <div class="hidden md:block">
+                    <div class="bg-white rounded-xl p-6 shadow-lg">
+                        <i class="fas fa-dumbbell text-5xl text-green-600"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Subject Selection -->
+    <div class="max-w-7xl mx-auto px-4 py-12">
+        <div class="mb-8 text-center">
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">Choose Your Subject</h2>
+            <p class="text-gray-600">Practice unlimited questions without time pressure</p>
+        </div>
+
+        <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Use of English (Mandatory) -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="english">
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-red-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-book-open text-3xl text-red-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Use of English</h3>
+                    <span class="text-xs bg-red-100 text-red-600 px-3 py-1 rounded-full font-semibold">MANDATORY</span>
+                    <p class="text-sm text-gray-600 mt-3">Comprehension, Grammar & Vocabulary</p>
+                </div>
+            </div>
+
+            <!-- Mathematics -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="mathematics">
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-calculator text-3xl text-blue-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Mathematics</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">SCIENCE</span>
+                    <p class="text-sm text-gray-600 mt-3">Algebra, Geometry & Statistics</p>
+                </div>
+            </div>
+
+            <!-- Physics -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="physics">
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-atom text-3xl text-purple-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Physics</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">SCIENCE</span>
+                    <p class="text-sm text-gray-600 mt-3">Mechanics, Waves & Electronics</p>
+                </div>
+            </div>
+
+            <!-- Chemistry -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="chemistry">
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-flask text-3xl text-green-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Chemistry</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">SCIENCE</span>
+                    <p class="text-sm text-gray-600 mt-3">Organic, Inorganic & Physical</p>
+                </div>
+            </div>
+
+            <!-- Biology -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="biology">
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-teal-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-dna text-3xl text-teal-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Biology</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">SCIENCE</span>
+                    <p class="text-sm text-gray-600 mt-3">Botany, Zoology & Ecology</p>
+                </div>
+            </div>
+
+            <!-- Government -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="government">
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-yellow-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-landmark text-3xl text-yellow-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Government</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">ARTS</span>
+                    <p class="text-sm text-gray-600 mt-3">Political Science & Governance</p>
+                </div>
+            </div>
+
+            <!-- Economics -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="economics">
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-line text-3xl text-orange-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Economics</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">COMMERCIAL</span>
+                    <p class="text-sm text-gray-600 mt-3">Micro & Macroeconomics</p>
+                </div>
+            </div>
+
+            <!-- Commerce -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="commerce">
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-shopping-cart text-3xl text-indigo-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Commerce</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">COMMERCIAL</span>
+                    <p class="text-sm text-gray-600 mt-3">Trade, Business & Finance</p>
+                </div>
+            </div>
+
+            <!-- Literature in English -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="literature">
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-pink-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-book text-3xl text-pink-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Literature in English</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">ARTS</span>
+                    <p class="text-sm text-gray-600 mt-3">Drama, Poetry & Prose</p>
+                </div>
+            </div>
+
+            <!-- Geography -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="geography">
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-cyan-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-globe-africa text-3xl text-cyan-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Geography</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">ARTS</span>
+                    <p class="text-sm text-gray-600 mt-3">Physical & Human Geography</p>
+                </div>
+            </div>
+
+            <!-- CRS -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="crs">
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-cross text-3xl text-amber-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">CRS</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">ARTS</span>
+                    <p class="text-sm text-gray-600 mt-3">Christian Religious Studies</p>
+                </div>
+            </div>
+
+            <!-- Civic Education -->
+            <div class="subject-card bg-white rounded-xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-transparent hover:border-primary-500 cursor-pointer" data-subject="civic">
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-lime-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-users text-3xl text-lime-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Civic Education</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold">ARTS</span>
+                    <p class="text-sm text-gray-600 mt-3">Citizenship & Rights</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="mt-12 bg-green-50 border border-green-200 rounded-xl p-6">
+            <div class="flex items-start space-x-4">
+                <i class="fas fa-info-circle text-3xl text-green-600 mt-1"></i>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Practice Mode Features</h3>
+                    <ul class="space-y-2 text-gray-700">
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check text-green-600"></i>
+                            <span>No time limit - practice at your own pace</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check text-green-600"></i>
+                            <span>Instant feedback on answers</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check text-green-600"></i>
+                            <span>View detailed explanations</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check text-green-600"></i>
+                            <span>Track your progress per subject</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mock Exam Call-to-Action -->
+        <div class="mt-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-8 md:p-12 text-white shadow-2xl transform hover:scale-105 transition-all">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="bg-yellow-400 rounded-full p-3">
+                            <i class="fas fa-trophy text-2xl text-black"></i>
+                        </div>
+                        <h2 class="text-3xl md:text-4xl font-bold">Ready for the Real Challenge?</h2>
+                    </div>
+                    <p class="text-lg md:text-xl text-orange-50 mb-4">
+                        Take a full JAMB Mock Exam and experience the actual exam conditions. Get detailed performance analytics and boost your confidence!
+                    </p>
+                    <div class="flex flex-wrap gap-4 mb-4">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-check-circle text-yellow-300"></i>
+                            <span class="text-sm md:text-base">180 Questions</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-check-circle text-yellow-300"></i>
+                            <span class="text-sm md:text-base">2-Hour Timer</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-check-circle text-yellow-300"></i>
+                            <span class="text-sm md:text-base">Real CBT Experience</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-check-circle text-yellow-300"></i>
+                            <span class="text-sm md:text-base">Full Analytics</span>
+                        </div>
+                    </div>
+                    <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4 inline-block">
+                        <p class="text-sm text-orange-50 mb-1">Pay per exam</p>
+                        <p class="text-3xl font-bold">Only ₦1,000</p>
+                    </div>
+                </div>
+                <div class="flex-shrink-0">
+                    <a href="exam-payment.html" class="block bg-white text-orange-600 px-8 md:px-12 py-4 md:py-6 rounded-xl hover:bg-yellow-50 transition-all font-bold text-xl md:text-2xl shadow-xl hover:shadow-2xl transform hover:scale-110">
+                        <i class="fas fa-rocket mr-3"></i>Take Mock Exam Now
+                        <div class="text-sm font-normal mt-1 text-orange-500">Unlock premium access</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center text-gray-400">
+                <p>&copy; 2025 JambGenius 💯. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        const app = initializeApp(CONFIG.firebase);
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, (user) => {
+            const userSection = document.getElementById('userSection');
+            const userName = document.getElementById('userName');
+            const authBtn = document.getElementById('authBtn');
+            const signOutBtn = document.getElementById('signOutBtn');
+
+            if (user) {
+                userSection.classList.remove('hidden');
+                userSection.classList.add('flex');
+                authBtn.classList.add('hidden');
+                userName.textContent = user.displayName || user.email.split('@')[0];
+
+                if (signOutBtn) {
+                    signOutBtn.addEventListener('click', async () => {
+                        if (confirm('Are you sure you want to sign out?')) {
+                            await signOut(auth);
+                            window.location.href = 'index.html';
+                        }
+                    });
+                }
+            } else {
+                userSection.classList.add('hidden');
+                userSection.classList.remove('flex');
+                authBtn.classList.remove('hidden');
+
+                if (authBtn) {
+                    authBtn.addEventListener('click', () => {
+                        window.location.href = 'index.html#auth';
+                    });
+                }
+            }
+        });
+
+        // Subject selection handler
+        const subjectCards = document.querySelectorAll('.subject-card');
+        
+        subjectCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const subject = card.dataset.subject;
+                window.location.href = `practice-enhanced.html?subject=${subject}`;
+            });
+        });
+    </script>
+</body>
+</html>

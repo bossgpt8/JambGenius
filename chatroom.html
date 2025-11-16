@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Chatroom - JambGenius 💯</title>
+    <meta name="description" content="Connect with fellow JAMB students from around the world. Share tips, ask questions, and study together.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="suppress-tailwind-warning.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="config.js"></script>
+    <script src="content-protection.js"></script>
+    <style>
+        #chatMessages {
+            scroll-behavior: smooth;
+        }
+        #chatInterface {
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Navigation Header -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <a href="index.html" class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-graduation-cap text-2xl text-primary-600 mr-2"></i>
+                        <span class="text-xl font-bold text-gray-900">JambGenius 💯</span>
+                    </a>
+                    <div class="hidden md:flex items-center space-x-8">
+                        <a href="index.html" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Home</a>
+                        <a href="study-tips.html" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Study Tips</a>
+                        <a href="jamb-syllabus.html" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">JAMB Syllabus</a>
+                        <a href="chatroom.html" class="text-primary-600 font-medium">Community Chat</a>
+                        <a href="help-center.html" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Help Center</a>
+                        <a href="contact-us.html" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Contact Us</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="profile.html" class="profile-link hidden text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                        <i class="fas fa-user-circle mr-1"></i>Profile
+                    </a>
+                    <div id="userSection" class="hidden items-center space-x-3">
+                        <img id="userAvatar" src="" alt="User" class="w-8 h-8 rounded-full">
+                        <span id="userName" class="text-gray-700 font-medium"></span>
+                        <button id="signOutBtn" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                    <button id="authBtn" class="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium">
+                        Sign In
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Chat Container -->
+    <div class="h-[calc(100vh-64px)] flex flex-col px-4 py-8 max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-primary-600 to-purple-600 rounded-t-2xl p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold mb-2">
+                        <i class="fas fa-comments mr-2"></i>Student Community Chat
+                    </h1>
+                    <p class="text-blue-100">Connect with JAMB students from around the world</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm text-blue-100">Online Students</div>
+                    <div id="onlineCount" class="text-2xl font-bold">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Rules Banner -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4">
+            <div class="flex items-start">
+                <i class="fas fa-shield-alt text-blue-500 text-xl mr-3 mt-1"></i>
+                <div class="flex-1">
+                    <p class="text-sm font-bold text-blue-900 mb-2">CHATROOM RULES - Educational Purpose Only</p>
+                    <ul class="text-sm text-blue-800 space-y-1 ml-4 list-disc">
+                        <li>Share educational tips, advice, and study support only</li>
+                        <li>Be respectful and help fellow students</li>
+                        <li>No spam, promotions, or off-topic discussions</li>
+                        <li>No inappropriate content or harassment</li>
+                        <li>Messages from <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-orange-500 to-red-500 text-white"><i class="fas fa-crown mr-1"></i>ADMIN</span> are from JambGenius team</li>
+                    </ul>
+                    <p class="text-xs text-blue-700 mt-2 italic">Violations will result in message removal. Let's keep this space helpful for everyone!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Panel (Only visible to admin) -->
+        <div id="adminPanel" class="hidden bg-gradient-to-r from-orange-500 to-red-500 text-white p-4 rounded-lg mb-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-crown text-2xl"></i>
+                    <div>
+                        <p class="font-bold">Admin Control Panel</p>
+                        <p class="text-sm text-orange-100">You have full moderation access</p>
+                    </div>
+                </div>
+                <div class="text-sm text-orange-100">
+                    <i class="fas fa-info-circle mr-1"></i>Click delete button on any message to remove it
+                </div>
+            </div>
+        </div>
+
+        <!-- Auth Required Message -->
+        <div id="authRequired" class="bg-white rounded-b-2xl shadow-lg p-12 text-center">
+            <i class="fas fa-lock text-6xl text-gray-300 mb-4"></i>
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Sign In Required</h2>
+            <p class="text-gray-600 mb-6">Please sign in to join the community chat and connect with fellow students</p>
+            <button onclick="document.getElementById('authBtn').click()" class="bg-primary-600 text-white px-8 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold">
+                <i class="fas fa-sign-in-alt mr-2"></i>Sign In to Chat
+            </button>
+        </div>
+
+        <!-- Chat Interface (Hidden until authenticated) -->
+        <div id="chatInterface" class="hidden bg-white rounded-b-2xl shadow-lg flex-1 flex flex-col min-h-0">
+            <!-- Messages Container -->
+            <div id="chatMessages" class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
+                <div class="text-center text-gray-500 py-8">
+                    <i class="fas fa-comment-dots text-4xl mb-2"></i>
+                    <p>Loading messages...</p>
+                </div>
+            </div>
+
+            <!-- Message Input -->
+            <div class="border-t border-gray-200 p-4 bg-white rounded-b-2xl flex-shrink-0">
+                <form id="messageForm" class="flex gap-2">
+                    <input 
+                        type="text" 
+                        id="messageInput" 
+                        placeholder="Type your message..." 
+                        class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        maxlength="500"
+                        required
+                    />
+                    <button 
+                        type="submit" 
+                        class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold flex items-center"
+                    >
+                        <i class="fas fa-paper-plane mr-2"></i>Send
+                    </button>
+                </form>
+                <div class="text-xs text-gray-500 mt-2">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Press Enter to send • Max 500 characters
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Features -->
+        <div class="grid md:grid-cols-3 gap-6 mt-4 mb-8">
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-globe text-blue-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Global Community</h3>
+                <p class="text-gray-600">Connect with JAMB students from all over Nigeria and beyond</p>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-user-friends text-green-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Peer Support</h3>
+                <p class="text-gray-600">Ask questions, share study tips, and motivate each other</p>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-shield-alt text-purple-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Admin Support</h3>
+                <p class="text-gray-600">Get guidance and updates directly from the JambGenius team</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-graduation-cap text-2xl text-primary-400 mr-2"></i>
+                        <span class="text-xl font-bold">JambGenius 💯</span>
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        Nigeria's leading JAMB UTME preparation platform helping students achieve their university dreams.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="index.html" class="hover:text-white transition-colors">Home</a></li>
+                        <li><a href="study-tips.html" class="hover:text-white transition-colors">Study Tips</a></li>
+                        <li><a href="jamb-syllabus.html" class="hover:text-white transition-colors">JAMB Syllabus</a></li>
+                        <li><a href="chatroom.html" class="hover:text-white transition-colors">Community Chat</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Resources</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="help-center.html" class="hover:text-white transition-colors">Help Center</a></li>
+                        <li><a href="contact-us.html" class="hover:text-white transition-colors">Contact Us</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Contact Info</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>Email: osanisrael2@gmail.com</li>
+                        <li>Phone: +234 916 489 8577</li>
+                        <li>WhatsApp: +234 705 464 1687</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 JambGenius. All rights reserved. Made with ❤️ for Nigerian students.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { auth, db } from './firebase-init.js';
+        import './auth-state.js';
+        import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const adminEmails = ['osanisrael2@gmail.com', 'admin@jambgenius.com'];
+        let currentUser = null;
+        let isAdmin = false;
+        let unsubscribeMessages = null;
+
+        function isUserAdmin(email) {
+            return adminEmails.includes(email.toLowerCase());
+        }
+
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return '';
+            const date = timestamp.toDate();
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
+            
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function createMessageElement(message) {
+            const div = document.createElement('div');
+            const isOwnMessage = message.userId === currentUser?.uid;
+            const messageIsAdmin = message.isAdmin || false;
+            
+            div.className = `flex ${isOwnMessage ? 'justify-end' : 'justify-start'} group`;
+            
+            div.innerHTML = `
+                <div class="max-w-xl ${isOwnMessage ? 'bg-primary-600 text-white' : 'bg-white border border-gray-200'} rounded-lg p-3 shadow-sm relative">
+                    <div class="flex items-center gap-2 mb-1">
+                        <div class="flex items-center gap-2 flex-1">
+                            <i class="fas fa-user-circle ${isOwnMessage ? 'text-white' : 'text-primary-600'} text-lg"></i>
+                            <span class="font-semibold text-sm ${isOwnMessage ? 'text-white' : 'text-gray-900'}">${message.displayName || 'Anonymous'}</span>
+                            ${messageIsAdmin ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-orange-500 to-red-500 text-white"><i class="fas fa-crown mr-1"></i>ADMIN</span>' : ''}
+                        </div>
+                        <span class="text-xs ${isOwnMessage ? 'text-blue-100' : 'text-gray-500'}">${formatTimestamp(message.timestamp)}</span>
+                    </div>
+                    <p class="${isOwnMessage ? 'text-white' : 'text-gray-800'}">${escapeHtml(message.text)}</p>
+                    ${isAdmin ? `
+                        <button 
+                            onclick="deleteMessage('${message.id}', '${escapeHtml(message.displayName)}')" 
+                            class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 shadow-lg"
+                            title="Delete this message (Admin only)"
+                        >
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+            
+            return div;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function scrollToBottom() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        window.deleteMessage = async function(messageId, userName) {
+            if (!isAdmin) {
+                alert('Only admins can delete messages.');
+                return;
+            }
+
+            if (confirm(`Delete message from ${userName}?\n\nThis action cannot be undone.`)) {
+                try {
+                    await deleteDoc(doc(db, 'chatMessages', messageId));
+                } catch (error) {
+                    console.error('Error deleting message:', error);
+                    alert('Failed to delete message. Please try again.');
+                }
+            }
+        }
+
+        async function sendMessage(text) {
+            if (!currentUser || !text.trim()) return;
+
+            try {
+                const displayName = isAdmin ? 'JambGenius' : (currentUser.displayName || currentUser.email.split('@')[0]);
+                
+                await addDoc(collection(db, 'chatMessages'), {
+                    text: text.trim(),
+                    userId: currentUser.uid,
+                    displayName: displayName,
+                    userEmail: currentUser.email,
+                    isAdmin: isAdmin,
+                    timestamp: serverTimestamp(),
+                    createdAt: new Date().toISOString()
+                });
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Failed to send message. Please try again.');
+            }
+        }
+
+        function loadMessages() {
+            const chatMessages = document.getElementById('chatMessages');
+            
+            if (unsubscribeMessages) {
+                unsubscribeMessages();
+            }
+
+            const q = query(
+                collection(db, 'chatMessages'),
+                orderBy('timestamp', 'desc'),
+                limit(50)
+            );
+
+            unsubscribeMessages = onSnapshot(q, (snapshot) => {
+                chatMessages.innerHTML = '';
+                
+                if (snapshot.empty) {
+                    chatMessages.innerHTML = `
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="fas fa-comment-dots text-4xl mb-2"></i>
+                            <p>No messages yet. Be the first to start the conversation!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const messages = [];
+                snapshot.forEach((doc) => {
+                    messages.push({ id: doc.id, ...doc.data() });
+                });
+
+                messages.reverse().forEach((message) => {
+                    chatMessages.appendChild(createMessageElement(message));
+                });
+
+                scrollToBottom();
+            }, (error) => {
+                console.error('Error loading messages:', error);
+                chatMessages.innerHTML = `
+                    <div class="text-center text-red-500 py-8">
+                        <i class="fas fa-exclamation-triangle text-4xl mb-2"></i>
+                        <p>Error loading messages. Please refresh the page.</p>
+                    </div>
+                `;
+            });
+        }
+
+        document.getElementById('messageForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('messageInput');
+            const text = input.value;
+            
+            if (text.trim()) {
+                await sendMessage(text);
+                input.value = '';
+            }
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            const authRequired = document.getElementById('authRequired');
+            const chatInterface = document.getElementById('chatInterface');
+            const userSection = document.getElementById('userSection');
+            const authBtn = document.getElementById('authBtn');
+            const userName = document.getElementById('userName');
+            const adminPanel = document.getElementById('adminPanel');
+
+            if (user) {
+                currentUser = user;
+                isAdmin = isUserAdmin(user.email);
+                
+                authRequired.classList.add('hidden');
+                chatInterface.classList.remove('hidden');
+                userSection.classList.remove('hidden');
+                userSection.classList.add('flex');
+                authBtn.classList.add('hidden');
+                userName.textContent = user.displayName || user.email.split('@')[0];
+
+                if (isAdmin) {
+                    adminPanel.classList.remove('hidden');
+                } else {
+                    adminPanel.classList.add('hidden');
+                }
+
+                loadMessages();
+            } else {
+                currentUser = null;
+                isAdmin = false;
+                
+                authRequired.classList.remove('hidden');
+                chatInterface.classList.add('hidden');
+                userSection.classList.add('hidden');
+                userSection.classList.remove('flex');
+                authBtn.classList.remove('hidden');
+                adminPanel.classList.add('hidden');
+
+                if (unsubscribeMessages) {
+                    unsubscribeMessages();
+                }
+            }
+        });
+
+        document.getElementById('authBtn').addEventListener('click', () => {
+            window.location.href = 'index.html#auth';
+        });
+
+        document.getElementById('signOutBtn').addEventListener('click', async () => {
+            if (confirm('Are you sure you want to sign out?')) {
+                await signOut(auth);
+            }
+        });
+
+        setInterval(() => {
+            document.getElementById('onlineCount').textContent = Math.floor(Math.random() * 50) + 10;
+        }, 5000);
+    </script>
+</body>
+</html>
