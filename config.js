@@ -1,7 +1,7 @@
 const CONFIG = {
   firebase: {
     apiKey: "AIzaSyCSVbZVsBO8luLUT-HznUQe57FGRZ_2U5g",
-    authDomain: "jambgenius.fireb aseapp.com",
+    authDomain: "jambgenius.firebaseapp.com",
     projectId: "jambgenius",
     storageBucket: "jambgenius.firebasestorage.app",
     messagingSenderId: "1057264829205",
