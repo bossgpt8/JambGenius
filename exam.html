@@ -38,6 +38,7 @@
     <script src="supabaseClient.js"></script>
     <script src="content-protection.js"></script>
     <script src="calculator.js"></script>
+    <script src="anti-cheat.js"></script>
     <script type="module">
         import './firebase-init.js';
         import './auth-state.js';
@@ -226,6 +227,7 @@
         let timeRemaining = 7200;
         let timerInterval = null;
         let useMockData = false;
+        let antiCheat = null;
 
         const urlParams = new URLSearchParams(window.location.search);
         const subjectsParam = urlParams.get('subjects');
@@ -235,6 +237,11 @@
         } else {
             selectedSubjects = ['english', 'mathematics', 'physics', 'chemistry'];
         }
+
+        antiCheat = new AntiCheatSystem((violations) => {
+            alert(`Maximum violations reached (${violations.length} violations). Your exam will be submitted automatically.`);
+            submitExam();
+        });
 
         async function initializeExam() {
             const supabaseConfigured = isSupabaseConfigured();
@@ -283,11 +290,14 @@
                 userAnswers = new Array(examQuestions.length).fill(null);
                 
                 document.getElementById('loadingScreen').classList.add('hidden');
-                document.getElementById('examInterface').classList.remove('hidden');
                 
-                initializeUI();
-                renderQuestion();
-                startTimer();
+                showExamRules(() => {
+                    document.getElementById('examInterface').classList.remove('hidden');
+                    initializeUI();
+                    renderQuestion();
+                    startTimer();
+                    antiCheat.startMonitoring();
+                });
             } catch (error) {
                 console.error('Error loading exam questions:', error);
                 alert('Failed to load exam questions. Please try again.');
@@ -426,6 +436,9 @@
 
         function submitExam() {
             clearInterval(timerInterval);
+            if (antiCheat) {
+                antiCheat.stopMonitoring();
+            }
             
             let correctCount = 0;
             const subjectScores = {};

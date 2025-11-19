@@ -28,9 +28,15 @@ let timeRemaining = 1200; // 20 minutes
 let timerInterval = null;
 let startTime = null;
 let bookmarkedQuestions = new Set();
+let antiCheat = null;
 
 const urlParams = new URLSearchParams(window.location.search);
 const subject = urlParams.get('subject') || 'english';
+
+antiCheat = new AntiCheatSystem(() => {
+    alert('Maximum violations reached. Your practice session will end.');
+    showCompletion();
+});
 
 // Mode selection
 document.getElementById('freeModeBtn').addEventListener('click', () => {
@@ -99,6 +105,10 @@ async function loadQuestions() {
         
         startTime = Date.now();
         renderQuestion();
+        
+        if (antiCheat) {
+            antiCheat.startMonitoring();
+        }
     } catch (error) {
         console.error('Error loading questions:', error);
         alert('Failed to load questions. Please try again.');
@@ -313,6 +323,10 @@ document.getElementById('nextBtn').addEventListener('click', () => {
 function showCompletion() {
     if (timerInterval) {
         clearInterval(timerInterval);
+    }
+    
+    if (antiCheat) {
+        antiCheat.stopMonitoring();
     }
     
     const endTime = Date.now();
