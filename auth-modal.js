@@ -39,9 +39,15 @@ export function showAuthModal() {
     if (!elements) initElements();
     if (elements.authModal) {
         elements.authModal.classList.remove('hidden');
+        if (elements.emailSignInBtn) elements.emailSignInBtn.disabled = true;
+        if (elements.emailSignUpBtn) elements.emailSignUpBtn.disabled = true;
         setTimeout(() => {
             initializeTurnstile();
-        }, 100);
+            setTimeout(() => {
+                if (elements.emailSignInBtn) elements.emailSignInBtn.disabled = false;
+                if (elements.emailSignUpBtn) elements.emailSignUpBtn.disabled = false;
+            }, 300);
+        }, 200);
     }
 }
 
@@ -58,9 +64,13 @@ function showSignInFormView() {
     if (elements.signInForm) elements.signInForm.classList.remove('hidden');
     if (elements.signUpForm) elements.signUpForm.classList.add('hidden');
     if (elements.forgotPasswordForm) elements.forgotPasswordForm.classList.add('hidden');
+    if (elements.emailSignInBtn) elements.emailSignInBtn.disabled = true;
     setTimeout(() => {
         initializeTurnstile();
-    }, 100);
+        setTimeout(() => {
+            if (elements.emailSignInBtn) elements.emailSignInBtn.disabled = false;
+        }, 300);
+    }, 200);
 }
 
 function showSignUpFormView() {
@@ -68,9 +78,13 @@ function showSignUpFormView() {
     if (elements.signInForm) elements.signInForm.classList.add('hidden');
     if (elements.signUpForm) elements.signUpForm.classList.remove('hidden');
     if (elements.forgotPasswordForm) elements.forgotPasswordForm.classList.add('hidden');
+    if (elements.emailSignUpBtn) elements.emailSignUpBtn.disabled = true;
     setTimeout(() => {
         initializeTurnstile();
-    }, 100);
+        setTimeout(() => {
+            if (elements.emailSignUpBtn) elements.emailSignUpBtn.disabled = false;
+        }, 300);
+    }, 200);
 }
 
 function showForgotPasswordFormView() {
@@ -277,7 +291,14 @@ function initializeTurnstile() {
         const signInTurnstileElement = document.getElementById('signInTurnstile');
         const signUpTurnstileElement = document.getElementById('signUpTurnstile');
 
-        if (signInTurnstileElement && !window.signInTurnstileId) {
+        if (signInTurnstileElement) {
+            if (window.signInTurnstileId !== undefined) {
+                try {
+                    turnstile.remove(window.signInTurnstileId);
+                } catch (e) {
+                    console.log('Could not remove existing sign-in widget:', e);
+                }
+            }
             signInTurnstileElement.setAttribute('data-sitekey', CONFIG.turnstile.siteKey);
             window.signInTurnstileId = turnstile.render('#signInTurnstile', {
                 sitekey: CONFIG.turnstile.siteKey,
@@ -285,7 +306,14 @@ function initializeTurnstile() {
             });
         }
 
-        if (signUpTurnstileElement && !window.signUpTurnstileId) {
+        if (signUpTurnstileElement) {
+            if (window.signUpTurnstileId !== undefined) {
+                try {
+                    turnstile.remove(window.signUpTurnstileId);
+                } catch (e) {
+                    console.log('Could not remove existing sign-up widget:', e);
+                }
+            }
             signUpTurnstileElement.setAttribute('data-sitekey', CONFIG.turnstile.siteKey);
             window.signUpTurnstileId = turnstile.render('#signUpTurnstile', {
                 sitekey: CONFIG.turnstile.siteKey,
