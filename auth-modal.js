@@ -71,6 +71,33 @@ function showForgotPasswordFormView() {
     if (elements.forgotPasswordForm) elements.forgotPasswordForm.classList.remove('hidden');
 }
 
+async function verifyRecaptcha(token) {
+    try {
+        const response = await fetch('/api/verify-recaptcha', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ token })
+        });
+
+        const responseText = await response.text();
+        let result;
+        
+        try {
+            result = JSON.parse(responseText);
+        } catch (parseError) {
+            console.error('Failed to parse reCAPTCHA verification response:', responseText);
+            return { success: false };
+        }
+
+        return result;
+    } catch (error) {
+        console.error('Error verifying reCAPTCHA:', error);
+        return { success: false };
+    }
+}
+
 async function createUserDocument(user) {
     const userRef = doc(db, 'users', user.uid);
     const userSnap = await getDoc(userRef);
@@ -111,11 +138,30 @@ async function signInWithEmail() {
         return;
     }
 
+    if (typeof grecaptcha === 'undefined' || typeof window.signInRecaptchaId === 'undefined') {
+        alert('reCAPTCHA is still loading. Please wait a moment and try again.');
+        return;
+    }
+
+    const recaptchaResponse = grecaptcha.getResponse(window.signInRecaptchaId);
+    if (!recaptchaResponse) {
+        alert('Please complete the reCAPTCHA verification');
+        return;
+    }
+
     try {
+        const verifyResult = await verifyRecaptcha(recaptchaResponse);
+        if (!verifyResult.success) {
+            alert('reCAPTCHA verification failed. Please try again.');
+            grecaptcha.reset(window.signInRecaptchaId);
+            return;
+        }
+
         await signInWithEmailAndPassword(auth, email, password);
         hideAuthModal();
     } catch (error) {
         console.error('Error signing in:', error);
+        grecaptcha.reset(window.signInRecaptchaId);
         if (error.code === 'auth/user-not-found') {
             alert('No account found with this email. Please sign up first.');
         } else if (error.code === 'auth/wrong-password') {
@@ -149,13 +195,32 @@ async function signUpWithEmail() {
         return;
     }
 
+    if (typeof grecaptcha === 'undefined' || typeof window.signUpRecaptchaId === 'undefined') {
+        alert('reCAPTCHA is still loading. Please wait a moment and try again.');
+        return;
+    }
+
+    const recaptchaResponse = grecaptcha.getResponse(window.signUpRecaptchaId);
+    if (!recaptchaResponse) {
+        alert('Please complete the reCAPTCHA verification');
+        return;
+    }
+
     try {
+        const verifyResult = await verifyRecaptcha(recaptchaResponse);
+        if (!verifyResult.success) {
+            alert('reCAPTCHA verification failed. Please try again.');
+            grecaptcha.reset(window.signUpRecaptchaId);
+            return;
+        }
+
         const result = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(result.user, { displayName: name });
         await createUserDocument(result.user);
         hideAuthModal();
     } catch (error) {
         console.error('Error signing up:', error);
+        grecaptcha.reset(window.signUpRecaptchaId);
         if (error.code === 'auth/email-already-in-use') {
             alert('This email is already registered. Please sign in instead.');
         } else if (error.code === 'auth/invalid-email') {
@@ -192,6 +257,38 @@ async function resetPassword() {
     }
 }
 
+function initializeRecaptcha() {
+    if (typeof grecaptcha === 'undefined' || typeof CONFIG === 'undefined') {
+        console.warn('grecaptcha or CONFIG not yet available, retrying...');
+        setTimeout(initializeRecaptcha, 100);
+        return;
+    }
+
+    grecaptcha.ready(() => {
+        try {
+            const signInRecaptchaElement = document.getElementById('signInRecaptcha');
+            const signUpRecaptchaElement = document.getElementById('signUpRecaptcha');
+
+            if (signInRecaptchaElement && !window.signInRecaptchaId) {
+                signInRecaptchaElement.setAttribute('data-sitekey', CONFIG.recaptcha.siteKey);
+                window.signInRecaptchaId = grecaptcha.render('signInRecaptcha', {
+                    'sitekey': CONFIG.recaptcha.siteKey
+                });
+            }
+
+            if (signUpRecaptchaElement && !window.signUpRecaptchaId) {
+                signUpRecaptchaElement.setAttribute('data-sitekey', CONFIG.recaptcha.siteKey);
+                window.signUpRecaptchaId = grecaptcha.render('signUpRecaptcha', {
+                    'sitekey': CONFIG.recaptcha.siteKey
+                });
+            }
+            console.log('reCAPTCHA widgets initialized successfully');
+        } catch (error) {
+            console.error('Error initializing reCAPTCHA widgets:', error);
+        }
+    });
+}
+
 export async function initializeAuthModal() {
     if (initialized) return;
     
@@ -199,6 +296,8 @@ export async function initializeAuthModal() {
     initElements();
     
     if (!elements.authModal) return;
+
+    initializeRecaptcha();
 
     if (elements.signInBtn) {
         elements.signInBtn.addEventListener('click', showAuthModal);
