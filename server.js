@@ -7,75 +7,78 @@ const app = express();
 app.use(express.json());
 app.use(express.static('.'));
 
-app.post('/api/verify-recaptcha', async (req, res) => {
+app.post('/api/verify-turnstile', async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Content-Type', 'application/json');
   
   const { token } = req.body;
   
   if (!token) {
-    return res.status(400).json({ success: false, error: 'reCAPTCHA token is required' });
+    return res.status(400).json({ success: false, error: 'Turnstile token is required' });
   }
 
-  const recaptchaSecretKey = process.env.RECAPTCHA_SECRET_KEY;
+  const turnstileSecretKey = process.env.TURNSTILE_SECRET_KEY;
   
-  if (!recaptchaSecretKey) {
-    console.error('RECAPTCHA_SECRET_KEY is not configured!');
+  if (!turnstileSecretKey) {
+    console.error('TURNSTILE_SECRET_KEY is not configured!');
     return res.status(500).json({
       success: false,
-      error: 'reCAPTCHA system is not properly configured. Please contact support.'
+      error: 'Verification system is not properly configured.'
     });
   }
 
-  const postData = `secret=${encodeURIComponent(recaptchaSecretKey)}&response=${encodeURIComponent(token)}`;
+  const postData = JSON.stringify({
+    secret: turnstileSecretKey,
+    response: token
+  });
   
   const options = {
-    hostname: 'www.google.com',
+    hostname: 'challenges.cloudflare.com',
     port: 443,
-    path: '/recaptcha/api/siteverify',
+    path: '/turnstile/v0/siteverify',
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/json',
       'Content-Length': Buffer.byteLength(postData)
     }
   };
 
-  const recaptchaRequest = https.request(options, (recaptchaRes) => {
+  const turnstileRequest = https.request(options, (turnstileRes) => {
     let data = '';
     
-    recaptchaRes.on('data', (chunk) => {
+    turnstileRes.on('data', (chunk) => {
       data += chunk;
     });
     
-    recaptchaRes.on('end', () => {
+    turnstileRes.on('end', () => {
       try {
         const result = JSON.parse(data);
-        console.log('reCAPTCHA verification response:', result);
+        console.log('Turnstile verification response:', result);
         
         if (result.success) {
           return res.json({ success: true });
         } else {
-          console.error('reCAPTCHA verification failed:', result);
+          console.error('Turnstile verification failed:', result);
           return res.status(400).json({ 
             success: false, 
-            error: 'reCAPTCHA verification failed',
+            error: 'Verification failed',
             errorCodes: result['error-codes']
           });
         }
       } catch (error) {
-        console.error('Error parsing reCAPTCHA response:', error);
+        console.error('Error parsing Turnstile response:', error);
         res.status(500).json({ success: false, error: 'Internal server error' });
       }
     });
   });
 
-  recaptchaRequest.on('error', (error) => {
-    console.error('reCAPTCHA request error:', error);
-    res.status(500).json({ success: false, error: 'reCAPTCHA verification failed' });
+  turnstileRequest.on('error', (error) => {
+    console.error('Turnstile request error:', error);
+    res.status(500).json({ success: false, error: 'Verification failed' });
   });
 
-  recaptchaRequest.write(postData);
-  recaptchaRequest.end();
+  turnstileRequest.write(postData);
+  turnstileRequest.end();
 });
 
 app.post('/api/verify-payment', async (req, res) => {

@@ -98,5 +98,5 @@ if (typeof document !== 'undefined') {
         document.addEventListener('DOMContentLoaded', loadAuthModal);
     } else {
         loadAuthModal();
-   
+    }
 }
