@@ -39,6 +39,9 @@ export function showAuthModal() {
     if (!elements) initElements();
     if (elements.authModal) {
         elements.authModal.classList.remove('hidden');
+        setTimeout(() => {
+            initializeTurnstile();
+        }, 100);
     }
 }
 
@@ -55,6 +58,9 @@ function showSignInFormView() {
     if (elements.signInForm) elements.signInForm.classList.remove('hidden');
     if (elements.signUpForm) elements.signUpForm.classList.add('hidden');
     if (elements.forgotPasswordForm) elements.forgotPasswordForm.classList.add('hidden');
+    setTimeout(() => {
+        initializeTurnstile();
+    }, 100);
 }
 
 function showSignUpFormView() {
@@ -62,6 +68,9 @@ function showSignUpFormView() {
     if (elements.signInForm) elements.signInForm.classList.add('hidden');
     if (elements.signUpForm) elements.signUpForm.classList.remove('hidden');
     if (elements.forgotPasswordForm) elements.forgotPasswordForm.classList.add('hidden');
+    setTimeout(() => {
+        initializeTurnstile();
+    }, 100);
 }
 
 function showForgotPasswordFormView() {
