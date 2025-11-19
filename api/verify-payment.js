@@ -83,8 +83,10 @@ module.exports = async function handler(req, res) {
             data: {
               reference: result.data.reference,
               amount: result.data.amount,
+              currency: result.data.currency || 'NGN',
               email: result.data.customer.email,
-              paidAt: result.data.paid_at
+              paidAt: result.data.paid_at,
+              status: result.data.status
             }
           });
         } catch (error) {
