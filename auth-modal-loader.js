@@ -1,58 +1,58 @@
 let modalLoaded = false;
 let loadPromise = null;
-let recaptchaLoaded = false;
+let turnstileLoaded = false;
 
-function loadRecaptchaScript() {
+function loadTurnstileScript() {
     return new Promise((resolve, reject) => {
-        if (recaptchaLoaded || typeof grecaptcha !== 'undefined') {
-            recaptchaLoaded = true;
+        if (turnstileLoaded || typeof turnstile !== 'undefined') {
+            turnstileLoaded = true;
             resolve();
             return;
         }
 
-        if (document.querySelector('script[src*="recaptcha"]')) {
+        if (document.querySelector('script[src*="turnstile"]')) {
             const checkInterval = setInterval(() => {
-                if (typeof grecaptcha !== 'undefined') {
+                if (typeof turnstile !== 'undefined') {
                     clearInterval(checkInterval);
-                    recaptchaLoaded = true;
+                    turnstileLoaded = true;
                     resolve();
                 }
             }, 100);
             setTimeout(() => {
                 clearInterval(checkInterval);
-                if (typeof grecaptcha !== 'undefined') {
-                    recaptchaLoaded = true;
+                if (typeof turnstile !== 'undefined') {
+                    turnstileLoaded = true;
                     resolve();
                 } else {
-                    reject(new Error('reCAPTCHA script failed to load'));
+                    reject(new Error('Turnstile script failed to load'));
                 }
             }, 10000);
             return;
         }
 
         const script = document.createElement('script');
-        script.src = 'https://www.google.com/recaptcha/api.js';
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
         script.async = true;
         script.defer = true;
         script.onload = () => {
             const checkLoaded = setInterval(() => {
-                if (typeof grecaptcha !== 'undefined') {
+                if (typeof turnstile !== 'undefined') {
                     clearInterval(checkLoaded);
-                    recaptchaLoaded = true;
+                    turnstileLoaded = true;
                     resolve();
                 }
             }, 50);
             setTimeout(() => {
                 clearInterval(checkLoaded);
-                if (typeof grecaptcha !== 'undefined') {
-                    recaptchaLoaded = true;
+                if (typeof turnstile !== 'undefined') {
+                    turnstileLoaded = true;
                     resolve();
                 } else {
-                    reject(new Error('grecaptcha not available after script load'));
+                    reject(new Error('Turnstile not available after script load'));
                 }
             }, 3000);
         };
-        script.onerror = () => reject(new Error('Failed to load reCAPTCHA script'));
+        script.onerror = () => reject(new Error('Failed to load Turnstile script'));
         document.head.appendChild(script);
     });
 }
@@ -71,7 +71,7 @@ export async function loadAuthModal() {
         return Promise.resolve();
     }
     
-    loadPromise = loadRecaptchaScript()
+    loadPromise = loadTurnstileScript()
         .then(() => fetch('/auth-modal.html'))
         .then(response => {
             if (!response.ok) {
@@ -98,5 +98,5 @@ if (typeof document !== 'undefined') {
         document.addEventListener('DOMContentLoaded', loadAuthModal);
     } else {
         loadAuthModal();
-    }
+   
 }
