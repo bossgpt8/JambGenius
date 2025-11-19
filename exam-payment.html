@@ -403,7 +403,15 @@
                                 })
                             });
 
-                            const result = await verifyResponse.json();
+                            let result;
+                            const responseText = await verifyResponse.text();
+                            
+                            try {
+                                result = JSON.parse(responseText);
+                            } catch (parseError) {
+                                console.error('Failed to parse response as JSON:', responseText);
+                                throw new Error('A server error occurred. Please ensure the payment server is running properly.');
+                            }
                             
                             if (!verifyResponse.ok && !result.error) {
                                 throw new Error(`Server error: ${verifyResponse.status}`);
