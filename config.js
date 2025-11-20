@@ -13,8 +13,8 @@ const CONFIG = {
     publicKey: "pk_test_56ea9fe6dc1cc19b965031a6297e3a683f9804af",
   },
 
-  turnstile: {
-    siteKey: "0x4AAAAAACB3zrPWsUiuRJU7",
+  hcaptcha: {
+    siteKey: "f7bceda2-a71e-45c8-9e9e-70fe4e08da2a",
   },
 
   pricing: {

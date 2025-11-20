@@ -42,7 +42,7 @@ export function showAuthModal() {
         if (elements.emailSignInBtn) elements.emailSignInBtn.disabled = true;
         if (elements.emailSignUpBtn) elements.emailSignUpBtn.disabled = true;
         setTimeout(() => {
-            initializeTurnstile();
+            initializeHcaptcha();
             setTimeout(() => {
                 if (elements.emailSignInBtn) elements.emailSignInBtn.disabled = false;
                 if (elements.emailSignUpBtn) elements.emailSignUpBtn.disabled = false;
@@ -66,7 +66,7 @@ function showSignInFormView() {
     if (elements.forgotPasswordForm) elements.forgotPasswordForm.classList.add('hidden');
     if (elements.emailSignInBtn) elements.emailSignInBtn.disabled = true;
     setTimeout(() => {
-        initializeTurnstile();
+        initializeHcaptcha();
         setTimeout(() => {
             if (elements.emailSignInBtn) elements.emailSignInBtn.disabled = false;
         }, 300);
@@ -80,7 +80,7 @@ function showSignUpFormView() {
     if (elements.forgotPasswordForm) elements.forgotPasswordForm.classList.add('hidden');
     if (elements.emailSignUpBtn) elements.emailSignUpBtn.disabled = true;
     setTimeout(() => {
-        initializeTurnstile();
+        initializeHcaptcha();
         setTimeout(() => {
             if (elements.emailSignUpBtn) elements.emailSignUpBtn.disabled = false;
         }, 300);
@@ -94,9 +94,9 @@ function showForgotPasswordFormView() {
     if (elements.forgotPasswordForm) elements.forgotPasswordForm.classList.remove('hidden');
 }
 
-async function verifyTurnstile(token) {
+async function verifyCaptcha(token) {
     try {
-        const response = await fetch('/api/verify-turnstile', {
+        const response = await fetch('/api/verify-captcha', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -161,22 +161,22 @@ async function signInWithEmail() {
         return;
     }
 
-    if (typeof turnstile === 'undefined' || !window.signInTurnstileId) {
+    if (typeof hcaptcha === 'undefined' || !window.signInHcaptchaId) {
         alert('Verification is still loading. Please wait a moment and try again.');
         return;
     }
 
-    const turnstileResponse = turnstile.getResponse(window.signInTurnstileId);
-    if (!turnstileResponse) {
+    const hcaptchaResponse = hcaptcha.getResponse(window.signInHcaptchaId);
+    if (!hcaptchaResponse) {
         alert('Please complete the verification');
         return;
     }
 
     try {
-        const verifyResult = await verifyTurnstile(turnstileResponse);
+        const verifyResult = await verifyCaptcha(hcaptchaResponse);
         if (!verifyResult.success) {
             alert('Verification failed. Please try again.');
-            turnstile.reset(window.signInTurnstileId);
+            hcaptcha.reset(window.signInHcaptchaId);
             return;
         }
 
@@ -184,7 +184,7 @@ async function signInWithEmail() {
         hideAuthModal();
     } catch (error) {
         console.error('Error signing in:', error);
-        turnstile.reset(window.signInTurnstileId);
+        hcaptcha.reset(window.signInHcaptchaId);
         if (error.code === 'auth/user-not-found') {
             alert('No account found with this email. Please sign up first.');
         } else if (error.code === 'auth/wrong-password') {
@@ -218,22 +218,22 @@ async function signUpWithEmail() {
         return;
     }
 
-    if (typeof turnstile === 'undefined' || !window.signUpTurnstileId) {
+    if (typeof hcaptcha === 'undefined' || !window.signUpHcaptchaId) {
         alert('Verification is still loading. Please wait a moment and try again.');
         return;
     }
 
-    const turnstileResponse = turnstile.getResponse(window.signUpTurnstileId);
-    if (!turnstileResponse) {
+    const hcaptchaResponse = hcaptcha.getResponse(window.signUpHcaptchaId);
+    if (!hcaptchaResponse) {
         alert('Please complete the verification');
         return;
     }
 
     try {
-        const verifyResult = await verifyTurnstile(turnstileResponse);
+        const verifyResult = await verifyCaptcha(hcaptchaResponse);
         if (!verifyResult.success) {
             alert('Verification failed. Please try again.');
-            turnstile.reset(window.signUpTurnstileId);
+            hcaptcha.reset(window.signUpHcaptchaId);
             return;
         }
 
@@ -243,7 +243,7 @@ async function signUpWithEmail() {
         hideAuthModal();
     } catch (error) {
         console.error('Error signing up:', error);
-        turnstile.reset(window.signUpTurnstileId);
+        hcaptcha.reset(window.signUpHcaptchaId);
         if (error.code === 'auth/email-already-in-use') {
             alert('This email is already registered. Please sign in instead.');
         } else if (error.code === 'auth/invalid-email') {
@@ -280,49 +280,49 @@ async function resetPassword() {
     }
 }
 
-function initializeTurnstile() {
-    if (typeof turnstile === 'undefined' || typeof CONFIG === 'undefined') {
-        console.warn('Turnstile or CONFIG not yet available, retrying...');
-        setTimeout(initializeTurnstile, 100);
+function initializeHcaptcha() {
+    if (typeof hcaptcha === 'undefined' || typeof CONFIG === 'undefined') {
+        console.warn('hCaptcha or CONFIG not yet available, retrying...');
+        setTimeout(initializeHcaptcha, 100);
         return;
     }
 
     try {
-        const signInTurnstileElement = document.getElementById('signInTurnstile');
-        const signUpTurnstileElement = document.getElementById('signUpTurnstile');
+        const signInHcaptchaElement = document.getElementById('signInHcaptcha');
+        const signUpHcaptchaElement = document.getElementById('signUpHcaptcha');
 
-        if (signInTurnstileElement) {
-            if (window.signInTurnstileId !== undefined) {
+        if (signInHcaptchaElement) {
+            if (window.signInHcaptchaId !== undefined) {
                 try {
-                    turnstile.remove(window.signInTurnstileId);
+                    hcaptcha.remove(window.signInHcaptchaId);
                 } catch (e) {
                     console.log('Could not remove existing sign-in widget:', e);
                 }
             }
-            signInTurnstileElement.setAttribute('data-sitekey', CONFIG.turnstile.siteKey);
-            window.signInTurnstileId = turnstile.render('#signInTurnstile', {
-                sitekey: CONFIG.turnstile.siteKey,
+            signInHcaptchaElement.setAttribute('data-sitekey', CONFIG.hcaptcha.siteKey);
+            window.signInHcaptchaId = hcaptcha.render('signInHcaptcha', {
+                sitekey: CONFIG.hcaptcha.siteKey,
                 theme: 'light'
             });
         }
 
-        if (signUpTurnstileElement) {
-            if (window.signUpTurnstileId !== undefined) {
+        if (signUpHcaptchaElement) {
+            if (window.signUpHcaptchaId !== undefined) {
                 try {
-                    turnstile.remove(window.signUpTurnstileId);
+                    hcaptcha.remove(window.signUpHcaptchaId);
                 } catch (e) {
                     console.log('Could not remove existing sign-up widget:', e);
                 }
             }
-            signUpTurnstileElement.setAttribute('data-sitekey', CONFIG.turnstile.siteKey);
-            window.signUpTurnstileId = turnstile.render('#signUpTurnstile', {
-                sitekey: CONFIG.turnstile.siteKey,
+            signUpHcaptchaElement.setAttribute('data-sitekey', CONFIG.hcaptcha.siteKey);
+            window.signUpHcaptchaId = hcaptcha.render('signUpHcaptcha', {
+                sitekey: CONFIG.hcaptcha.siteKey,
                 theme: 'light'
             });
         }
-        console.log('Turnstile widgets initialized successfully');
+        console.log('hCaptcha widgets initialized successfully');
     } catch (error) {
-        console.error('Error initializing Turnstile widgets:', error);
+        console.error('Error initializing hCaptcha widgets:', error);
     }
 }
 
@@ -334,7 +334,7 @@ export async function initializeAuthModal() {
     
     if (!elements.authModal) return;
 
-    initializeTurnstile();
+    initializeHcaptcha();
 
     if (elements.signInBtn) {
         elements.signInBtn.addEventListener('click', showAuthModal);

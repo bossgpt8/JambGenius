@@ -1,58 +1,58 @@
 let modalLoaded = false;
 let loadPromise = null;
-let turnstileLoaded = false;
+let hcaptchaLoaded = false;
 
-function loadTurnstileScript() {
+function loadHcaptchaScript() {
     return new Promise((resolve, reject) => {
-        if (turnstileLoaded || typeof turnstile !== 'undefined') {
-            turnstileLoaded = true;
+        if (hcaptchaLoaded || typeof hcaptcha !== 'undefined') {
+            hcaptchaLoaded = true;
             resolve();
             return;
         }
 
-        if (document.querySelector('script[src*="turnstile"]')) {
+        if (document.querySelector('script[src*="hcaptcha"]')) {
             const checkInterval = setInterval(() => {
-                if (typeof turnstile !== 'undefined') {
+                if (typeof hcaptcha !== 'undefined') {
                     clearInterval(checkInterval);
-                    turnstileLoaded = true;
+                    hcaptchaLoaded = true;
                     resolve();
                 }
             }, 100);
             setTimeout(() => {
                 clearInterval(checkInterval);
-                if (typeof turnstile !== 'undefined') {
-                    turnstileLoaded = true;
+                if (typeof hcaptcha !== 'undefined') {
+                    hcaptchaLoaded = true;
                     resolve();
                 } else {
-                    reject(new Error('Turnstile script failed to load'));
+                    reject(new Error('hCaptcha script failed to load'));
                 }
             }, 10000);
             return;
         }
 
         const script = document.createElement('script');
-        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+        script.src = 'https://js.hcaptcha.com/1/api.js';
         script.async = true;
         script.defer = true;
         script.onload = () => {
             const checkLoaded = setInterval(() => {
-                if (typeof turnstile !== 'undefined') {
+                if (typeof hcaptcha !== 'undefined') {
                     clearInterval(checkLoaded);
-                    turnstileLoaded = true;
+                    hcaptchaLoaded = true;
                     resolve();
                 }
             }, 50);
             setTimeout(() => {
                 clearInterval(checkLoaded);
-                if (typeof turnstile !== 'undefined') {
-                    turnstileLoaded = true;
+                if (typeof hcaptcha !== 'undefined') {
+                    hcaptchaLoaded = true;
                     resolve();
                 } else {
-                    reject(new Error('Turnstile not available after script load'));
+                    reject(new Error('hCaptcha not available after script load'));
                 }
             }, 3000);
         };
-        script.onerror = () => reject(new Error('Failed to load Turnstile script'));
+        script.onerror = () => reject(new Error('Failed to load hCaptcha script'));
         document.head.appendChild(script);
     });
 }
@@ -71,7 +71,7 @@ export async function loadAuthModal() {
         return Promise.resolve();
     }
     
-    loadPromise = loadTurnstileScript()
+    loadPromise = loadHcaptchaScript()
         .then(() => fetch('/auth-modal.html'))
         .then(response => {
             if (!response.ok) {
