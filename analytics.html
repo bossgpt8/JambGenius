@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
     <head>
+    <link rel="stylesheet" href="/styles.css?v=1.0">
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Performance Analytics | JambGenius 💯</title>
@@ -9,27 +10,9 @@
             content="Track your JAMB preparation progress and performance"
         />
 
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script src="suppress-tailwind-warning.js"></script>
+        
+        
         <script>
-            tailwind.config = {
-                theme: {
-                    extend: {
-                        colors: {
-                            primary: {
-                                50: "#eff6ff",
-                                100: "#dbeafe",
-                                500: "#3b82f6",
-                                600: "#2563eb",
-                                700: "#1d4ed8",
-                            },
-                        },
-                        fontFamily: {
-                            sans: ["Inter", "system-ui", "sans-serif"],
-                        },
-                    },
-                },
-            };
         </script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -86,33 +69,33 @@
             </div>
         </nav>
 
-        <div class="max-w-7xl mx-auto px-4 py-8">
-            <div class="mb-8">
-                <h1 class="text-4xl font-bold text-gray-900 mb-2">
+        <div class="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
+            <div class="mb-6 sm:mb-8">
+                <h1 class="text-2xl sm:text-4xl font-bold text-gray-900 mb-2">
                     Performance Analytics
                 </h1>
-                <p class="text-gray-600">
+                <p class="text-sm sm:text-base text-gray-600">
                     Track your progress and identify areas for improvement
                 </p>
             </div>
 
             <!-- Overall Stats -->
-            <div class="grid md:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white rounded-xl p-6 shadow-sm">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+                <div class="bg-white rounded-xl p-3 sm:p-6 shadow-sm">
                     <div class="flex items-center justify-between mb-2">
                         <div
-                            class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"
+                            class="w-10 sm:w-12 h-10 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center"
                         >
-                            <i class="fas fa-book text-blue-600 text-xl"></i>
+                            <i class="fas fa-book text-blue-600 text-lg sm:text-xl"></i>
                         </div>
                     </div>
                     <div
-                        class="text-3xl font-bold text-gray-900"
+                        class="text-2xl sm:text-3xl font-bold text-gray-900"
                         id="totalSessions"
                     >
                         0
                     </div>
-                    <div class="text-sm text-gray-600">Total Sessions</div>
+                    <div class="text-xs sm:text-sm text-gray-600">Total Sessions</div>
                 </div>
 
                 <div class="bg-white rounded-xl p-6 shadow-sm">

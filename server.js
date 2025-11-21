@@ -5,7 +5,31 @@ const path = require('path');
 
 const app = express();
 app.use(express.json());
-app.use(express.static('.'));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname)));
+
+// Initialize Firebase Admin for AI messages (for Vercel deployment)
+let admin;
+try {
+  admin = require('firebase-admin');
+  if (!admin.apps.length) {
+    const serviceAccount = {
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL
+    };
+    
+    if (serviceAccount.projectId && serviceAccount.privateKey && serviceAccount.clientEmail) {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+      });
+      console.log('✅ Firebase Admin initialized');
+    }
+  }
+} catch (error) {
+  console.log('⚠️ Firebase Admin not available - AI messages will use client SDK');
+  admin = null;
+}
 
 app.post('/api/verify-captcha', async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -76,13 +100,17 @@ app.post('/api/verify-captcha', async (req, res) => {
 app.post('/api/verify-payment', async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   
-  const { reference, email, fullName } = req.body;
+  const { reference, email, fullName, expectedCredits } = req.body;
   
-  console.log('Verifying payment:', { reference, email, fullName });
+  console.log('Verifying payment:', { reference, email, fullName, expectedCredits });
   
   if (!reference) {
     return res.status(400).json({ error: 'Payment reference is required' });
   }
+
+  const credits = expectedCredits || 1;
+  const PRICE_PER_CREDIT = 100000;
+  const expectedAmount = credits * PRICE_PER_CREDIT;
 
   const paystackSecretKey = process.env.PAYSTACK_SECRET_KEY;
   
@@ -143,12 +171,11 @@ app.post('/api/verify-payment', async (req, res) => {
           });
         }
         
-        const EXPECTED_AMOUNT = 100000;
-        if (result.data.amount !== EXPECTED_AMOUNT) {
-          console.error(`Amount mismatch: expected ${EXPECTED_AMOUNT}, got ${result.data.amount}`);
+        if (result.data.amount !== expectedAmount) {
+          console.error(`Amount mismatch: expected ${expectedAmount}, got ${result.data.amount}`);
           return res.status(400).json({
             success: false,
-            error: `Amount mismatch: expected ₦1,000, got ₦${result.data.amount / 100}`
+            error: `Amount mismatch: expected ₦${expectedAmount / 100}, got ₦${result.data.amount / 100}`
           });
         }
         
@@ -160,7 +187,8 @@ app.post('/api/verify-payment', async (req, res) => {
             amount: result.data.amount,
             currency: result.data.currency,
             email: result.data.customer?.email || email,
-            fullName: fullName
+            fullName: fullName,
+            credits: credits
           }
         });
       } catch (error) {
@@ -176,6 +204,23 @@ app.post('/api/verify-payment', async (req, res) => {
   });
 
   paystackRequest.end();
+});
+
+// SPA Fallback Route - Serve index.html for all non-API requests
+// This allows client-side routing to work properly
+app.get('*', (req, res) => {
+  // Don't catch API routes or file extensions
+  if (req.path.startsWith('/api/') || /\.\w+$/.test(req.path)) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+  
+  // Serve index.html for all other routes to enable SPA routing
+  res.sendFile(path.join(__dirname, 'index.html'), (err) => {
+    if (err) {
+      console.error('Error sending index.html:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
 });
 
 const PORT = process.env.PORT || 5000;

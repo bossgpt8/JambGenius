@@ -1,32 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="/styles.css?v=1.0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Practice Mode | JambGenius 💯</title>
     <meta name="description" content="Practice JAMB questions with timed or free mode">
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="suppress-tailwind-warning.js"></script>
+    
+    
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                    }
-                }
-            }
-        };
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,7 +17,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
+    <script src="supabase-config.js"></script>
     <script src="supabaseClient.js"></script>
+    <script src="modal-component.js"></script>
     <script src="content-protection.js"></script>
     <script src="calculator.js"></script>
     <script type="module">
@@ -181,6 +166,19 @@
 
             <div id="feedback" class="hidden mt-6 p-4 rounded-lg">
             </div>
+
+            <!-- AI Explanation Section -->
+            <div id="explanationSection" class="hidden mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="font-semibold text-blue-900 flex items-center gap-2">
+                        <i class="fas fa-bolt text-blue-600"></i>AI Explanation
+                    </h3>
+                    <button id="closeExplanationBtn" class="text-blue-400 hover:text-blue-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <p id="explanationText" class="text-sm text-blue-800"></p>
+            </div>
         </div>
 
         <div class="flex justify-between items-center">
@@ -193,6 +191,9 @@
                 <div class="text-2xl font-bold text-gray-900"><span id="correctCount">0</span> / <span id="answeredCount">0</span></div>
             </div>
 
+            <button id="getExplanationBtn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed hidden">
+                <i class="fas fa-lightbulb mr-2"></i>Get AI Explanation
+            </button>
             <button id="nextBtn" class="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
                 Next<i class="fas fa-arrow-right ml-2"></i>
             </button>
@@ -249,6 +250,19 @@
         </div>
     </div>
 
+    <script type="module">
+        import { BookmarksAndStreaks } from './bookmarks-streaks.js';
+        import { auth } from './firebase-init.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        window.bookmarksStreaks = new BookmarksAndStreaks();
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.bookmarksStreaks.setUser(user);
+            }
+        });
+    </script>
     <script src="practice-script.js"></script>
 </body>
 </html>

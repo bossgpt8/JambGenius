@@ -82,8 +82,16 @@ export async function loadAuthModal() {
         .then(html => {
             const container = document.createElement('div');
             container.innerHTML = html;
-            document.body.appendChild(container.firstElementChild);
+            const modalElement = container.firstElementChild;
+            document.body.appendChild(modalElement);
             modalLoaded = true;
+            
+            // Wait for modal to be in DOM, then initialize event listeners
+            setTimeout(() => {
+                if (window.initializeAuthModal) {
+                    window.initializeAuthModal();
+                }
+            }, 50);
         })
         .catch(error => {
             console.error('Error loading auth modal:', error);

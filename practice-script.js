@@ -29,13 +29,48 @@ let timerInterval = null;
 let startTime = null;
 let bookmarkedQuestions = new Set();
 let antiCheat = null;
+let bookmarksStreaks = null;
+let currentUser = null;
 
 const urlParams = new URLSearchParams(window.location.search);
 const subject = urlParams.get('subject') || 'english';
 
-antiCheat = new AntiCheatSystem(() => {
-    alert('Maximum violations reached. Your practice session will end.');
-    showCompletion();
+function waitForCustomModal() {
+    return new Promise((resolve) => {
+        if (typeof window.customModal !== 'undefined') {
+            resolve();
+        } else {
+            const checkInterval = setInterval(() => {
+                if (typeof window.customModal !== 'undefined') {
+                    clearInterval(checkInterval);
+                    resolve();
+                }
+            }, 50);
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await waitForCustomModal();
+    antiCheat = new AntiCheatSystem(() => {
+        customModal.alert('Maximum violations reached. Your practice session will end.', 'Session Ended');
+        showCompletion();
+    });
+    
+    // Initialize bookmarks & streaks module
+    if (typeof window.bookmarksStreaks !== 'undefined') {
+        bookmarksStreaks = window.bookmarksStreaks;
+    }
+    
+    // Get current user
+    const { getAuth } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
+    const auth = getAuth();
+    auth.onAuthStateChanged((user) => {
+        currentUser = user;
+        if (user && bookmarksStreaks) {
+            bookmarksStreaks.setUser(user);
+        }
+    });
 });
 
 // Mode selection
@@ -111,7 +146,7 @@ async function loadQuestions() {
         }
     } catch (error) {
         console.error('Error loading questions:', error);
-        alert('Failed to load questions. Please try again.');
+        customModal.error('Failed to load questions. Please try again.', 'Loading Error');
     }
 }
 
@@ -151,17 +186,34 @@ function saveBookmarks() {
     localStorage.setItem('jambgenius_bookmarks', JSON.stringify([...bookmarkedQuestions]));
 }
 
-function toggleBookmark() {
-    const questionId = currentQuestions[currentQuestionIndex].id;
+async function toggleBookmark() {
+    const question = currentQuestions[currentQuestionIndex];
     const bookmarkBtn = document.getElementById('bookmarkBtn');
     const icon = bookmarkBtn.querySelector('i');
     
-    if (bookmarkedQuestions.has(questionId)) {
-        bookmarkedQuestions.delete(questionId);
+    // Save to Firebase if user is logged in
+    if (currentUser && bookmarksStreaks) {
+        await bookmarksStreaks.toggleBookmark(question.id, {
+            question: question.question,
+            subject: question.subject,
+            options: {
+                A: question.option_a,
+                B: question.option_b,
+                C: question.option_c,
+                D: question.option_d
+            },
+            correctAnswer: question.correct_answer,
+            explanation: question.explanation
+        });
+    }
+    
+    // Update local state
+    if (bookmarkedQuestions.has(question.id)) {
+        bookmarkedQuestions.delete(question.id);
         icon.classList.remove('fas');
         icon.classList.add('far');
     } else {
-        bookmarkedQuestions.add(questionId);
+        bookmarkedQuestions.add(question.id);
         icon.classList.remove('far');
         icon.classList.add('fas');
     }
@@ -226,7 +278,7 @@ function renderQuestion() {
     updateScore();
 }
 
-function selectOption(option) {
+async function selectOption(option) {
     if (userAnswers[currentQuestionIndex]) return;
     
     const question = currentQuestions[currentQuestionIndex];
@@ -239,6 +291,11 @@ function selectOption(option) {
     
     if (isCorrect) correctCount++;
     
+    // Update streak for first answer in session
+    if (currentUser && bookmarksStreaks && userAnswers.filter(a => a !== null).length === 1) {
+        await bookmarksStreaks.updateStreak();
+    }
+    
     document.querySelectorAll('.option-btn').forEach(btn => {
         btn.classList.remove('border-primary-500', 'bg-primary-50');
         btn.style.pointerEvents = 'none';
@@ -249,6 +306,13 @@ function selectOption(option) {
     
     showFeedback();
     updateScore();
+    
+    // Show explanation button if answer is wrong or correct
+    if (!isCorrect && currentUser && bookmarksStreaks) {
+        document.getElementById('getExplanationBtn').classList.remove('hidden');
+    } else {
+        document.getElementById('getExplanationBtn').classList.add('hidden');
+    }
 }
 
 function showFeedback() {
@@ -430,4 +494,60 @@ document.getElementById('reviewBtn').addEventListener('click', () => {
 
 document.getElementById('newPracticeBtn').addEventListener('click', () => {
     window.location.href = 'practice-mode-subjects.html';
+});
+
+// AI Explanation Button Handler
+document.getElementById('getExplanationBtn')?.addEventListener('click', async () => {
+    const question = currentQuestions[currentQuestionIndex];
+    const answer = userAnswers[currentQuestionIndex];
+    const btn = document.getElementById('getExplanationBtn');
+    const explanationSection = document.getElementById('explanationSection');
+    const explanationText = document.getElementById('explanationText');
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Loading...';
+    
+    try {
+        const response = await fetch('/api/gemini-explain', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                question: question.question,
+                options: {
+                    A: question.option_a,
+                    B: question.option_b,
+                    C: question.option_c,
+                    D: question.option_d
+                },
+                correctAnswer: question.correct_answer,
+                userAnswer: answer.selected
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.explanation) {
+            explanationText.textContent = data.explanation;
+            explanationSection.classList.remove('hidden');
+            
+            // Save explanation to Firebase
+            if (currentUser && bookmarksStreaks) {
+                await bookmarksStreaks.saveExplanation(question.id, data.explanation);
+            }
+        } else {
+            explanationText.textContent = 'Unable to generate explanation. Please try again.';
+            explanationSection.classList.remove('hidden');
+        }
+    } catch (error) {
+        console.error('Error getting explanation:', error);
+        explanationText.textContent = 'Error loading explanation. Please try again.';
+        explanationSection.classList.remove('hidden');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-lightbulb mr-2"></i>Get AI Explanation';
+    }
+});
+
+document.getElementById('closeExplanationBtn')?.addEventListener('click', () => {
+    document.getElementById('explanationSection').classList.add('hidden');
 });

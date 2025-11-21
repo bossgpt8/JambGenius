@@ -9,6 +9,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { loadAuthModal } from './auth-modal-loader.js';
+import { initPasswordValidator } from './password-validator.js';
 
 const provider = new GoogleAuthProvider();
 
@@ -41,8 +42,17 @@ export function showAuthModal() {
         elements.authModal.classList.remove('hidden');
         if (elements.emailSignInBtn) elements.emailSignInBtn.disabled = true;
         if (elements.emailSignUpBtn) elements.emailSignUpBtn.disabled = true;
+        
+        // Prevent accidental close from initial click
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                hideAuthModal();
+            }
+        };
+        
         setTimeout(() => {
             initializeHcaptcha();
+            document.addEventListener('keydown', handleEscape);
             setTimeout(() => {
                 if (elements.emailSignInBtn) elements.emailSignInBtn.disabled = false;
                 if (elements.emailSignUpBtn) elements.emailSignUpBtn.disabled = false;
@@ -56,6 +66,12 @@ function hideAuthModal() {
     if (elements.authModal) {
         elements.authModal.classList.add('hidden');
         showSignInFormView();
+        // Remove escape key listener
+        document.removeEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                hideAuthModal();
+            }
+        });
     }
 }
 
@@ -148,7 +164,7 @@ async function signInWithGoogle() {
         hideAuthModal();
     } catch (error) {
         console.error('Error signing in:', error);
-        alert('Sign in failed. Please try again.');
+        customModal.error('Sign in failed. Please try again.', 'Sign In Error');
     }
 }
 
@@ -157,25 +173,25 @@ async function signInWithEmail() {
     const password = document.getElementById('signInPassword').value;
 
     if (!email || !password) {
-        alert('Please enter both email and password');
+        customModal.error('Please enter both email and password');
         return;
     }
 
     if (typeof hcaptcha === 'undefined' || !window.signInHcaptchaId) {
-        alert('Verification is still loading. Please wait a moment and try again.');
+        customModal.alert('Verification is still loading. Please wait a moment and try again.', 'Please Wait');
         return;
     }
 
     const hcaptchaResponse = hcaptcha.getResponse(window.signInHcaptchaId);
     if (!hcaptchaResponse) {
-        alert('Please complete the verification');
+        customModal.error('Please complete the verification');
         return;
     }
 
     try {
         const verifyResult = await verifyCaptcha(hcaptchaResponse);
         if (!verifyResult.success) {
-            alert('Verification failed. Please try again.');
+            customModal.error('Verification failed. Please try again.', 'Verification Error');
             hcaptcha.reset(window.signInHcaptchaId);
             return;
         }
@@ -186,13 +202,13 @@ async function signInWithEmail() {
         console.error('Error signing in:', error);
         hcaptcha.reset(window.signInHcaptchaId);
         if (error.code === 'auth/user-not-found') {
-            alert('No account found with this email. Please sign up first.');
+            customModal.error('No account found with this email. Please sign up first.', 'Account Not Found');
         } else if (error.code === 'auth/wrong-password') {
-            alert('Incorrect password. Please try again.');
+            customModal.error('Incorrect password. Please try again.', 'Incorrect Password');
         } else if (error.code === 'auth/invalid-email') {
-            alert('Invalid email address.');
+            customModal.error('Invalid email address.', 'Invalid Email');
         } else {
-            alert('Sign in failed: ' + error.message);
+            customModal.error('Sign in failed: ' + error.message, 'Sign In Error');
         }
     }
 }
@@ -204,35 +220,42 @@ async function signUpWithEmail() {
     const agreeToTerms = document.getElementById('agreeToTerms');
 
     if (!name || !email || !password) {
-        alert('Please fill in all fields');
+        customModal.error('Please fill in all fields');
+        return;
+    }
+
+    // Validate password
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,})/;
+    if (!passwordRegex.test(password)) {
+        customModal.error('Password must be at least 8 characters with 1 uppercase, 1 lowercase, and 1 special character', 'Weak Password');
         return;
     }
 
     if (agreeToTerms && !agreeToTerms.checked) {
-        alert('You must agree to the Terms of Service and Privacy Policy to create an account');
+        customModal.error('You must agree to the Terms of Service and Privacy Policy to create an account', 'Terms Required');
         return;
     }
 
     if (password.length < 6) {
-        alert('Password must be at least 6 characters long');
+        customModal.error('Password must be at least 6 characters long', 'Weak Password');
         return;
     }
 
     if (typeof hcaptcha === 'undefined' || !window.signUpHcaptchaId) {
-        alert('Verification is still loading. Please wait a moment and try again.');
+        customModal.alert('Verification is still loading. Please wait a moment and try again.', 'Please Wait');
         return;
     }
 
     const hcaptchaResponse = hcaptcha.getResponse(window.signUpHcaptchaId);
     if (!hcaptchaResponse) {
-        alert('Please complete the verification');
+        customModal.error('Please complete the verification');
         return;
     }
 
     try {
         const verifyResult = await verifyCaptcha(hcaptchaResponse);
         if (!verifyResult.success) {
-            alert('Verification failed. Please try again.');
+            customModal.error('Verification failed. Please try again.', 'Verification Error');
             hcaptcha.reset(window.signUpHcaptchaId);
             return;
         }
@@ -245,13 +268,13 @@ async function signUpWithEmail() {
         console.error('Error signing up:', error);
         hcaptcha.reset(window.signUpHcaptchaId);
         if (error.code === 'auth/email-already-in-use') {
-            alert('This email is already registered. Please sign in instead.');
+            customModal.error('This email is already registered. Please sign in instead.', 'Email Already In Use');
         } else if (error.code === 'auth/invalid-email') {
-            alert('Invalid email address.');
+            customModal.error('Invalid email address.', 'Invalid Email');
         } else if (error.code === 'auth/weak-password') {
-            alert('Password is too weak. Please use a stronger password.');
+            customModal.error('Password is too weak. Please use a stronger password.', 'Weak Password');
         } else {
-            alert('Sign up failed: ' + error.message);
+            customModal.error('Sign up failed: ' + error.message, 'Sign Up Error');
         }
     }
 }
@@ -260,22 +283,22 @@ async function resetPassword() {
     const email = document.getElementById('resetEmail').value;
 
     if (!email) {
-        alert('Please enter your email address');
+        customModal.error('Please enter your email address');
         return;
     }
 
     try {
         await sendPasswordResetEmail(auth, email);
-        alert('Password reset email sent! Please check your inbox.');
+        await customModal.success('Password reset email sent! Please check your inbox.', 'Email Sent');
         showSignInFormView();
     } catch (error) {
         console.error('Error sending reset email:', error);
         if (error.code === 'auth/user-not-found') {
-            alert('No account found with this email.');
+            customModal.error('No account found with this email.', 'Account Not Found');
         } else if (error.code === 'auth/invalid-email') {
-            alert('Invalid email address.');
+            customModal.error('Invalid email address.', 'Invalid Email');
         } else {
-            alert('Failed to send reset email: ' + error.message);
+            customModal.error('Failed to send reset email: ' + error.message, 'Error');
         }
     }
 }
@@ -326,10 +349,9 @@ function initializeHcaptcha() {
     }
 }
 
-export async function initializeAuthModal() {
+export function initializeAuthModal() {
     if (initialized) return;
     
-    await loadAuthModal();
     initElements();
     
     if (!elements.authModal) return;
@@ -380,15 +402,39 @@ export async function initializeAuthModal() {
         elements.backToSignIn.addEventListener('click', showSignInFormView);
     }
 
+    // Initialize password validator
+    initPasswordValidator();
+
     if (elements.authModal) {
+        // Remove old listeners first to prevent duplicates
+        const oldOverlay = elements.authModal.cloneNode(false);
+        
+        // Prevent modal from closing when clicking inside the modal box
+        const modalContent = elements.authModal.querySelector('.bg-white');
+        if (modalContent) {
+            modalContent.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
+        
+        // Close only when clicking on the background overlay - with proper event handling
         elements.authModal.addEventListener('click', (e) => {
-            if (e.target === elements.authModal) {
-                hideAuthModal();
+            if (e.target === elements.authModal && elements.authModal.classList.contains('hidden') === false) {
+                // Check if click is truly on overlay, not from event bubbling
+                const modalBox = elements.authModal.querySelector('.bg-white');
+                if (!modalBox || !modalBox.contains(e.target)) {
+                    hideAuthModal();
+                }
             }
-        });
+        }, false);
     }
     
     initialized = true;
+}
+
+// Make it available globally for auth-modal-loader to call
+if (typeof window !== 'undefined') {
+    window.initializeAuthModal = initializeAuthModal;
 }
 
 if (typeof document !== 'undefined') {

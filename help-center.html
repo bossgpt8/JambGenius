@@ -1,32 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="/styles.css?v=1.0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Help Center - JambGenius 💯</title>
     <meta name="description" content="Find answers to common questions and get help with using JambGenius, Nigeria's premier JAMB preparation platform.">
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="suppress-tailwind-warning.js"></script>
+    
+    
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                    }
-                }
+        // Define toggleFaq at global scope immediately (not in module)
+        function toggleFaq(index) {
+            const buttons = document.querySelectorAll('.space-y-4 > div button');
+            const button = buttons[index];
+            
+            if (!button) return;
+            
+            const answerDiv = button.parentElement.querySelector('.faq-answer');
+            const icon = button.querySelector('[class^="faq-icon-"]');
+            
+            if (!answerDiv) return;
+            
+            answerDiv.classList.toggle('active');
+            if (icon) {
+                icon.style.transform = answerDiv.classList.contains('active') ? 'rotate(90deg)' : 'rotate(0)';
             }
-        };
+        }
+        
+        // Category click handler
+        function handleCategoryClick(categoryName) {
+            alert('Category: ' + categoryName + ' selected');
+            console.log('Category selected:', categoryName);
+        }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -142,7 +148,7 @@
             <div class="lg:col-span-1">
                 <h2 class="text-2xl font-semibold text-gray-900 mb-6">Browse by Category</h2>
                 <div class="space-y-4">
-                    <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onclick="handleCategoryClick('Getting Started')">
                         <div class="flex items-center space-x-3">
                             <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                                 <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,7 +162,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onclick="handleCategoryClick('Account & Settings')">
                         <div class="flex items-center space-x-3">
                             <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                                 <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -171,7 +177,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onclick="handleCategoryClick('Practice & Exams')">
                         <div class="flex items-center space-x-3">
                             <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                                 <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -185,7 +191,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onclick="handleCategoryClick('Technical Support')">
                         <div class="flex items-center space-x-3">
                             <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                                 <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -471,51 +477,61 @@
         import './firebase-init.js';
         import './auth-state.js';
         import './auth-modal.js';
+        import { auth } from './firebase-init.js';
+        import { signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { onAuthChange } from './auth-state.js';
 
-        function toggleFaq(index) {
-            const allAnswers = document.querySelectorAll('.faq-answer');
-            const allIcons = document.querySelectorAll('[class^="faq-icon-"]');
-            const currentAnswer = allAnswers[index];
-            const currentIcon = allIcons[index];
-            
-            if (!currentAnswer || !currentIcon) return;
-            
-            allAnswers.forEach((answer, i) => {
-                if (i !== index) {
-                    answer.classList.remove('active');
-                    if (allIcons[i]) {
-                        allIcons[i].style.transform = 'rotate(0deg)';
-                    }
-                }
-            });
-            
-            if (currentAnswer.classList.contains('active')) {
-                currentAnswer.classList.remove('active');
-                currentIcon.style.transform = 'rotate(0deg)';
-            } else {
-                currentAnswer.classList.add('active');
-                currentIcon.style.transform = 'rotate(90deg)';
-            }
-        }
 
-        window.toggleFaq = toggleFaq;
-
+        // Show/Hide Guide Modal
         const showGuideBtn = document.getElementById('showGuideBtn');
         const closeGuideBtn = document.getElementById('closeGuideBtn');
         const guideModal = document.getElementById('guideModal');
 
-        showGuideBtn.addEventListener('click', () => {
-            guideModal.classList.add('active');
-        });
+        if (showGuideBtn) {
+            showGuideBtn.addEventListener('click', () => {
+                guideModal.classList.add('active');
+            });
+        }
 
-        closeGuideBtn.addEventListener('click', () => {
-            guideModal.classList.remove('active');
-        });
-
-        guideModal.addEventListener('click', (e) => {
-            if (e.target === guideModal) {
+        if (closeGuideBtn) {
+            closeGuideBtn.addEventListener('click', () => {
                 guideModal.classList.remove('active');
+            });
+        }
+
+        if (guideModal) {
+            guideModal.addEventListener('click', (e) => {
+                if (e.target === guideModal) {
+                    guideModal.classList.remove('active');
+                }
+            });
+        }
+
+        // Auth state management
+        onAuthChange((user, profile) => {
+            const authBtn = document.getElementById('authBtn');
+            const userSection = document.getElementById('userSection');
+            const userName = document.getElementById('userName');
+            const userAvatar = document.getElementById('userAvatar');
+
+            if (user) {
+                authBtn.classList.add('hidden');
+                userSection.classList.remove('hidden');
+                userName.textContent = user.displayName || user.email.split('@')[0];
+                userAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=3b82f6&color=fff`;
+            } else {
+                authBtn.classList.remove('hidden');
+                userSection.classList.add('hidden');
             }
+        });
+
+        document.getElementById('signOutBtn')?.addEventListener('click', () => {
+            signOut(auth).catch(console.error);
+        });
+
+        document.getElementById('authBtn')?.addEventListener('click', () => {
+            const event = new CustomEvent('openAuthModal');
+            document.dispatchEvent(event);
         });
     </script>
 </body>

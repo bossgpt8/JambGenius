@@ -1,32 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="/styles.css?v=1.0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Unlock Mock Exam - Payment | JambGenius 💯</title>
-    <meta name="description" content="Unlock full JAMB mock exam access for ₦1,000">
+    <meta name="description" content="Purchase JAMB mock exam credits">
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="suppress-tailwind-warning.js"></script>
+    
+    
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                    }
-                }
-            }
-        };
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,6 +18,7 @@
     <script src="https://js.paystack.co/v1/inline.js"></script>
     <script src="config.js"></script>
     <script src="content-protection.js"></script>
+    <script src="modal-component.js"></script>
     <script type="module">
         import './firebase-init.js';
         import './auth-state.js';
@@ -65,14 +49,53 @@
                 <div class="inline-block bg-gradient-to-r from-orange-500 to-red-500 rounded-full p-4 mb-4">
                     <i class="fas fa-trophy text-white text-4xl"></i>
                 </div>
-                <h1 class="text-4xl font-bold text-gray-900 mb-2">Unlock Mock Exam Mode</h1>
-                <p class="text-xl text-gray-600">Get full access to JAMB simulation experience</p>
+                <h1 class="text-4xl font-bold text-gray-900 mb-2">Purchase Exam Credits</h1>
+                <p class="text-xl text-gray-600">Get access to JAMB mock exam simulations</p>
             </div>
 
-            <div class="grid md:grid-cols-2 gap-8">
+            <!-- Loading State -->
+            <div id="checkingCreditsSection" class="max-w-2xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-lg p-8 text-center">
+                    <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-primary-500 mx-auto mb-4"></div>
+                    <p class="text-gray-600">Checking your account...</p>
+                </div>
+            </div>
+
+            <!-- Has Credits Message -->
+            <div id="hasCreditsSection" class="hidden">
+                <div class="max-w-2xl mx-auto">
+                    <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl shadow-lg p-8 border-2 border-green-200">
+                        <div class="text-center">
+                            <div class="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-4">
+                                <i class="fas fa-check-circle text-4xl text-green-600"></i>
+                            </div>
+                            <h2 class="text-3xl font-bold text-gray-900 mb-3">You Have Credits!</h2>
+                            <div class="bg-white rounded-xl p-6 mb-6 shadow-sm">
+                                <p class="text-gray-600 mb-2">Available Exam Credits</p>
+                                <div class="text-6xl font-bold text-green-600" id="currentCreditsDisplay">0</div>
+                                <p class="text-sm text-gray-500 mt-2">credits remaining</p>
+                            </div>
+                            <p class="text-gray-700 mb-6 text-lg">
+                                You can start taking mock exams right away!
+                            </p>
+                            <div class="space-y-3">
+                                <a href="exam-mode-subjects.html" class="block w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white py-4 rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105">
+                                    <i class="fas fa-play-circle mr-2"></i>Start Exam Now
+                                </a>
+                                <button id="buyMoreCreditsBtn" class="w-full bg-white border-2 border-green-600 text-green-600 py-3 rounded-lg hover:bg-green-50 transition-colors font-semibold">
+                                    <i class="fas fa-plus-circle mr-2"></i>Buy More Credits
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Form Section -->
+            <div id="paymentSection" class="hidden grid md:grid-cols-2 gap-8">
                 <!-- What You Get -->
                 <div class="bg-white rounded-2xl shadow-lg p-8 border-2 border-gray-100">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-6">What You Get</h2>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">What You Get Per Credit</h2>
                     <ul class="space-y-4">
                         <li class="flex items-start">
                             <div class="flex-shrink-0 bg-green-100 rounded-lg p-2 mr-3">
@@ -112,15 +135,6 @@
                         </li>
                         <li class="flex items-start">
                             <div class="flex-shrink-0 bg-green-100 rounded-lg p-2 mr-3">
-                                <i class="fas fa-ticket-alt text-green-600"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-gray-900">1 Full Mock Exam</h3>
-                                <p class="text-sm text-gray-600">Complete exam session with results</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start">
-                            <div class="flex-shrink-0 bg-green-100 rounded-lg p-2 mr-3">
                                 <i class="fas fa-certificate text-green-600"></i>
                             </div>
                             <div>
@@ -133,11 +147,32 @@
 
                 <!-- Payment Form -->
                 <div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl shadow-lg p-8 border-2 border-orange-200">
+                    <!-- Credit Selector -->
                     <div class="bg-white rounded-xl p-6 mb-6">
-                        <div class="text-center">
-                            <p class="text-gray-600 mb-2">Pay per exam</p>
-                            <div class="text-5xl font-bold text-gray-900 mb-2">₦1,000</div>
-                            <p class="text-sm text-gray-500">One full mock exam session</p>
+                        <div class="text-center mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">Select Number of Credits</label>
+                            <p class="text-xs text-gray-500 mb-4">1 credit = ₦1,000 • Each credit = 1 full exam</p>
+                            
+                            <div class="flex items-center justify-center space-x-4 mb-4">
+                                <button id="decreaseCredits" class="w-14 h-14 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center transition-all transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <i class="fas fa-minus text-xl text-gray-700"></i>
+                                </button>
+                                
+                                <div class="bg-gradient-to-br from-orange-100 to-red-100 rounded-2xl px-8 py-4 min-w-[120px]">
+                                    <div class="text-5xl font-bold text-gray-900" id="creditCount">1</div>
+                                    <div class="text-sm text-gray-600 mt-1">credit<span id="creditPlural">s</span></div>
+                                </div>
+                                
+                                <button id="increaseCredits" class="w-14 h-14 bg-orange-500 hover:bg-orange-600 rounded-full flex items-center justify-center transition-all transform hover:scale-110">
+                                    <i class="fas fa-plus text-xl text-white"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="border-t border-gray-200 pt-4">
+                                <p class="text-gray-600 mb-2">Total Amount</p>
+                                <div class="text-5xl font-bold text-gray-900" id="totalAmount">₦1,000</div>
+                                <p class="text-sm text-gray-500 mt-2"><span id="examCount">1</span> full mock exam session<span id="examPlural">s</span></p>
+                            </div>
                         </div>
                     </div>
 
@@ -178,9 +213,10 @@
                         <button 
                             type="submit" 
                             id="payButton"
-                            class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-4 rounded-xl hover:from-orange-600 hover:to-red-600 transition-all font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105"
+                            disabled
+                            class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-4 rounded-xl hover:from-orange-600 hover:to-red-600 transition-all font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <i class="fas fa-lock mr-2"></i>Pay ₦1,000 Securely
+                            <i class="fas fa-lock mr-2"></i>Pay <span id="payButtonAmount">₦1,000</span> Securely
                         </button>
 
                         <p class="text-xs text-center text-gray-600 mt-4">
@@ -218,7 +254,7 @@
             </div>
 
             <!-- Bank Transfer Payment Guide -->
-            <div class="mt-12 bg-blue-50 border-2 border-blue-200 rounded-2xl p-8">
+            <div id="bankTransferGuide" class="hidden mt-12 bg-blue-50 border-2 border-blue-200 rounded-2xl p-8">
                 <div class="text-center mb-6">
                     <div class="inline-block bg-blue-500 rounded-full p-3 mb-3">
                         <i class="fas fa-university text-white text-2xl"></i>
@@ -228,16 +264,14 @@
                 </div>
 
                 <div class="grid md:grid-cols-4 gap-4">
-                    <!-- Step 1 -->
                     <div class="bg-white rounded-xl p-6 shadow-sm">
                         <div class="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center mb-4">
                             <span class="text-blue-600 font-bold text-xl">1</span>
                         </div>
                         <h4 class="font-bold text-gray-900 mb-2">Select Transfer</h4>
-                        <p class="text-sm text-gray-600">After clicking "Pay ₦1,000", choose <span class="font-semibold text-blue-600">"Pay with Transfer"</span> option from the payment popup</p>
+                        <p class="text-sm text-gray-600">After clicking "Pay", choose <span class="font-semibold text-blue-600">"Pay with Transfer"</span> option from the payment popup</p>
                     </div>
 
-                    <!-- Step 2 -->
                     <div class="bg-white rounded-xl p-6 shadow-sm">
                         <div class="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center mb-4">
                             <span class="text-green-600 font-bold text-xl">2</span>
@@ -246,16 +280,14 @@
                         <p class="text-sm text-gray-600">You'll see an account number displayed. <span class="font-semibold text-green-600">Copy it</span> to your clipboard</p>
                     </div>
 
-                    <!-- Step 3 -->
                     <div class="bg-white rounded-xl p-6 shadow-sm">
                         <div class="bg-orange-100 rounded-full w-12 h-12 flex items-center justify-center mb-4">
                             <span class="text-orange-600 font-bold text-xl">3</span>
                         </div>
                         <h4 class="font-bold text-gray-900 mb-2">Make Payment</h4>
-                        <p class="text-sm text-gray-600">Open your bank app, paste the account number, and <span class="font-semibold text-orange-600">transfer ₦1,000</span></p>
+                        <p class="text-sm text-gray-600">Open your bank app, paste the account number, and <span class="font-semibold text-orange-600">transfer the amount</span></p>
                     </div>
 
-                    <!-- Step 4 -->
                     <div class="bg-white rounded-xl p-6 shadow-sm">
                         <div class="bg-purple-100 rounded-full w-12 h-12 flex items-center justify-center mb-4">
                             <span class="text-purple-600 font-bold text-xl">4</span>
@@ -300,30 +332,6 @@
         </div>
     </div>
 
-    <!-- Error Modal -->
-    <div id="errorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-8 max-w-md w-full">
-            <div class="text-center mb-6">
-                <div class="inline-block bg-red-100 rounded-full p-4 mb-4">
-                    <i class="fas fa-exclamation-circle text-red-600 text-4xl"></i>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2">Payment not successful</h3>
-                <p id="errorMessage" class="text-gray-600 mb-4"></p>
-                <div id="errorReference" class="bg-gray-100 rounded-lg p-3 mb-4">
-                    <p class="text-xs text-gray-500 mb-1">Reference Number</p>
-                    <p id="errorReferenceText" class="font-mono text-sm text-gray-800"></p>
-                </div>
-                <p class="text-sm text-gray-600">Please contact support if you were charged.</p>
-            </div>
-            <button 
-                onclick="document.getElementById('errorModal').classList.add('hidden')"
-                class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
-            >
-                OK
-            </button>
-        </div>
-    </div>
-
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
@@ -337,21 +345,105 @@
         const emailInput = document.getElementById('email');
         const fullNameInput = document.getElementById('fullName');
         const loadingModal = document.getElementById('loadingModal');
+        const creditCountEl = document.getElementById('creditCount');
+        const totalAmountEl = document.getElementById('totalAmount');
+        const payButtonAmountEl = document.getElementById('payButtonAmount');
+        const decreaseBtn = document.getElementById('decreaseCredits');
+        const increaseBtn = document.getElementById('increaseCredits');
+        const examCountEl = document.getElementById('examCount');
+        const examPluralEl = document.getElementById('examPlural');
+        const creditPluralEl = document.getElementById('creditPlural');
+        const checkingCreditsSection = document.getElementById('checkingCreditsSection');
+        const hasCreditsSection = document.getElementById('hasCreditsSection');
+        const paymentSection = document.getElementById('paymentSection');
+        const bankTransferGuide = document.getElementById('bankTransferGuide');
+        const buyMoreCreditsBtn = document.getElementById('buyMoreCreditsBtn');
+        const payButton = document.getElementById('payButton');
+
+        let selectedCredits = 1;
+        const PRICE_PER_CREDIT = 1000;
+
+        function updateCreditDisplay() {
+            creditCountEl.textContent = selectedCredits;
+            const totalPrice = selectedCredits * PRICE_PER_CREDIT;
+            const formattedPrice = `₦${totalPrice.toLocaleString()}`;
+            totalAmountEl.textContent = formattedPrice;
+            payButtonAmountEl.textContent = formattedPrice;
+            examCountEl.textContent = selectedCredits;
+            examPluralEl.textContent = selectedCredits === 1 ? '' : 's';
+            creditPluralEl.textContent = selectedCredits === 1 ? '' : 's';
+            decreaseBtn.disabled = selectedCredits <= 1;
+        }
+
+        decreaseBtn.addEventListener('click', () => {
+            if (selectedCredits > 1) {
+                selectedCredits--;
+                updateCreditDisplay();
+            }
+        });
+
+        increaseBtn.addEventListener('click', () => {
+            if (selectedCredits < 99) {
+                selectedCredits++;
+                updateCreditDisplay();
+            }
+        });
+
+        buyMoreCreditsBtn?.addEventListener('click', () => {
+            checkingCreditsSection.classList.add('hidden');
+            hasCreditsSection.classList.add('hidden');
+            paymentSection.classList.remove('hidden');
+            bankTransferGuide.classList.remove('hidden');
+            if (payButton) payButton.disabled = false;
+        });
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 emailInput.value = user.email || '';
                 fullNameInput.value = user.displayName || '';
 
-                const userDoc = await getDoc(doc(db, 'users', user.uid));
-                if (userDoc.exists()) {
-                    const examCredits = userDoc.data().examCredits || 0;
+                try {
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    const examCredits = userDoc.exists() ? (userDoc.data().examCredits || 0) : 0;
+                    
+                    checkingCreditsSection.classList.add('hidden');
+                    
                     if (examCredits > 0) {
-                        if (confirm(`You have ${examCredits} exam credit${examCredits > 1 ? 's' : ''} available. Would you like to take an exam now?`)) {
-                            window.location.href = 'exam-mode-subjects.html';
-                        }
+                        document.getElementById('currentCreditsDisplay').textContent = examCredits;
+                        hasCreditsSection.classList.remove('hidden');
+                        paymentSection.classList.add('hidden');
+                        bankTransferGuide.classList.add('hidden');
+                        if (payButton) payButton.disabled = true;
+                    } else {
+                        hasCreditsSection.classList.add('hidden');
+                        paymentSection.classList.remove('hidden');
+                        bankTransferGuide.classList.remove('hidden');
+                        if (payButton) payButton.disabled = false;
+                    }
+                } catch (error) {
+                    console.error('Error checking credits:', error);
+                    
+                    const retry = await customModal.confirm(
+                        'Unable to check your credit balance. Would you like to refresh the page to try again?',
+                        'Error Loading Account'
+                    );
+                    
+                    if (retry) {
+                        window.location.reload();
+                    } else {
+                        checkingCreditsSection.classList.remove('hidden');
+                        hasCreditsSection.classList.add('hidden');
+                        paymentSection.classList.add('hidden');
+                        bankTransferGuide.classList.add('hidden');
+                        if (payButton) payButton.disabled = true;
                     }
                 }
+            } else {
+                checkingCreditsSection.classList.add('hidden');
+                hasCreditsSection.classList.add('hidden');
+                paymentSection.classList.remove('hidden');
+                bankTransferGuide.classList.remove('hidden');
+                if (payButton) payButton.disabled = false;
             }
         });
 
@@ -362,14 +454,16 @@
             const fullName = fullNameInput.value.trim();
 
             if (!email || !fullName) {
-                alert('Please fill in all fields');
+                customModal.error('Please fill in all fields');
                 return;
             }
+
+            const totalAmount = selectedCredits * PRICE_PER_CREDIT * 100;
 
             const handler = PaystackPop.setup({
                 key: CONFIG.paystack.publicKey,
                 email: email,
-                amount: CONFIG.pricing.mockExamPrice,
+                amount: totalAmount,
                 currency: 'NGN',
                 ref: 'JAMB_MOCK_' + Math.floor((Math.random() * 1000000000) + 1),
                 metadata: {
@@ -383,6 +477,11 @@
                             display_name: "Product",
                             variable_name: "product",
                             value: "JAMB Mock Exam Access"
+                        },
+                        {
+                            display_name: "Credits",
+                            variable_name: "credits",
+                            value: selectedCredits
                         }
                     ]
                 },
@@ -399,7 +498,8 @@
                                 body: JSON.stringify({
                                     reference: response.reference,
                                     email: email,
-                                    fullName: fullName
+                                    fullName: fullName,
+                                    expectedCredits: selectedCredits
                                 })
                             });
 
@@ -424,7 +524,7 @@
                                     const currentCredits = userDoc.exists() ? (userDoc.data().examCredits || 0) : 0;
 
                                     await setDoc(userDocRef, {
-                                        examCredits: currentCredits + 1,
+                                        examCredits: currentCredits + selectedCredits,
                                         lastPaymentReference: response.reference,
                                         lastPaymentAt: new Date().toISOString(),
                                         lastPaymentAmount: result.data.amount,
@@ -436,18 +536,23 @@
                                                 reference: response.reference,
                                                 amount: result.data.amount,
                                                 currency: result.data.currency,
+                                                credits: selectedCredits,
                                                 paidAt: new Date().toISOString()
                                             }]
                                             : [{
                                                 reference: response.reference,
                                                 amount: result.data.amount,
                                                 currency: result.data.currency,
+                                                credits: selectedCredits,
                                                 paidAt: new Date().toISOString()
                                             }]
                                     }, { merge: true });
                                 }
 
-                                alert('Payment successful! You now have 1 exam credit. Redirecting to exam selection...');
+                                await customModal.success(
+                                    `Payment successful! You now have ${selectedCredits} exam credit${selectedCredits > 1 ? 's' : ''}. Redirecting to exam selection...`,
+                                    'Payment Successful!'
+                                );
                                 window.location.href = 'exam-mode-subjects.html?payment=success';
                             } else {
                                 const errorMessage = result.error || 'Payment verification failed';
@@ -457,16 +562,17 @@
                             console.error('Payment verification error:', error);
                             const errorMsg = error.message || 'Payment verification failed';
                             
-                            document.getElementById('errorMessage').textContent = errorMsg;
-                            document.getElementById('errorReferenceText').textContent = response.reference;
-                            document.getElementById('errorModal').classList.remove('hidden');
+                            await customModal.error(
+                                `${errorMsg}\n\nReference: ${response.reference}\n\nPlease contact support if you were charged.`,
+                                'Payment Error'
+                            );
                         } finally {
                             loadingModal.classList.add('hidden');
                         }
                     })();
                 },
                 onClose: function() {
-                    alert('Payment cancelled');
+                    customModal.alert('Payment was cancelled', 'Payment Cancelled', 'warning');
                 }
             });
 

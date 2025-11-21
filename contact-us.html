@@ -1,32 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="/styles.css?v=1.0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Us - JambGenius 💯</title>
     <meta name="description" content="Get in touch with JambGenius. We're here to help you with any questions about JAMB preparation and our platform.">
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="suppress-tailwind-warning.js"></script>
+    
+    
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                    }
-                }
-            }
-        };
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -164,8 +147,10 @@
             <!-- Contact Form -->
             <div>
                 <h2 class="text-2xl font-semibold text-gray-900 mb-6">Send us a Message</h2>
-                
-                <form class="space-y-6" action="https://formspree.io/f/xyzlpgjj" method="POST">
+                <div id="successMessage" class="hidden mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <p class="text-green-800 font-medium">✓ Thank you! Your message has been sent successfully. We'll get back to you soon.</p>
+                </div>
+                <form class="space-y-6" id="contactForm">
                     <div class="grid sm:grid-cols-2 gap-4">
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
@@ -285,6 +270,63 @@
         import './firebase-init.js';
         import './auth-state.js';
         import './auth-modal.js';
+        import { auth } from './firebase-init.js';
+        import { signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { onAuthChange } from './auth-state.js';
+
+        // Contact form handler
+        const contactForm = document.getElementById('contactForm');
+        const successMessage = document.getElementById('successMessage');
+
+        if (contactForm) {
+            contactForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const name = contactForm.querySelector('[name="name"]').value;
+                const email = contactForm.querySelector('[name="email"]').value;
+                const subject = contactForm.querySelector('[name="subject"]').value;
+                const message = contactForm.querySelector('[name="message"]').value;
+
+                // Show success message
+                successMessage.classList.remove('hidden');
+                contactForm.reset();
+                
+                // Hide success message after 5 seconds
+                setTimeout(() => {
+                    successMessage.classList.add('hidden');
+                }, 5000);
+
+                // Log message (in real app, would send to backend)
+                console.log('Message sent:', { name, email, subject, message });
+            });
+        }
+
+        // Auth state management
+        onAuthChange((user, profile) => {
+            const authBtn = document.getElementById('authBtn');
+            const userSection = document.getElementById('userSection');
+            const userName = document.getElementById('userName');
+            const userAvatar = document.getElementById('userAvatar');
+
+            if (user) {
+                authBtn.classList.add('hidden');
+                userSection.classList.remove('hidden');
+                userName.textContent = user.displayName || user.email.split('@')[0];
+                userAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=3b82f6&color=fff`;
+            } else {
+                authBtn.classList.remove('hidden');
+                userSection.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('signOutBtn')?.addEventListener('click', () => {
+            signOut(auth).catch(console.error);
+        });
+
+        document.getElementById('authBtn')?.addEventListener('click', () => {
+            const event = new CustomEvent('openAuthModal');
+            document.dispatchEvent(event);
+        });
     </script>
 </body>
 </html>

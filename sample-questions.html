@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="/styles.css?v=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample Questions | JambGenius</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .copyable { user-select: text !important; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-graduation-cap text-2xl text-blue-600 mr-2"></i>
+                    <span class="text-xl font-bold text-gray-900">JambGenius 💯</span>
+                </div>
+                <a href="index.html" class="text-gray-600 hover:text-blue-600">
+                    <i class="fas fa-home mr-2"></i>Home
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto px-4 py-12">
+        <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">
+                <i class="fas fa-database text-blue-600 mr-3"></i>
+                3 Sample Questions for Supabase
+            </h1>
+            <p class="text-gray-600 text-lg mb-6">
+                Here are 3 ready-to-use questions you can insert into your Supabase database. 
+                Each question follows the proper format for JambGenius.
+            </p>
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                <p class="text-sm text-blue-800">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <strong>Tip:</strong> Copy these SQL commands and paste them into your Supabase SQL Editor to insert all 3 questions at once!
+                </p>
+            </div>
+        </div>
+
+        <!-- Question 1: English -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold text-gray-900">
+                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm mr-2">Question 1</span>
+                    English Language
+                </h2>
+                <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">Medium</span>
+            </div>
+            
+            <div class="mb-6">
+                <p class="text-lg font-semibold text-gray-900 mb-4">
+                    Choose the option that best completes the sentence: The committee _____ its findings yesterday.
+                </p>
+                <div class="space-y-2">
+                    <div class="p-3 bg-gray-50 rounded-lg">
+                        <span class="font-semibold text-gray-700">A.</span> submit
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded-lg">
+                        <span class="font-semibold text-gray-700">B.</span> submits
+                    </div>
+                    <div class="p-3 bg-green-100 rounded-lg border-2 border-green-500">
+                        <span class="font-semibold text-green-700">C.</span> submitted ✓
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded-lg">
+                        <span class="font-semibold text-gray-700">D.</span> submitting
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded mb-4">
+                <p class="text-sm font-semibold text-green-900 mb-1">Explanation:</p>
+                <p class="text-green-800">
+                    The sentence is in past tense (yesterday), and "committee" is a collective noun that takes a singular verb. "Submitted" is the correct past tense form.
+                </p>
+            </div>
+
+            <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm overflow-x-auto copyable">
+<pre>INSERT INTO questions (subject, question, option_a, option_b, option_c, option_d, correct_answer, explanation, difficulty)
+VALUES (
+  'english',
+  'Choose the option that best completes the sentence: The committee _____ its findings yesterday.',
+  'submit',
+  'submits',
+  'submitted',
+  'submitting',
+  'C',
+  'The sentence is in past tense (yesterday), and "committee" is a collective noun that takes a singular verb. "Submitted" is the correct past tense form.',
+  'medium'
+);</pre>
+            </div>
+        </div>
+
+        <!-- Question 2: Mathematics -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold text-gray-900">
+                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm mr-2">Question 2</span>
+                    Mathematics
+                </h2>
+                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">Easy</span>
+            </div>
+            
+            <div class="mb-6">
+                <p class="text-lg font-semibold text-gray-900 mb-4">
+                    If 3x - 7 = 14, what is the value of x?
+                </p>
+                <div class="space-y-2">
+                    <div class="p-3 bg-gray-50 rounded-lg">
+                        <span class="font-semibold text-gray-700">A.</span> 5
+                    </div>
+                    <div class="p-3 bg-green-100 rounded-lg border-2 border-green-500">
+                        <span class="font-semibold text-green-700">B.</span> 7 ✓
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded-lg">
+                        <span class="font-semibold text-gray-700">C.</span> 21
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded-lg">
+                        <span class="font-semibold text-gray-700">D.</span> 9
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded mb-4">
+                <p class="text-sm font-semibold text-green-900 mb-1">Explanation:</p>
+                <p class="text-green-800">
+                    Add 7 to both sides: 3x = 21. Divide both sides by 3: x = 7.
+                </p>
+            </div>
+
+            <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm overflow-x-auto copyable">
+<pre>INSERT INTO questions (subject, question, option_a, option_b, option_c, option_d, correct_answer, explanation, difficulty)
+VALUES (
+  'mathematics',
+  'If 3x - 7 = 14, what is the value of x?',
+  '5',
+  '7',
+  '21',
+  '9',
+  'B',
+  'Add 7 to both sides: 3x = 21. Divide both sides by 3: x = 7.',
+  'easy'
+);</pre>
+            </div>
+        </div>
+
+        <!-- Question 3: Physics -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold text-gray-900">
+                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm mr-2">Question 3</span>
+                    Physics
+                </h2>
+                <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">Medium</span>
+            </div>
+            
+            <div class="mb-6">
+                <p class="text-lg font-semibold text-gray-900 mb-4">
+                    A car accelerates uniformly from rest to a velocity of 20 m/s in 5 seconds. What is its acceleration?
+                </p>
+                <div class="space-y-2">
+                    <div class="p-3 bg-gray-50 rounded-lg">
+                        <span class="font-semibold text-gray-700">A.</span> 2 m/s²
+                    </div>
+                    <div class="p-3 bg-green-100 rounded-lg border-2 border-green-500">
+                        <span class="font-semibold text-green-700">B.</span> 4 m/s² ✓
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded-lg">
+                        <span class="font-semibold text-gray-700">C.</span> 5 m/s²
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded-lg">
+                        <span class="font-semibold text-gray-700">D.</span> 10 m/s²
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded mb-4">
+                <p class="text-sm font-semibold text-green-900 mb-1">Explanation:</p>
+                <p class="text-green-800">
+                    Using the formula a = (v - u) / t, where v = 20 m/s, u = 0 m/s (from rest), and t = 5 s. Therefore, a = (20 - 0) / 5 = 4 m/s².
+                </p>
+            </div>
+
+            <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm overflow-x-auto copyable">
+<pre>INSERT INTO questions (subject, question, option_a, option_b, option_c, option_d, correct_answer, explanation, difficulty)
+VALUES (
+  'physics',
+  'A car accelerates uniformly from rest to a velocity of 20 m/s in 5 seconds. What is its acceleration?',
+  '2 m/s²',
+  '4 m/s²',
+  '5 m/s²',
+  '10 m/s²',
+  'B',
+  'Using the formula a = (v - u) / t, where v = 20 m/s, u = 0 m/s (from rest), and t = 5 s. Therefore, a = (20 - 0) / 5 = 4 m/s².',
+  'medium'
+);</pre>
+            </div>
+        </div>
+
+        <!-- Combined SQL -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-lg p-8 text-white">
+            <h2 class="text-2xl font-bold mb-4">
+                <i class="fas fa-code mr-2"></i>
+                Insert All 3 Questions at Once
+            </h2>
+            <p class="mb-4 opacity-90">Copy this complete SQL script to insert all 3 sample questions:</p>
+            
+            <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm overflow-x-auto copyable">
+<pre>-- Insert 3 Sample Questions for JambGenius
+
+INSERT INTO questions (subject, question, option_a, option_b, option_c, option_d, correct_answer, explanation, difficulty)
+VALUES
+  (
+    'english',
+    'Choose the option that best completes the sentence: The committee _____ its findings yesterday.',
+    'submit',
+    'submits',
+    'submitted',
+    'submitting',
+    'C',
+    'The sentence is in past tense (yesterday), and "committee" is a collective noun that takes a singular verb. "Submitted" is the correct past tense form.',
+    'medium'
+  ),
+  (
+    'mathematics',
+    'If 3x - 7 = 14, what is the value of x?',
+    '5',
+    '7',
+    '21',
+    '9',
+    'B',
+    'Add 7 to both sides: 3x = 21. Divide both sides by 3: x = 7.',
+    'easy'
+  ),
+  (
+    'physics',
+    'A car accelerates uniformly from rest to a velocity of 20 m/s in 5 seconds. What is its acceleration?',
+    '2 m/s²',
+    '4 m/s²',
+    '5 m/s²',
+    '10 m/s²',
+    'B',
+    'Using the formula a = (v - u) / t, where v = 20 m/s, u = 0 m/s (from rest), and t = 5 s. Therefore, a = (20 - 0) / 5 = 4 m/s².',
+    'medium'
+  );
+</pre>
+            </div>
+        </div>
+
+        <!-- Next Steps -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 mt-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                <i class="fas fa-rocket text-blue-600 mr-2"></i>
+                Next Steps
+            </h2>
+            <ol class="list-decimal list-inside space-y-3 text-gray-700">
+                <li>Create your Supabase account at <a href="https://supabase.com" target="_blank" class="text-blue-600 hover:underline">supabase.com</a></li>
+                <li>Create the <code class="bg-gray-200 px-2 py-1 rounded">questions</code> table using the schema in SUPABASE_SETUP_GUIDE.md</li>
+                <li>Copy the SQL code above and paste it into Supabase SQL Editor</li>
+                <li>Get your Supabase URL and anon key from Settings > API</li>
+                <li>Add them to Replit Secrets (see the setup guide)</li>
+                <li>Your app will automatically load questions from Supabase!</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>
