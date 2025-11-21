@@ -13,13 +13,17 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { reference, email, fullName } = req.body;
+  const { reference, email, fullName, expectedCredits } = req.body;
 
-  console.log('Verifying payment:', { reference, email, fullName });
+  console.log('Verifying payment:', { reference, email, fullName, expectedCredits });
 
   if (!reference) {
     return res.status(400).json({ error: 'Payment reference is required' });
   }
+
+  const credits = expectedCredits || 1;
+  const PRICE_PER_CREDIT = 100000;
+  const expectedAmount = credits * PRICE_PER_CREDIT;
 
   const paystackSecretKey = process.env.PAYSTACK_SECRET_KEY;
 
@@ -69,11 +73,10 @@ module.exports = async function handler(req, res) {
             });
           }
 
-          const EXPECTED_AMOUNT = 100000;
-          if (result.data.amount !== EXPECTED_AMOUNT) {
+          if (result.data.amount !== expectedAmount) {
             return res.status(400).json({
               success: false,
-              error: `Amount mismatch. Expected ₦1,000, got ₦${result.data.amount / 100}`
+              error: `Amount mismatch. Expected ₦${expectedAmount / 100}, got ₦${result.data.amount / 100}`
             });
           }
 
@@ -86,7 +89,8 @@ module.exports = async function handler(req, res) {
               currency: result.data.currency || 'NGN',
               email: result.data.customer.email,
               paidAt: result.data.paid_at,
-              status: result.data.status
+              status: result.data.status,
+              credits: credits
             }
           });
         } catch (error) {
