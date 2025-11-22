@@ -1,27 +1,20 @@
 {
   "version": 2,
-  "buildCommand": "cd JambGenius && npm run build:css",
-  "installCommand": "cd JambGenius && npm install",
+  "buildCommand": "npm --prefix JambGenius install && npm --prefix JambGenius run build:css",
+  "functions": {
+    "JambGenius/api/**/*.js": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  },
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/JambGenius/api/$1.js"
+      "src": "/api/.*",
+      "dest": "/JambGenius/api"
     },
     {
-      "src": "/(.*\\.html)",
+      "src": "/(.*)",
       "dest": "/JambGenius/$1"
-    },
-    {
-      "src": "/(.*\\.(css|js|png|jpg|jpeg|gif|svg|ico|json|woff|woff2|ttf|eot))",
-      "dest": "/JambGenius/$1"
-    },
-    {
-      "src": "/([^.]+)",
-      "dest": "/JambGenius/$1.html"
-    },
-    {
-      "src": "/",
-      "dest": "/JambGenius/index.html"
     }
   ]
 }
