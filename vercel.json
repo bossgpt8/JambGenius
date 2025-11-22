@@ -1,52 +1,21 @@
 {
   "version": 2,
-  "buildCommand": "npm run build:css",
+  "buildCommand": "cd JambGenius && npm run build:css",
+  "installCommand": "cd JambGenius && npm install",
   "functions": {
-    "api/**/*.js": {
+    "JambGenius/api/**/*.js": {
       "memory": 1024,
       "maxDuration": 60
     }
   },
   "routes": [
     {
-      "src": "/api/config",
-      "dest": "/api/config.js"
+      "src": "/api/(.*)",
+      "dest": "/JambGenius/api/$1"
     },
     {
-      "src": "/api/verify-captcha",
-      "dest": "/api/verify-captcha.js"
-    },
-    {
-      "src": "/api/verify-payment",
-      "dest": "/api/verify-payment.js"
-    },
-    {
-      "src": "/api/supabase-config",
-      "dest": "/api/supabase-config.js"
-    },
-    {
-      "src": "/api/gemini-explain",
-      "dest": "/api/gemini-explain.js"
-    },
-    {
-      "src": "/api/cleanup-chatroom",
-      "dest": "/api/cleanup-chatroom.js"
-    },
-    {
-      "src": "/",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/(.*\\.(css|js|png|jpg|jpeg|gif|svg|ico|json|woff|woff2|ttf|eot))",
-      "dest": "/$1"
-    },
-    {
-      "src": "/(.*)\\.html",
-      "dest": "/$1.html"
-    },
-    {
-      "src": "/([^.]+)",
-      "dest": "/$1.html"
+      "src": "/(.*)",
+      "dest": "/JambGenius/$1"
     }
   ]
 }
