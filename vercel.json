@@ -1,16 +1,11 @@
 {
   "version": 2,
-  "buildCommand": "npm --prefix JambGenius install && npm --prefix JambGenius run build:css",
-  "functions": {
-    "JambGenius/api/**/*.js": {
-      "memory": 1024,
-      "maxDuration": 60
-    }
-  },
+  "buildCommand": "npm --prefix JambGenius run build:css",
+  "installCommand": "npm --prefix JambGenius install",
   "routes": [
     {
-      "src": "/api/.*",
-      "dest": "/JambGenius/api"
+      "src": "/api/(.*)",
+      "dest": "/JambGenius/api/$1.js"
     },
     {
       "src": "/(.*)",
