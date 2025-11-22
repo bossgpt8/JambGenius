@@ -3,6 +3,7 @@
 <head>
     <script src="suppress-tailwind-warning.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/styles.css?v=1.0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile - JambGenius 💯</title>
@@ -290,7 +291,7 @@
     <script type="module">
         import { auth, db, storage } from './firebase-init.js';
         import { onAuthChange } from './auth-state.js';
-        import { doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         import { ref, uploadString, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
         import { updateProfile } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
@@ -321,7 +322,7 @@
         async function loadStudyStats(userId) {
             try {
                 // Load streak data
-                const streakDoc = await getDoc(doc(db, 'userStreaks', userId));
+                const streakDoc = await getDoc(doc(db, 'streaks', userId));
                 if (streakDoc.exists()) {
                     const data = streakDoc.data();
                     document.getElementById('currentStreak').textContent = data.currentStreak || 0;
@@ -329,12 +330,13 @@
                     document.getElementById('totalQuestions').textContent = data.totalQuestionsAnswered || 0;
                 }
                 
-                // Load bookmarks
-                const bookmarksDoc = await getDoc(doc(db, 'userBookmarks', userId));
+                // Load bookmarks from Firestore collection structure
+                const bookmarksRef = collection(db, 'bookmarks', userId, 'questions');
+                const bookmarkSnapshot = await getDocs(bookmarksRef);
                 let bookmarks = [];
-                if (bookmarksDoc.exists()) {
-                    bookmarks = bookmarksDoc.data().bookmarks || [];
-                }
+                bookmarkSnapshot.forEach(doc => {
+                    bookmarks.push(doc.data());
+                });
                 
                 document.getElementById('totalBookmarks').textContent = bookmarks.length;
                 

@@ -1,32 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="suppress-tailwind-warning.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/styles.css?v=1.0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Chatroom - JambGenius 💯</title>
     <meta name="description" content="Connect with fellow JAMB students from around the world. Share tips, ask questions, and study together.">
     
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        };
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="config.js"></script>
-    <script src="content-protection.js"></script>
-    <script type="module">
-        import './firebase-init.js';
-        import './auth-state.js';
-        import './auth-modal.js';
-    </script>
     <style>
         #chatMessages {
             scroll-behavior: smooth;
-        }
-        #chatInterface {
-            display: flex;
-            flex-direction: column;
         }
     </style>
 </head>
@@ -50,13 +58,9 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <a href="profile.html" class="profile-link hidden text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                        <i class="fas fa-user-circle mr-1"></i>Profile
-                    </a>
-                    <div id="userSection" class="hidden items-center space-x-3">
-                        <img id="userAvatar" src="" alt="User" class="w-8 h-8 rounded-full">
+                    <div id="userSection" class="hidden items-center space-x-4">
                         <span id="userName" class="text-gray-700 font-medium"></span>
-                        <button id="signOutBtn" class="text-gray-500 hover:text-gray-700">
+                        <button id="signOutBtn" class="text-gray-600 hover:text-red-600 transition-colors">
                             <i class="fas fa-sign-out-alt"></i>
                         </button>
                     </div>
@@ -69,299 +73,185 @@
     </nav>
 
     <!-- Main Chat Container -->
-    <div class="fixed top-16 left-0 right-0 bottom-0 flex flex-col w-full overflow-hidden">
-        <!-- Enhanced Layout with Sidebar -->
-        <div class="flex flex-col md:flex-row gap-0 h-full w-full flex-1">
-            <!-- Main Chat Area -->
-            <div class="flex-1 flex flex-col overflow-hidden">
-                <!-- Header -->
-                <div class="bg-gradient-to-r from-primary-600 to-purple-600 rounded-t-2xl p-3 sm:p-6 text-white flex-shrink-0">
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
-                        <div>
-                            <h1 class="text-xl sm:text-3xl font-bold mb-1 sm:mb-2">
-                                <i class="fas fa-comments mr-2"></i>Student Community Chat
-                            </h1>
-                            <p class="text-blue-100">Connect with JAMB students from around the world</p>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-sm text-blue-100">Online Students</div>
-                            <div id="onlineCount" class="text-2xl font-bold">0</div>
-                        </div>
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-primary-600 to-purple-600 rounded-t-2xl p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold mb-2">
+                        <i class="fas fa-comments mr-2"></i>Student Community Chat
+                    </h1>
+                    <p class="text-blue-100">Connect with JAMB students from around the world</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm text-blue-100">Online Students</div>
+                    <div id="onlineCount" class="text-2xl font-bold">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Rules Banner -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4">
+            <div class="flex items-start">
+                <i class="fas fa-shield-alt text-blue-500 text-xl mr-3 mt-1"></i>
+                <div class="flex-1">
+                    <p class="text-sm font-bold text-blue-900 mb-2">CHATROOM RULES - Educational Purpose Only</p>
+                    <ul class="text-sm text-blue-800 space-y-1 ml-4 list-disc">
+                        <li>Share educational tips, advice, and study support only</li>
+                        <li>Be respectful and help fellow students</li>
+                        <li>No spam, promotions, or off-topic discussions</li>
+                        <li>No inappropriate content or harassment</li>
+                        <li>Messages from <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-orange-500 to-red-500 text-white"><i class="fas fa-crown mr-1"></i>ADMIN</span> are from JambGenius team</li>
+                    </ul>
+                    <p class="text-xs text-blue-700 mt-2 italic">Violations will result in message removal. Let's keep this space helpful for everyone!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Panel (Only visible to admin) -->
+        <div id="adminPanel" class="hidden bg-gradient-to-r from-orange-500 to-red-500 text-white p-4 rounded-lg mb-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-crown text-2xl"></i>
+                    <div>
+                        <p class="font-bold">Admin Control Panel</p>
+                        <p class="text-sm text-orange-100">You have full moderation access</p>
                     </div>
                 </div>
-
-                <!-- Admin Panel (Only visible to admin) -->
-                <div id="adminPanel" class="hidden bg-gradient-to-r from-orange-500 to-red-500 text-white p-4 rounded-lg mb-4">
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-crown text-2xl"></i>
-                            <div>
-                                <p class="font-bold">Admin Control Panel</p>
-                                <p class="text-sm text-orange-100">You have full moderation access</p>
-                            </div>
-                        </div>
-                        <div class="flex flex-col sm:flex-row gap-2 text-sm">
-                            <button id="manageMembersBtn" class="bg-white text-orange-600 px-3 py-1.5 rounded font-medium hover:bg-orange-50 whitespace-nowrap">
-                                <i class="fas fa-users mr-1"></i>Manage Members
-                            </button>
-                            <div class="text-orange-100 hidden sm:flex items-center">
-                                <i class="fas fa-info-circle mr-1"></i>Click delete on any message
-                            </div>
-                        </div>
-                    </div>
+                <div class="text-sm text-orange-100">
+                    <i class="fas fa-info-circle mr-1"></i>Click delete button on any message to remove it
                 </div>
+            </div>
+        </div>
 
-                <!-- Auth Required Message -->
-                <div id="authRequired" class="bg-white rounded-b-2xl shadow-lg p-12 text-center">
-                    <i class="fas fa-lock text-6xl text-gray-300 mb-4"></i>
-                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Sign In Required</h2>
-                    <p class="text-gray-600 mb-6">Please sign in to join the community chat and connect with fellow students</p>
-                    <button onclick="document.getElementById('authBtn').click()" class="bg-primary-600 text-white px-8 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold">
-                        <i class="fas fa-sign-in-alt mr-2"></i>Sign In to Chat
+        <!-- Auth Required Message -->
+        <div id="authRequired" class="bg-white rounded-b-2xl shadow-lg p-12 text-center">
+            <i class="fas fa-lock text-6xl text-gray-300 mb-4"></i>
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Sign In Required</h2>
+            <p class="text-gray-600 mb-6">Please sign in to join the community chat and connect with fellow students</p>
+            <button onclick="document.getElementById('authBtn').click()" class="bg-primary-600 text-white px-8 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold">
+                <i class="fas fa-sign-in-alt mr-2"></i>Sign In to Chat
+            </button>
+        </div>
+
+        <!-- Chat Interface (Hidden until authenticated) -->
+        <div id="chatInterface" class="hidden bg-white rounded-b-2xl shadow-lg">
+            <!-- Messages Container -->
+            <div id="chatMessages" class="h-96 overflow-y-auto p-6 space-y-4 bg-gray-50">
+                <div class="text-center text-gray-500 py-8">
+                    <i class="fas fa-comment-dots text-4xl mb-2"></i>
+                    <p>Loading messages...</p>
+                </div>
+            </div>
+
+            <!-- Message Input -->
+            <div class="border-t border-gray-200 p-4 bg-white rounded-b-2xl">
+                <form id="messageForm" class="flex gap-2">
+                    <input 
+                        type="text" 
+                        id="messageInput" 
+                        placeholder="Type your message..." 
+                        class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        maxlength="500"
+                        required
+                    />
+                    <button 
+                        type="submit" 
+                        class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold flex items-center"
+                    >
+                        <i class="fas fa-paper-plane mr-2"></i>Send
                     </button>
-                </div>
-
-                <!-- Chat Interface (Hidden until authenticated) -->
-                <div id="chatInterface" class="hidden bg-white rounded-b-2xl shadow-lg flex-1 flex flex-col min-h-0 overflow-hidden">
-                    <!-- Messages Container -->
-                    <div id="chatMessages" class="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4 bg-gray-50">
-                        <div class="text-center text-gray-500 py-8">
-                            <i class="fas fa-comment-dots text-4xl mb-2"></i>
-                            <p>Loading messages...</p>
-                        </div>
-                    </div>
-
-                    <!-- Message Input Form -->
-                    <form id="messageForm" class="flex-shrink-0 border-t border-gray-200 bg-white p-3 sm:p-4 rounded-b-2xl">
-                        <div class="flex gap-2 mb-2">
-                            <input 
-                                type="text" 
-                                id="messageInput" 
-                                placeholder="Type your message..." 
-                                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
-                            >
-                            <button 
-                                type="submit" 
-                                class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium flex items-center gap-2 text-sm"
-                            >
-                                <i class="fas fa-paper-plane"></i>Send
-                            </button>
-                        </div>
-                        
-                        <!-- Media Buttons -->
-                        <div class="flex gap-2 mb-2">
-                            <label class="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer font-medium text-xs">
-                                <i class="fas fa-image text-sm"></i>Image
-                                <input type="file" id="imageInput" accept="image/*" class="hidden" />
-                            </label>
-                            
-                            <button id="voiceBtn" type="button" class="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors font-medium text-xs">
-                                <i class="fas fa-microphone text-sm"></i>
-                                <span id="voiceLabel">Voice Note</span>
-                            </button>
-                        </div>
-                        
-                        <div class="text-xs text-gray-500">
-                            <i class="fas fa-info-circle mr-1"></i>
-                            Press Enter to send • Send images (max 5MB) • Record voice notes • Type @boss for AI assistance
-                        </div>
-
-                        <!-- @ Mention Popup -->
-                        <div id="mentionPopup" class="hidden absolute bottom-32 left-0 bg-white border border-gray-300 rounded-lg shadow-xl z-50 w-48">
-                            <div class="p-0">
-                                <button id="bossMentionBtn" type="button" class="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-center gap-3 transition-colors">
-                                    <div class="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                                        <i class="fas fa-bolt text-white text-xs"></i>
-                                    </div>
-                                    <div>
-                                        <div class="font-semibold text-gray-900">Boss</div>
-                                        <div class="text-xs text-gray-500">Assistant</div>
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Online Users Sidebar (Admin or Users) -->
-            <div class="w-full md:w-64 bg-white rounded-r-2xl shadow-lg flex flex-col hidden md:flex flex-shrink-0 overflow-hidden">
-                <div class="bg-gradient-to-b from-primary-50 to-gray-50 p-4 border-b border-gray-200 rounded-tr-2xl">
-                    <div id="normalUsersSidebar">
-                        <h3 class="font-bold text-gray-900 flex items-center gap-2">
-                            <span class="w-3 h-3 bg-green-500 rounded-full"></span>
-                            Online Students (<span id="sidebarOnlineCount">0</span>)
-                        </h3>
-                    </div>
-                    <div id="adminSidebar" class="hidden">
-                        <h3 class="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                            <i class="fas fa-users text-primary-600"></i>Member Management
-                        </h3>
-                        <div class="flex gap-2">
-                            <button id="allMembersBtn" class="flex-1 bg-primary-600 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-primary-700">
-                                All Members
-                            </button>
-                            <button id="bannedMembersBtn" class="flex-1 bg-red-600 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-red-700">
-                                Banned
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div id="membersList" class="flex-1 overflow-y-auto p-4 space-y-2"></div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Chatroom Rules Welcome Modal -->
-    <div id="rulesModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-shield-alt text-blue-600 text-2xl"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-gray-900">Chatroom Rules</h2>
-            </div>
-
-            <p class="text-gray-600 mb-6">Welcome to the JambGenius Student Community Chat! Please read and agree to our rules before entering:</p>
-
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <h3 class="font-bold text-blue-900 mb-4 flex items-center gap-2">
-                    <i class="fas fa-check-circle text-blue-600"></i>
-                    Educational Purpose Only
-                </h3>
-                <ul class="space-y-3 text-sm text-blue-800">
-                    <li class="flex gap-2">
-                        <span class="text-blue-600 font-bold">✓</span>
-                        <span>Share educational tips, advice, and study support only</span>
-                    </li>
-                    <li class="flex gap-2">
-                        <span class="text-blue-600 font-bold">✓</span>
-                        <span>Be respectful and help fellow students</span>
-                    </li>
-                    <li class="flex gap-2">
-                        <span class="text-blue-600 font-bold">✓</span>
-                        <span>Ask questions and share study resources</span>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                <h3 class="font-bold text-red-900 mb-4 flex items-center gap-2">
-                    <i class="fas fa-ban text-red-600"></i>
-                    Prohibited Content
-                </h3>
-                <ul class="space-y-2 text-sm text-red-800">
-                    <li class="flex gap-2">
-                        <span class="text-red-600 font-bold">✗</span>
-                        <span>No spam, promotions, or off-topic discussions</span>
-                    </li>
-                    <li class="flex gap-2">
-                        <span class="text-red-600 font-bold">✗</span>
-                        <span>No inappropriate content or harassment</span>
-                    </li>
-                    <li class="flex gap-2">
-                        <span class="text-red-600 font-bold">✗</span>
-                        <span>No hate speech or discriminatory language</span>
-                    </li>
-                </ul>
-            </div>
-
-            <p class="text-xs text-gray-600 bg-gray-50 p-3 rounded-lg mb-6 italic">
-                <i class="fas fa-info-circle mr-2"></i>
-                Violations will result in message removal. Let's keep this space helpful and respectful for everyone!
-            </p>
-
-            <div class="flex gap-3">
-                <button id="continueBtn" class="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold">
-                    <i class="fas fa-arrow-right mr-2"></i>Continue to Chat
-                </button>
-                <div id="autoRedirect" class="flex-1 bg-gray-100 text-gray-700 px-6 py-3 rounded-lg text-center font-semibold text-sm">
-                    Auto-redirecting in <span id="countdown">10</span>s
+                </form>
+                <div class="text-xs text-gray-500 mt-2">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Press Enter to send • Max 500 characters
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Members Management Modal (Mobile & Desktop) -->
-    <div id="membersModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 my-8">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    <i class="fas fa-users text-primary-600"></i>Member Management
-                </h2>
-                <button id="closeMembersModal" class="text-gray-500 hover:text-gray-700 text-2xl">
-                    <i class="fas fa-times"></i>
-                </button>
+        <!-- Chat Features -->
+        <div class="grid md:grid-cols-3 gap-6 mt-8">
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-globe text-blue-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Global Community</h3>
+                <p class="text-gray-600">Connect with JAMB students from all over Nigeria and beyond</p>
             </div>
-
-            <div class="flex gap-2 mb-6">
-                <button id="modalAllMembersBtn" class="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700">
-                    All Members
-                </button>
-                <button id="modalBannedMembersBtn" class="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700">
-                    Banned Users
-                </button>
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-user-friends text-green-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Peer Support</h3>
+                <p class="text-gray-600">Ask questions, share study tips, and motivate each other</p>
             </div>
-
-            <div id="modalMembersList" class="space-y-3 max-h-96 overflow-y-auto"></div>
-        </div>
-    </div>
-
-    <!-- Ban User Modal (Admin Only) -->
-    <div id="banModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <h2 class="text-2xl font-bold text-gray-900 mb-4">
-                <i class="fas fa-ban text-red-600 mr-2"></i>Restrict User
-            </h2>
-            <div id="banUserInfo" class="bg-gray-50 p-4 rounded-lg mb-4">
-                <p><strong>User:</strong> <span id="banUserName">-</span></p>
-                <p><strong>Email:</strong> <span id="banUserEmail">-</span></p>
-            </div>
-            
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-900 mb-2">Restriction Duration</label>
-                <select id="banDuration" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
-                    <option value="1">1 Day</option>
-                    <option value="7">7 Days</option>
-                    <option value="30">30 Days</option>
-                    <option value="forever">Permanent Ban</option>
-                </select>
-            </div>
-            
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-900 mb-2">Reason (Optional)</label>
-                <textarea id="banReason" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm" rows="3" placeholder="Why are you restricting this user?"></textarea>
-            </div>
-            
-            <div class="flex gap-3">
-                <button id="confirmBanBtn" class="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium">
-                    Restrict User
-                </button>
-                <button id="cancelBanBtn" class="flex-1 bg-gray-300 text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors font-medium">
-                    Cancel
-                </button>
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-shield-alt text-purple-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Admin Support</h3>
+                <p class="text-gray-600">Get guidance and updates directly from the JambGenius team</p>
             </div>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 py-6 mt-8">
-        <div class="max-w-7xl mx-auto px-4 text-center text-gray-600">
-            <div class="flex items-center justify-center gap-2">
-                <i class="fas fa-graduation-cap text-primary-600 text-xl"></i>
-                <span class="text-lg font-bold text-gray-900">JambGenius 💯</span>
+    <footer class="bg-gray-900 text-white py-12 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-graduation-cap text-2xl text-primary-400 mr-2"></i>
+                        <span class="text-xl font-bold">JambGenius 💯</span>
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        Nigeria's leading JAMB UTME preparation platform helping students achieve their university dreams.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="index.html" class="hover:text-white transition-colors">Home</a></li>
+                        <li><a href="study-tips.html" class="hover:text-white transition-colors">Study Tips</a></li>
+                        <li><a href="jamb-syllabus.html" class="hover:text-white transition-colors">JAMB Syllabus</a></li>
+                        <li><a href="chatroom.html" class="hover:text-white transition-colors">Community Chat</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Resources</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="help-center.html" class="hover:text-white transition-colors">Help Center</a></li>
+                        <li><a href="contact-us.html" class="hover:text-white transition-colors">Contact Us</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Contact Info</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>Email: osanisrael2@gmail.com</li>
+                        <li>Phone: +234 916 489 8577</li>
+                        <li>WhatsApp: +234 705 464 1687</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 JambGenius. All rights reserved. Made with ❤️ for Nigerian students.</p>
             </div>
         </div>
     </footer>
 
     <script type="module">
-        import { auth, db } from './firebase-init.js';
-        import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, doc, deleteDoc, getDocs, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-        import { chatroomMedia } from './chatroom-media.js';
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-        // Global state
+        const app = initializeApp(CONFIG.firebase);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
         const adminEmails = ['osanisrael2@gmail.com', 'admin@jambgenius.com'];
         let currentUser = null;
         let isAdmin = false;
@@ -402,18 +292,7 @@
                         </div>
                         <span class="text-xs ${isOwnMessage ? 'text-blue-100' : 'text-gray-500'}">${formatTimestamp(message.timestamp)}</span>
                     </div>
-                    ${message.type === 'image' ? `
-                        <img src="${message.imageData}" alt="Shared image" class="max-w-xs rounded-lg mb-2">
-                    ` : ''}
-                    ${message.type === 'voice' ? `
-                        <audio controls class="w-full max-w-xs rounded-lg mb-2">
-                            <source src="${message.voiceData}" type="audio/webm">
-                            Your browser does not support audio playback.
-                        </audio>
-                    ` : ''}
-                    ${message.type === 'text' || !message.type ? `
-                        <p class="${isOwnMessage ? 'text-white' : 'text-gray-800'}">${escapeHtml(message.text)}</p>
-                    ` : ''}
+                    <p class="${isOwnMessage ? 'text-white' : 'text-gray-800'}">${escapeHtml(message.text)}</p>
                     ${isAdmin ? `
                         <button 
                             onclick="deleteMessage('${message.id}', '${escapeHtml(message.displayName)}')" 
@@ -437,9 +316,7 @@
 
         function scrollToBottom() {
             const chatMessages = document.getElementById('chatMessages');
-            setTimeout(() => {
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }, 100);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
         window.deleteMessage = async function(messageId, userName) {
@@ -458,25 +335,24 @@
             }
         }
 
-        async function handleAIBossRequest(messageText, userId, displayName) {
-            if (!messageText.includes('@boss')) return null;
-            
+        async function sendMessage(text) {
+            if (!currentUser || !text.trim()) return;
+
             try {
-                const question = messageText.replace('@boss', '').trim();
-                if (!question) return null;
-
-                const response = await fetch('/api/gemini-chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question })
+                const displayName = isAdmin ? 'JambGenius' : (currentUser.displayName || currentUser.email.split('@')[0]);
+                
+                await addDoc(collection(db, 'chatMessages'), {
+                    text: text.trim(),
+                    userId: currentUser.uid,
+                    displayName: displayName,
+                    userEmail: currentUser.email,
+                    isAdmin: isAdmin,
+                    timestamp: serverTimestamp(),
+                    createdAt: new Date().toISOString()
                 });
-
-                if (!response.ok) throw new Error('AI service error');
-                const data = await response.json();
-                return data.answer;
             } catch (error) {
-                console.error('AI Boss error:', error);
-                return "Sorry, I'm having trouble thinking right now. Try again later!";
+                console.error('Error sending message:', error);
+                alert('Failed to send message. Please try again.');
             }
         }
 
@@ -515,7 +391,6 @@
                     chatMessages.appendChild(createMessageElement(message));
                 });
 
-                chatMessages.scrollTop = chatMessages.scrollHeight;
                 scrollToBottom();
             }, (error) => {
                 console.error('Error loading messages:', error);
@@ -528,382 +403,17 @@
             });
         }
 
-        // Handle image upload
-        document.getElementById('imageInput').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                chatroomMedia.setCurrentUser(currentUser);
-                await chatroomMedia.handleImageUpload(file);
-                e.target.value = '';
-            }
-        });
-
-        // Handle voice recording
-        let isRecording = false;
-        document.getElementById('voiceBtn').addEventListener('click', async () => {
-            const voiceBtn = document.getElementById('voiceBtn');
-            const voiceLabel = document.getElementById('voiceLabel');
-            
-            chatroomMedia.setCurrentUser(currentUser);
-            
-            if (!isRecording) {
-                const started = await chatroomMedia.startRecording();
-                if (started) {
-                    isRecording = true;
-                    voiceBtn.classList.add('bg-red-50', 'text-red-600');
-                    voiceBtn.classList.remove('bg-green-50', 'text-green-600');
-                    voiceLabel.textContent = 'Stop Recording';
-                    voiceBtn.querySelector('i').classList.add('animate-pulse');
-                }
-            } else {
-                chatroomMedia.stopRecording();
-                isRecording = false;
-                voiceBtn.classList.remove('bg-red-50', 'text-red-600');
-                voiceBtn.classList.add('bg-green-50', 'text-green-600');
-                voiceLabel.textContent = 'Voice Note';
-                voiceBtn.querySelector('i').classList.remove('animate-pulse');
-            }
-        });
-
-        // Handle @ mention popup
-        const mentionPopup = document.getElementById('mentionPopup');
-        const bossMentionBtn = document.getElementById('bossMentionBtn');
-        const messageInput = document.getElementById('messageInput');
-        let mentionStartPos = -1;
-
-        messageInput.addEventListener('input', (e) => {
-            const text = e.target.value;
-            const cursorPos = e.target.selectionStart;
-            const textBeforeCursor = text.substring(0, cursorPos);
-            const lastAtSign = textBeforeCursor.lastIndexOf('@');
-
-            if (lastAtSign !== -1 && (cursorPos - lastAtSign <= 10)) {
-                // Show mention popup
-                mentionStartPos = lastAtSign;
-                mentionPopup.classList.remove('hidden');
-            } else {
-                // Hide mention popup
-                mentionPopup.classList.add('hidden');
-            }
-        });
-
-        // Handle boss mention click
-        bossMentionBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (mentionStartPos !== -1) {
-                const text = messageInput.value;
-                const beforeMention = text.substring(0, mentionStartPos);
-                const afterCursor = text.substring(messageInput.selectionStart);
-                messageInput.value = beforeMention + '@boss ' + afterCursor;
-                messageInput.focus();
-                messageInput.selectionStart = beforeMention.length + 6;
-                mentionPopup.classList.add('hidden');
-                mentionStartPos = -1;
-            }
-        });
-
-        // Hide mention popup on blur
-        messageInput.addEventListener('blur', () => {
-            setTimeout(() => {
-                mentionPopup.classList.add('hidden');
-            }, 200);
-        });
-
-        // Check if user is banned
-        async function checkIfUserBanned(userId) {
-            try {
-                const banDoc = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js').then(m => 
-                    m.getDoc(m.doc(db, 'bannedUsers', userId))
-                );
-                
-                if (!banDoc.exists()) return false;
-                
-                const banData = banDoc.data();
-                if (banData.permanent) return true;
-                
-                if (banData.expiresAt) {
-                    const expiryTime = banData.expiresAt.toDate?.() || new Date(banData.expiresAt);
-                    return new Date() < expiryTime;
-                }
-                
-                return false;
-            } catch (error) {
-                console.error('Error checking ban status:', error);
-                return false;
-            }
-        }
-
-        // Message form submit
         document.getElementById('messageForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const input = document.getElementById('messageInput');
             const text = input.value;
             
-            if (text.trim() && currentUser) {
-                // Check if user is banned
-                const isBanned = await checkIfUserBanned(currentUser.uid);
-                if (isBanned) {
-                    alert('You have been restricted from sending messages in this chatroom.');
-                    return;
-                }
-
-                await addDoc(collection(db, 'chatMessages'), {
-                    type: 'text',
-                    text: text.trim(),
-                    userId: currentUser.uid,
-                    displayName: isAdmin ? 'JambGenius' : (currentUser.displayName || currentUser.email.split('@')[0]),
-                    userEmail: currentUser.email,
-                    isAdmin: isAdmin,
-                    timestamp: serverTimestamp(),
-                    createdAt: new Date().toISOString()
-                });
-                
-                // Handle AI Boss request
-                const aiAnswer = await handleAIBossRequest(text, currentUser.uid, isAdmin ? 'JambGenius' : currentUser.displayName);
-                if (aiAnswer) {
-                    setTimeout(async () => {
-                        await addDoc(collection(db, 'chatMessages'), {
-                            type: 'text',
-                            text: aiAnswer,
-                            userId: 'ai-boss',
-                            displayName: 'Boss',
-                            userEmail: 'bot@jambgenius.com',
-                            isAdmin: false,
-                            timestamp: serverTimestamp(),
-                            createdAt: new Date().toISOString()
-                        });
-                    }, 500);
-                }
-                
+            if (text.trim()) {
+                await sendMessage(text);
                 input.value = '';
             }
         });
 
-        // Admin member management
-        let currentViewMode = 'all'; // 'all' or 'banned'
-        let selectedUserForBan = null;
-
-        // Load members list (admin only)
-        async function loadMembersList(targetElement = 'membersList') {
-            if (!isAdmin) return;
-
-            const membersList = document.getElementById(targetElement);
-            const q = query(collection(db, 'chatMessages'), limit(1000));
-            
-            try {
-                const snapshot = await getDocs(q);
-                const uniqueUsers = new Map();
-
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (data.userId && data.userId !== 'ai-boss' && !uniqueUsers.has(data.userId)) {
-                        uniqueUsers.set(data.userId, {
-                            uid: data.userId,
-                            displayName: data.displayName,
-                            email: data.userEmail
-                        });
-                    }
-                });
-
-                // Load banned users
-                const bannedSnapshot = await getDocs(collection(db, 'bannedUsers'));
-                const bannedIds = new Set();
-                bannedSnapshot.forEach(doc => {
-                    bannedIds.add(doc.id);
-                });
-
-                membersList.innerHTML = '';
-
-                if (currentViewMode === 'all') {
-                    uniqueUsers.forEach(user => {
-                        if (!bannedIds.has(user.uid)) {
-                            addMemberCard(user, membersList, false);
-                        }
-                    });
-                } else {
-                    uniqueUsers.forEach(user => {
-                        if (bannedIds.has(user.uid)) {
-                            addMemberCard(user, membersList, true);
-                        }
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading members:', error);
-            }
-        }
-
-        function addMemberCard(user, container, isBanned) {
-            const card = document.createElement('div');
-            card.className = 'p-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-all';
-            
-            card.innerHTML = `
-                <div class="flex items-center justify-between mb-2">
-                    <div class="flex-1">
-                        <p class="font-medium text-sm text-gray-900">${user.displayName}</p>
-                        <p class="text-xs text-gray-500">${user.email}</p>
-                    </div>
-                </div>
-                <div class="flex gap-2">
-                    ${!isBanned ? `
-                        <button class="flex-1 bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-medium hover:bg-red-200 ban-btn" data-uid="${user.uid}" data-name="${user.displayName}" data-email="${user.email}">
-                            Restrict
-                        </button>
-                    ` : `
-                        <button class="flex-1 bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-medium hover:bg-green-200 unban-btn" data-uid="${user.uid}">
-                            Unban
-                        </button>
-                    `}
-                </div>
-            `;
-
-            container.appendChild(card);
-
-            // Add event listeners
-            const banBtn = card.querySelector('.ban-btn');
-            const unbanBtn = card.querySelector('.unban-btn');
-
-            if (banBtn) {
-                banBtn.addEventListener('click', (e) => {
-                    selectedUserForBan = {
-                        uid: e.target.dataset.uid,
-                        displayName: e.target.dataset.name,
-                        email: e.target.dataset.email
-                    };
-                    document.getElementById('banUserName').textContent = selectedUserForBan.displayName;
-                    document.getElementById('banUserEmail').textContent = selectedUserForBan.email;
-                    document.getElementById('banModal').classList.remove('hidden');
-                });
-            }
-
-            if (unbanBtn) {
-                unbanBtn.addEventListener('click', async (e) => {
-                    const uid = e.target.dataset.uid;
-                    try {
-                        const { deleteDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-                        await deleteDoc(doc(db, 'bannedUsers', uid));
-                        alert('User has been unbanned!');
-                        loadMembersList();
-                    } catch (error) {
-                        console.error('Error unbanning user:', error);
-                        alert('Failed to unban user');
-                    }
-                });
-            }
-        }
-
-        // Ban modal handlers
-        document.getElementById('cancelBanBtn').addEventListener('click', () => {
-            document.getElementById('banModal').classList.add('hidden');
-            selectedUserForBan = null;
-        });
-
-        document.getElementById('confirmBanBtn').addEventListener('click', async () => {
-            if (!selectedUserForBan) return;
-
-            const duration = document.getElementById('banDuration').value;
-            const reason = document.getElementById('banReason').value;
-
-            try {
-                const banRecord = {
-                    userId: selectedUserForBan.uid,
-                    displayName: selectedUserForBan.displayName,
-                    email: selectedUserForBan.email,
-                    reason: reason,
-                    bannedAt: serverTimestamp(),
-                    bannedBy: currentUser.email,
-                    permanent: duration === 'forever'
-                };
-
-                if (duration !== 'forever') {
-                    const days = parseInt(duration);
-                    const expiryDate = new Date();
-                    expiryDate.setDate(expiryDate.getDate() + days);
-                    banRecord.expiresAt = expiryDate;
-                }
-
-                const { setDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-                await setDoc(doc(db, 'bannedUsers', selectedUserForBan.uid), banRecord);
-
-                alert(`User restricted successfully!${duration !== 'forever' ? ` (${duration} days)` : ' (Permanent)'}`);
-                document.getElementById('banModal').classList.add('hidden');
-                selectedUserForBan = null;
-                document.getElementById('banReason').value = '';
-                loadMembersList();
-            } catch (error) {
-                console.error('Error banning user:', error);
-                alert('Failed to restrict user');
-            }
-        });
-
-        // Admin sidebar buttons (Desktop)
-        document.getElementById('allMembersBtn')?.addEventListener('click', () => {
-            currentViewMode = 'all';
-            loadMembersList('membersList');
-        });
-
-        document.getElementById('bannedMembersBtn')?.addEventListener('click', () => {
-            currentViewMode = 'banned';
-            loadMembersList('membersList');
-        });
-
-        // Admin mobile members modal buttons
-        document.getElementById('manageMembersBtn')?.addEventListener('click', () => {
-            currentViewMode = 'all';
-            document.getElementById('membersModal').classList.remove('hidden');
-            loadMembersList('modalMembersList');
-        });
-
-        document.getElementById('closeMembersModal')?.addEventListener('click', () => {
-            document.getElementById('membersModal').classList.add('hidden');
-        });
-
-        document.getElementById('modalAllMembersBtn')?.addEventListener('click', () => {
-            currentViewMode = 'all';
-            loadMembersList('modalMembersList');
-        });
-
-        document.getElementById('modalBannedMembersBtn')?.addEventListener('click', () => {
-            currentViewMode = 'banned';
-            loadMembersList('modalMembersList');
-        });
-
-        // Close modal when clicking outside
-        document.getElementById('membersModal')?.addEventListener('click', (e) => {
-            if (e.target.id === 'membersModal') {
-                document.getElementById('membersModal').classList.add('hidden');
-            }
-        });
-
-        // Rules modal
-        function showRulesModal() {
-            const rulesModal = document.getElementById('rulesModal');
-            const continueBtn = document.getElementById('continueBtn');
-            const countdown = document.getElementById('countdown');
-            let timeLeft = 10;
-
-            rulesModal.classList.remove('hidden');
-
-            const countdownInterval = setInterval(() => {
-                timeLeft--;
-                countdown.textContent = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(countdownInterval);
-                    hideRulesModal();
-                }
-            }, 1000);
-
-            continueBtn.addEventListener('click', () => {
-                clearInterval(countdownInterval);
-                hideRulesModal();
-            });
-        }
-
-        function hideRulesModal() {
-            const rulesModal = document.getElementById('rulesModal');
-            rulesModal.classList.add('hidden');
-        }
-
-        // Auth state listener
         onAuthStateChanged(auth, async (user) => {
             const authRequired = document.getElementById('authRequired');
             const chatInterface = document.getElementById('chatInterface');
@@ -925,19 +435,8 @@
 
                 if (isAdmin) {
                     adminPanel.classList.remove('hidden');
-                    document.getElementById('normalUsersSidebar').classList.add('hidden');
-                    document.getElementById('adminSidebar').classList.remove('hidden');
-                    loadMembersList();
                 } else {
                     adminPanel.classList.add('hidden');
-                    document.getElementById('normalUsersSidebar').classList.remove('hidden');
-                    document.getElementById('adminSidebar').classList.add('hidden');
-                }
-
-                const hasSeenRules = sessionStorage.getItem('chatroomRulesSeen');
-                if (!hasSeenRules) {
-                    showRulesModal();
-                    sessionStorage.setItem('chatroomRulesSeen', 'true');
                 }
 
                 loadMessages();

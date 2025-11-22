@@ -1,46 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="suppress-tailwind-warning.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/styles.css?v=1.0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Help Center - JambGenius 💯</title>
     <meta name="description" content="Find answers to common questions and get help with using JambGenius, Nigeria's premier JAMB preparation platform.">
     
-    
-    
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Define toggleFaq at global scope immediately (not in module)
-        function toggleFaq(index) {
-            const buttons = document.querySelectorAll('.space-y-4 > div button');
-            const button = buttons[index];
-            
-            if (!button) return;
-            
-            const answerDiv = button.parentElement.querySelector('.faq-answer');
-            const icon = button.querySelector('[class^="faq-icon-"]');
-            
-            if (!answerDiv) return;
-            
-            answerDiv.classList.toggle('active');
-            if (icon) {
-                icon.style.transform = answerDiv.classList.contains('active') ? 'rotate(90deg)' : 'rotate(0)';
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
             }
-        }
-        
-        // Category click handler
-        function handleCategoryClick(categoryName) {
-            alert('Category: ' + categoryName + ' selected');
-            console.log('Category selected:', categoryName);
-        }
+        };
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="content-protection.js"></script>
     <style>
         .faq-answer {
             max-height: 0;
@@ -48,23 +38,9 @@
             transition: max-height 0.3s ease;
         }
         .faq-answer.active {
-            max-height: 500px;
-        }
-        .guide-modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-        .guide-modal.active {
-            display: flex;
+            max-height: 200px;
         }
     </style>
-    <script src="config.js"></script>
 </head>
 <body class="bg-gray-50 font-sans">
     <!-- Navigation -->
@@ -86,19 +62,9 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <a href="profile.html" class="profile-link hidden text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                        <i class="fas fa-user-circle mr-1"></i>Profile
+                    <a href="index.html" class="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium">
+                        Get Started
                     </a>
-                    <div id="userSection" class="hidden items-center space-x-3">
-                        <img id="userAvatar" src="" alt="User" class="w-8 h-8 rounded-full">
-                        <span id="userName" class="text-gray-700 font-medium"></span>
-                        <button id="signOutBtn" class="text-gray-500 hover:text-gray-700">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </button>
-                    </div>
-                    <button id="authBtn" class="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium">
-                        Sign In
-                    </button>
                 </div>
             </div>
         </div>
@@ -138,9 +104,9 @@
             <div class="bg-green-50 border border-green-200 rounded-xl p-6">
                 <h3 class="text-xl font-bold text-green-900 mb-2">New to JambGenius?</h3>
                 <p class="text-green-700 mb-4">Learn how to get started with our platform</p>
-                <button id="showGuideBtn" class="inline-block bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 font-medium">
+                <a href="study-tips.html" class="inline-block bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 font-medium">
                     Getting Started Guide
-                </button>
+                </a>
             </div>
         </div>
 
@@ -150,7 +116,7 @@
             <div class="lg:col-span-1">
                 <h2 class="text-2xl font-semibold text-gray-900 mb-6">Browse by Category</h2>
                 <div class="space-y-4">
-                    <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onclick="handleCategoryClick('Getting Started')">
+                    <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
                         <div class="flex items-center space-x-3">
                             <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                                 <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,7 +130,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onclick="handleCategoryClick('Account & Settings')">
+                    <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
                         <div class="flex items-center space-x-3">
                             <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                                 <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,7 +145,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onclick="handleCategoryClick('Practice & Exams')">
+                    <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
                         <div class="flex items-center space-x-3">
                             <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                                 <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -193,7 +159,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onclick="handleCategoryClick('Technical Support')">
+                    <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
                         <div class="flex items-center space-x-3">
                             <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                                 <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -318,113 +284,6 @@
         </div>
     </div>
 
-    <!-- Getting Started Guide Modal -->
-    <div id="guideModal" class="guide-modal">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                <h2 class="text-2xl font-bold text-gray-900">Getting Started with JambGenius</h2>
-                <button id="closeGuideBtn" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-            <div class="p-6 space-y-6">
-                <div class="bg-blue-50 border-l-4 border-blue-500 p-4">
-                    <h3 class="font-bold text-blue-900 mb-2">Welcome to JambGenius!</h3>
-                    <p class="text-blue-800">Follow these simple steps to start your JAMB preparation journey.</p>
-                </div>
-
-                <div class="space-y-4">
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-8 h-8 bg-primary-600 text-white rounded-full flex items-center justify-center font-bold">1</div>
-                        <div>
-                            <h4 class="font-bold text-gray-900 mb-1">Create Your Account</h4>
-                            <p class="text-gray-700">Sign up using your email or Google account. Click the "Sign In" button on any page and choose "Sign up".</p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-8 h-8 bg-primary-600 text-white rounded-full flex items-center justify-center font-bold">2</div>
-                        <div>
-                            <h4 class="font-bold text-gray-900 mb-1">Complete Your Profile</h4>
-                            <p class="text-gray-700">Add your information, profile picture, and preferences. Click on "Profile" in the navigation after signing in.</p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-8 h-8 bg-primary-600 text-white rounded-full flex items-center justify-center font-bold">3</div>
-                        <div>
-                            <h4 class="font-bold text-gray-900 mb-1">Start with Practice Mode</h4>
-                            <p class="text-gray-700">Begin with free practice mode to familiarize yourself with the questions. Select any subject and start practicing at your own pace.</p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-8 h-8 bg-primary-600 text-white rounded-full flex items-center justify-center font-bold">4</div>
-                        <div>
-                            <h4 class="font-bold text-gray-900 mb-1">Take Daily Challenges</h4>
-                            <p class="text-gray-700">Complete daily challenges to earn points and stay consistent with your preparation.</p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-8 h-8 bg-primary-600 text-white rounded-full flex items-center justify-center font-bold">5</div>
-                        <div>
-                            <h4 class="font-bold text-gray-900 mb-1">Join the Community</h4>
-                            <p class="text-gray-700">Connect with other students in the Community Chat. Share tips, ask questions, and motivate each other.</p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center font-bold">6</div>
-                        <div>
-                            <h4 class="font-bold text-gray-900 mb-1">Take Mock Exams</h4>
-                            <p class="text-gray-700">When you're ready, unlock the full Mock Exam Mode for ₦1,000 to experience the real JAMB CBT environment with 180 questions and 2-hour timer.</p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold">7</div>
-                        <div>
-                            <h4 class="font-bold text-gray-900 mb-1">Track Your Progress</h4>
-                            <p class="text-gray-700">View your performance analytics to see your improvement over time and identify areas that need more attention.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-gray-50 rounded-lg p-4 mt-6">
-                    <h4 class="font-bold text-gray-900 mb-2">Tips for Success</h4>
-                    <ul class="space-y-2 text-gray-700">
-                        <li class="flex items-start gap-2">
-                            <i class="fas fa-check text-green-600 mt-1"></i>
-                            <span>Practice consistently every day, even if just for 30 minutes</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i class="fas fa-check text-green-600 mt-1"></i>
-                            <span>Review explanations for questions you get wrong</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i class="fas fa-check text-green-600 mt-1"></i>
-                            <span>Focus on your weakest subjects first</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i class="fas fa-check text-green-600 mt-1"></i>
-                            <span>Take at least one full mock exam before the real test</span>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="flex gap-4 pt-4">
-                    <a href="index.html" class="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold text-center">
-                        Go to Home Page
-                    </a>
-                    <a href="study-tips.html" class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition-colors font-semibold text-center">
-                        Read Study Tips
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Footer -->
     <footer class="bg-gray-900 text-white py-12 mt-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -475,66 +334,30 @@
         </div>
     </footer>
 
-    <script type="module">
-        import './firebase-init.js';
-        import './auth-state.js';
-        import './auth-modal.js';
-        import { auth } from './firebase-init.js';
-        import { signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { onAuthChange } from './auth-state.js';
-
-
-        // Show/Hide Guide Modal
-        const showGuideBtn = document.getElementById('showGuideBtn');
-        const closeGuideBtn = document.getElementById('closeGuideBtn');
-        const guideModal = document.getElementById('guideModal');
-
-        if (showGuideBtn) {
-            showGuideBtn.addEventListener('click', () => {
-                guideModal.classList.add('active');
-            });
-        }
-
-        if (closeGuideBtn) {
-            closeGuideBtn.addEventListener('click', () => {
-                guideModal.classList.remove('active');
-            });
-        }
-
-        if (guideModal) {
-            guideModal.addEventListener('click', (e) => {
-                if (e.target === guideModal) {
-                    guideModal.classList.remove('active');
+    <script>
+        function toggleFaq(index) {
+            const allAnswers = document.querySelectorAll('.faq-answer');
+            const allIcons = document.querySelectorAll('[class^="faq-icon-"]');
+            const currentAnswer = allAnswers[index];
+            const currentIcon = allIcons[index];
+            
+            // Close all other FAQs
+            allAnswers.forEach((answer, i) => {
+                if (i !== index) {
+                    answer.classList.remove('active');
+                    allIcons[i].style.transform = 'rotate(0deg)';
                 }
             });
-        }
-
-        // Auth state management
-        onAuthChange((user, profile) => {
-            const authBtn = document.getElementById('authBtn');
-            const userSection = document.getElementById('userSection');
-            const userName = document.getElementById('userName');
-            const userAvatar = document.getElementById('userAvatar');
-
-            if (user) {
-                authBtn.classList.add('hidden');
-                userSection.classList.remove('hidden');
-                userName.textContent = user.displayName || user.email.split('@')[0];
-                userAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=3b82f6&color=fff`;
+            
+            // Toggle current FAQ
+            if (currentAnswer.classList.contains('active')) {
+                currentAnswer.classList.remove('active');
+                currentIcon.style.transform = 'rotate(0deg)';
             } else {
-                authBtn.classList.remove('hidden');
-                userSection.classList.add('hidden');
+                currentAnswer.classList.add('active');
+                currentIcon.style.transform = 'rotate(90deg)';
             }
-        });
-
-        document.getElementById('signOutBtn')?.addEventListener('click', () => {
-            signOut(auth).catch(console.error);
-        });
-
-        document.getElementById('authBtn')?.addEventListener('click', () => {
-            const event = new CustomEvent('openAuthModal');
-            document.dispatchEvent(event);
-        });
+        }
     </script>
 </body>
 </html>

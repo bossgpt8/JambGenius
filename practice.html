@@ -1,17 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="suppress-tailwind-warning.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/styles.css?v=1.0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Practice Mode | JambGenius 💯</title>
-    <meta name="description" content="Practice JAMB questions with timed or free mode">
+    <meta name="description" content="Practice JAMB questions at your own pace with instant feedback">
     
-    
-    
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        };
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,19 +33,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
-    <script src="supabase-config.js"></script>
     <script src="supabaseClient.js"></script>
-    <script src="modal-component.js"></script>
-    <script src="content-protection.js"></script>
-    <script src="calculator.js"></script>
-    <script src="bookmarks.js"></script>
-    <script src="ai-helper.js"></script>
-    <script src="streak-tracker.js"></script>
-    <script type="module">
-        import './firebase-init.js';
-        import './auth-state.js';
-        import './auth-modal.js';
-    </script>
 </head>
 <body class="bg-gray-50 font-sans">
     <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
@@ -44,64 +46,15 @@
                     </a>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <a href="analytics.html" class="text-gray-600 hover:text-primary-600 transition-colors">
-                        <i class="fas fa-chart-line mr-2"></i>Analytics
-                    </a>
                     <a href="practice-mode-subjects.html" class="text-gray-600 hover:text-primary-600 transition-colors">
-                        <i class="fas fa-arrow-left mr-2"></i>Back
+                        <i class="fas fa-arrow-left mr-2"></i>Change Subject
                     </a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Mode Selection Modal -->
-    <div id="modeSelectionModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 sm:p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-4 sm:p-8">
-            <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Choose Practice Mode</h2>
-            <p class="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8">Select how you want to practice</p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                <!-- Free Practice -->
-                <button id="freeModeBtn" class="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-6 hover:shadow-xl transition-all text-left">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fas fa-infinity text-white text-xl"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold text-gray-900">Free Practice</h3>
-                            <span class="text-sm text-green-600 font-semibold">No Time Limit</span>
-                        </div>
-                    </div>
-                    <ul class="space-y-2 text-sm text-gray-700">
-                        <li><i class="fas fa-check text-green-500 mr-2"></i>Practice at your own pace</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i>Instant feedback</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i>Review anytime</li>
-                    </ul>
-                </button>
-
-                <!-- Timed Practice -->
-                <button id="timedModeBtn" class="bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200 rounded-xl p-6 hover:shadow-xl transition-all text-left">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fas fa-clock text-white text-xl"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold text-gray-900">Timed Practice</h3>
-                            <span class="text-sm text-orange-600 font-semibold">Build Speed</span>
-                        </div>
-                    </div>
-                    <ul class="space-y-2 text-sm text-gray-700">
-                        <li><i class="fas fa-check text-orange-500 mr-2"></i>20 minutes timer</li>
-                        <li><i class="fas fa-check text-orange-500 mr-2"></i>Simulate exam pressure</li>
-                        <li><i class="fas fa-check text-orange-500 mr-2"></i>Improve speed</li>
-                    </ul>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="loadingScreen" class="hidden min-h-screen flex items-center justify-center">
+    <div id="loadingScreen" class="min-h-screen flex items-center justify-center">
         <div class="text-center">
             <div class="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p class="text-gray-600 text-lg">Loading questions...</p>
@@ -137,38 +90,21 @@
 
     <div id="practiceInterface" class="hidden max-w-4xl mx-auto px-4 py-8">
         <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <div class="flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900" id="subjectTitle">Practice Mode</h1>
-                    <p class="text-gray-600 mt-1" id="modeDescription">Answer at your own pace</p>
+                    <p class="text-gray-600 mt-1">Answer at your own pace with instant feedback</p>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <div id="timerDisplay" class="hidden bg-orange-100 text-orange-700 px-4 py-2 rounded-lg font-bold">
-                        <i class="fas fa-clock mr-2"></i>
-                        <span id="timeRemaining">20:00</span>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-3xl font-bold text-primary-600" id="questionCounter">1/20</div>
-                        <div class="text-sm text-gray-600">Questions</div>
-                    </div>
+                <div class="text-right">
+                    <div class="text-3xl font-bold text-primary-600" id="questionCounter">1/20</div>
+                    <div class="text-sm text-gray-600">Questions</div>
                 </div>
             </div>
         </div>
 
         <div class="bg-white rounded-xl shadow-sm p-8 mb-6">
             <div class="mb-6">
-                <div class="flex justify-between items-start">
-                    <div class="text-sm font-semibold text-gray-500 mb-2">Question <span id="currentQuestionNum">1</span></div>
-                    <div class="flex items-center space-x-3">
-                        <button id="aiExplainBtn" class="text-gray-400 hover:text-purple-500 transition-colors flex items-center gap-1" title="Get AI explanation">
-                            <i class="fas fa-lightbulb text-lg"></i>
-                            <span class="text-xs">Explain</span>
-                        </button>
-                        <button id="bookmarkBtn" class="text-gray-400 hover:text-yellow-500 transition-colors" title="Bookmark this question">
-                            <i class="far fa-bookmark text-xl"></i>
-                        </button>
-                    </div>
-                </div>
+                <div class="text-sm font-semibold text-gray-500 mb-2">Question <span id="currentQuestionNum">1</span></div>
                 <h2 class="text-xl font-semibold text-gray-900" id="questionText">Loading question...</h2>
             </div>
 
@@ -195,7 +131,7 @@
         </div>
 
         <div id="completionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
                 <div class="text-center">
                     <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-check text-4xl text-green-600"></i>
@@ -204,35 +140,18 @@
                     <div class="bg-gray-50 rounded-xl p-6 mb-6">
                         <div class="text-5xl font-bold text-primary-600 mb-2" id="finalScore">0%</div>
                         <div class="text-gray-600 mb-4">Your Score</div>
-                        <div class="grid grid-cols-3 gap-4 text-sm">
+                        <div class="grid grid-cols-2 gap-4 text-sm">
                             <div>
                                 <div class="text-gray-600">Correct</div>
                                 <div class="text-2xl font-bold text-green-600" id="finalCorrect">0</div>
                             </div>
                             <div>
-                                <div class="text-gray-600">Wrong</div>
-                                <div class="text-2xl font-bold text-red-600" id="finalWrong">0</div>
-                            </div>
-                            <div>
-                                <div class="text-gray-600">Time</div>
-                                <div class="text-2xl font-bold text-gray-900" id="finalTime">--</div>
+                                <div class="text-gray-600">Total</div>
+                                <div class="text-2xl font-bold text-gray-900" id="finalTotal">0</div>
                             </div>
                         </div>
                     </div>
-
-                    <div id="detailedReport" class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6 text-left">
-                        <h3 class="font-bold text-gray-900 mb-3 flex items-center">
-                            <i class="fas fa-chart-bar mr-2 text-blue-600"></i>
-                            Detailed Report
-                        </h3>
-                        <div class="space-y-2 text-sm text-gray-700" id="reportDetails">
-                        </div>
-                    </div>
-
                     <div class="space-y-3">
-                        <button id="downloadReportBtn" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
-                            <i class="fas fa-download mr-2"></i>Download Report
-                        </button>
                         <button id="reviewBtn" class="w-full bg-primary-600 text-white py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold">
                             Review Answers
                         </button>
@@ -245,11 +164,273 @@
         </div>
     </div>
 
-    <script type="module">
-        import './firebase-init.js';
-        import './bookmarks.js';
-        import './streak-tracker.js';
+    <script>
+        const MOCK_QUESTIONS = {
+            english: [
+                { id: 1, subject: 'english', question: 'Choose the word that best completes the sentence: The student was _____ for his outstanding performance.', option_a: 'commended', option_b: 'commanded', option_c: 'commented', option_d: 'commenced', correct_answer: 'A', explanation: 'Commended means to praise formally or officially.' },
+                { id: 2, subject: 'english', question: 'Identify the part of speech of the underlined word: She runs <u>quickly</u>.', option_a: 'Noun', option_b: 'Verb', option_c: 'Adverb', option_d: 'Adjective', correct_answer: 'C', explanation: 'Quickly modifies the verb "runs" and is therefore an adverb.' }
+            ],
+            mathematics: [
+                { id: 1, subject: 'mathematics', question: 'Solve for x: 2x + 5 = 13', option_a: '3', option_b: '4', option_c: '5', option_d: '6', correct_answer: 'B', explanation: '2x + 5 = 13, 2x = 8, x = 4' },
+                { id: 2, subject: 'mathematics', question: 'What is 15% of 200?', option_a: '25', option_b: '30', option_c: '35', option_d: '40', correct_answer: 'B', explanation: '15% of 200 = 0.15 × 200 = 30' }
+            ],
+            physics: [
+                { id: 1, subject: 'physics', question: 'What is the SI unit of force?', option_a: 'Joule', option_b: 'Newton', option_c: 'Watt', option_d: 'Pascal', correct_answer: 'B', explanation: 'The Newton (N) is the SI unit of force.' },
+                { id: 2, subject: 'physics', question: 'The speed of light in vacuum is approximately:', option_a: '3 × 10⁸ m/s', option_b: '3 × 10⁶ m/s', option_c: '3 × 10⁷ m/s', option_d: '3 × 10⁹ m/s', correct_answer: 'A', explanation: 'The speed of light is approximately 3 × 10⁸ meters per second.' }
+            ],
+            chemistry: [
+                { id: 1, subject: 'chemistry', question: 'What is the chemical symbol for Gold?', option_a: 'Go', option_b: 'Gd', option_c: 'Au', option_d: 'Ag', correct_answer: 'C', explanation: 'Au is the chemical symbol for Gold, derived from the Latin word "Aurum".' },
+                { id: 2, subject: 'chemistry', question: 'Water has the chemical formula:', option_a: 'H₂O', option_b: 'CO₂', option_c: 'O₂', option_d: 'H₂O₂', correct_answer: 'A', explanation: 'Water is H₂O - two hydrogen atoms and one oxygen atom.' }
+            ],
+            biology: [
+                { id: 1, subject: 'biology', question: 'What is the powerhouse of the cell?', option_a: 'Nucleus', option_b: 'Mitochondria', option_c: 'Ribosome', option_d: 'Chloroplast', correct_answer: 'B', explanation: 'Mitochondria generate most of the chemical energy needed to power the cell.' },
+                { id: 2, subject: 'biology', question: 'Photosynthesis occurs in which part of the plant cell?', option_a: 'Nucleus', option_b: 'Vacuole', option_c: 'Chloroplast', option_d: 'Mitochondria', correct_answer: 'C', explanation: 'Chloroplasts contain chlorophyll and are the site of photosynthesis.' }
+            ],
+            government: [
+                { id: 1, subject: 'government', question: 'What type of government is Nigeria?', option_a: 'Monarchy', option_b: 'Federal Republic', option_c: 'Dictatorship', option_d: 'Confederation', correct_answer: 'B', explanation: 'Nigeria operates a federal republic system of government.' }
+            ],
+            economics: [
+                { id: 1, subject: 'economics', question: 'The law of demand states that:', option_a: 'As price increases, quantity demanded increases', option_b: 'As price increases, quantity demanded decreases', option_c: 'Price and demand are not related', option_d: 'Supply equals demand', correct_answer: 'B', explanation: 'The law of demand states that quantity demanded decreases as price increases, all else being equal.' }
+            ],
+            commerce: [
+                { id: 1, subject: 'commerce', question: 'A document that shows a summary of business transactions is called:', option_a: 'Receipt', option_b: 'Invoice', option_c: 'Statement of account', option_d: 'Voucher', correct_answer: 'C', explanation: 'A statement of account summarizes all transactions between parties over a period.' }
+            ],
+            literature: [
+                { id: 1, subject: 'literature', question: 'Who wrote "Things Fall Apart"?', option_a: 'Wole Soyinka', option_b: 'Chinua Achebe', option_c: 'Ben Okri', option_d: 'Chimamanda Adichie', correct_answer: 'B', explanation: 'Chinua Achebe wrote the acclaimed novel "Things Fall Apart" in 1958.' }
+            ],
+            geography: [
+                { id: 1, subject: 'geography', question: 'The longest river in the world is:', option_a: 'Amazon', option_b: 'Nile', option_c: 'Mississippi', option_d: 'Yangtze', correct_answer: 'B', explanation: 'The Nile River is generally considered the longest river in the world.' }
+            ],
+            crs: [
+                { id: 1, subject: 'crs', question: 'How many books are in the New Testament?', option_a: '27', option_b: '39', option_c: '66', option_d: '22', correct_answer: 'A', explanation: 'The New Testament contains 27 books.' }
+            ],
+            civic: [
+                { id: 1, subject: 'civic', question: 'Democracy is defined as government of the people, by the people, and for the people by:', option_a: 'Nelson Mandela', option_b: 'Abraham Lincoln', option_c: 'Winston Churchill', option_d: 'Mahatma Gandhi', correct_answer: 'B', explanation: 'Abraham Lincoln defined democracy this way in the Gettysburg Address.' }
+            ]
+        };
+
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let correctCount = 0;
+        let useMockData = false;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const subject = urlParams.get('subject') || 'english';
+
+        async function initializePractice() {
+            document.getElementById('subjectTitle').textContent = `Practice: ${capitalizeFirst(subject)}`;
+            
+            const supabaseConfigured = isSupabaseConfigured();
+            
+            if (!supabaseConfigured) {
+                document.getElementById('loadingScreen').classList.add('hidden');
+                document.getElementById('setupAlert').classList.remove('hidden');
+                
+                document.getElementById('useMockDataBtn').addEventListener('click', () => {
+                    useMockData = true;
+                    document.getElementById('setupAlert').classList.add('hidden');
+                    loadQuestions();
+                });
+                
+                return;
+            }
+            
+            await loadQuestions();
+        }
+
+        async function loadQuestions() {
+            try {
+                let questions = null;
+                
+                if (!useMockData) {
+                    questions = await loadQuestionsFromSupabase(subject, 20);
+                }
+                
+                if (!questions || questions.length === 0) {
+                    const mockQuestions = MOCK_QUESTIONS[subject.toLowerCase()] || MOCK_QUESTIONS.english;
+                    questions = Array(20).fill(null).map((_, i) => ({
+                        ...mockQuestions[i % mockQuestions.length],
+                        id: i + 1
+                    }));
+                }
+                
+                currentQuestions = shuffleArray(questions);
+                userAnswers = new Array(currentQuestions.length).fill(null);
+                
+                document.getElementById('loadingScreen').classList.add('hidden');
+                document.getElementById('practiceInterface').classList.remove('hidden');
+                
+                renderQuestion();
+            } catch (error) {
+                console.error('Error loading questions:', error);
+                alert('Failed to load questions. Please try again.');
+            }
+        }
+
+        function capitalizeFirst(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function renderQuestion() {
+            const question = currentQuestions[currentQuestionIndex];
+            
+            document.getElementById('currentQuestionNum').textContent = currentQuestionIndex + 1;
+            document.getElementById('questionCounter').textContent = `${currentQuestionIndex + 1}/${currentQuestions.length}`;
+            document.getElementById('questionText').textContent = question.question;
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            const options = ['A', 'B', 'C', 'D'];
+            options.forEach(opt => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option-btn p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-all';
+                optionDiv.dataset.option = opt;
+                
+                const isSelected = userAnswers[currentQuestionIndex]?.selected === opt;
+                if (isSelected) {
+                    optionDiv.classList.add('border-primary-500', 'bg-primary-50');
+                }
+                
+                optionDiv.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center mr-3 font-semibold">
+                            ${opt}
+                        </div>
+                        <div class="flex-1">${question[`option_${opt.toLowerCase()}`]}</div>
+                    </div>
+                `;
+                
+                optionDiv.addEventListener('click', () => selectOption(opt));
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            if (userAnswers[currentQuestionIndex]) {
+                showFeedback();
+            } else {
+                document.getElementById('feedback').classList.add('hidden');
+            }
+            
+            updateNavigation();
+            updateScore();
+        }
+
+        function selectOption(option) {
+            if (userAnswers[currentQuestionIndex]) return;
+            
+            const question = currentQuestions[currentQuestionIndex];
+            const isCorrect = option === question.correct_answer;
+            
+            userAnswers[currentQuestionIndex] = {
+                selected: option,
+                correct: isCorrect
+            };
+            
+            if (isCorrect) correctCount++;
+            
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('border-primary-500', 'bg-primary-50');
+                btn.style.pointerEvents = 'none';
+            });
+            
+            const selectedBtn = document.querySelector(`[data-option="${option}"]`);
+            selectedBtn.classList.add('border-primary-500', 'bg-primary-50');
+            
+            showFeedback();
+            updateScore();
+        }
+
+        function showFeedback() {
+            const question = currentQuestions[currentQuestionIndex];
+            const answer = userAnswers[currentQuestionIndex];
+            
+            if (!answer) return;
+            
+            const feedback = document.getElementById('feedback');
+            feedback.classList.remove('hidden');
+            
+            if (answer.correct) {
+                feedback.className = 'mt-6 p-4 rounded-lg bg-green-50 border-2 border-green-200';
+                feedback.innerHTML = `
+                    <div class="flex items-start space-x-3">
+                        <i class="fas fa-check-circle text-2xl text-green-600 mt-1"></i>
+                        <div>
+                            <div class="font-semibold text-green-900 mb-1">Correct!</div>
+                            <div class="text-green-800">${question.explanation || 'Well done!'}</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                feedback.className = 'mt-6 p-4 rounded-lg bg-red-50 border-2 border-red-200';
+                feedback.innerHTML = `
+                    <div class="flex items-start space-x-3">
+                        <i class="fas fa-times-circle text-2xl text-red-600 mt-1"></i>
+                        <div>
+                            <div class="font-semibold text-red-900 mb-1">Incorrect</div>
+                            <div class="text-red-800 mb-2">The correct answer is <strong>${question.correct_answer}</strong></div>
+                            <div class="text-red-700">${question.explanation || ''}</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function updateNavigation() {
+            document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
+            
+            const nextBtn = document.getElementById('nextBtn');
+            if (currentQuestionIndex === currentQuestions.length - 1) {
+                nextBtn.textContent = 'Finish';
+                nextBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Finish';
+            } else {
+                nextBtn.innerHTML = 'Next<i class="fas fa-arrow-right ml-2"></i>';
+            }
+        }
+
+        function updateScore() {
+            const answered = userAnswers.filter(a => a !== null).length;
+            document.getElementById('correctCount').textContent = correctCount;
+            document.getElementById('answeredCount').textContent = answered;
+        }
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentQuestionIndex < currentQuestions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                showCompletion();
+            }
+        });
+
+        function showCompletion() {
+            const answered = userAnswers.filter(a => a !== null).length;
+            const percentage = answered > 0 ? Math.round((correctCount / answered) * 100) : 0;
+            
+            document.getElementById('finalScore').textContent = `${percentage}%`;
+            document.getElementById('finalCorrect').textContent = correctCount;
+            document.getElementById('finalTotal').textContent = answered;
+            document.getElementById('completionModal').classList.remove('hidden');
+        }
+
+        document.getElementById('reviewBtn').addEventListener('click', () => {
+            document.getElementById('completionModal').classList.add('hidden');
+            currentQuestionIndex = 0;
+            renderQuestion();
+        });
+
+        document.getElementById('newPracticeBtn').addEventListener('click', () => {
+            window.location.href = 'practice-mode-subjects.html';
+        });
+
+        initializePractice();
     </script>
-    <script src="practice-script.js"></script>
 </body>
 </html>
