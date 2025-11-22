@@ -13,7 +13,7 @@ let CONFIG = {
     publicKey: "pk_test_56ea9fe6dc1cc19b965031a6297e3a683f9804af",
   },
   hcaptcha: {
-    siteKey: "b88a27ee-0c12-42c8-94aa-eb5827ca0c42",
+    siteKey: "10000000-ffff-ffff-ffff-000000000001",
   },
   pricing: {
     mockExamPrice: 100000,

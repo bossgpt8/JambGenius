@@ -3,6 +3,7 @@
 <head>
     <script src="suppress-tailwind-warning.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/styles.css?v=1.0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mock Exam | JambGenius 💯</title>
@@ -28,6 +29,8 @@
         import './firebase-init.js';
         import './auth-state.js';
         import './auth-modal.js';
+        import './bookmarks.js';
+        import './streak-tracker.js';
     </script>
 </head>
 <body class="bg-gray-50 font-sans">
@@ -117,6 +120,9 @@
                                     <span class="text-sm font-semibold text-primary-600" id="currentSubject">Use of English</span>
                                     <div class="text-sm text-gray-500">Question <span id="currentQuestionNum">1</span> of <span id="totalQuestions">180</span></div>
                                 </div>
+                                <button id="aiExplainBtn" class="text-gray-400 hover:text-purple-500 transition-colors" title="Get AI explanation">
+                                    <i class="fas fa-lightbulb text-lg"></i>
+                                </button>
                             </div>
                             <h2 class="text-xl font-semibold text-gray-900" id="questionText">Loading question...</h2>
                         </div>

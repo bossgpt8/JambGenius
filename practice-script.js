@@ -1,3 +1,7 @@
+// Import required modules
+import { bookmarkManager } from './bookmarks.js';
+import { streakTracker } from './streak-tracker.js';
+
 // Mock questions for fallback
 const MOCK_QUESTIONS = {
     english: [
@@ -29,7 +33,6 @@ let timerInterval = null;
 let startTime = null;
 let bookmarkedQuestions = new Set();
 let antiCheat = null;
-let bookmarksStreaks = null;
 let currentUser = null;
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -57,18 +60,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         showCompletion();
     });
     
-    // Initialize bookmarks & streaks module
-    if (typeof window.bookmarksStreaks !== 'undefined') {
-        bookmarksStreaks = window.bookmarksStreaks;
-    }
-    
     // Get current user
     const { getAuth } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
     const auth = getAuth();
     auth.onAuthStateChanged((user) => {
         currentUser = user;
-        if (user && bookmarksStreaks) {
-            bookmarksStreaks.setUser(user);
+        if (user) {
+            streakTracker.loadFromFirestore();
+            bookmarkManager.loadFromFirestore();
         }
     });
 });
@@ -191,34 +190,34 @@ async function toggleBookmark() {
     const bookmarkBtn = document.getElementById('bookmarkBtn');
     const icon = bookmarkBtn.querySelector('i');
     
-    // Save to Firebase if user is logged in
-    if (currentUser && bookmarksStreaks) {
-        await bookmarksStreaks.toggleBookmark(question.id, {
-            question: question.question,
-            subject: question.subject,
-            options: {
-                A: question.option_a,
-                B: question.option_b,
-                C: question.option_c,
-                D: question.option_d
-            },
-            correctAnswer: question.correct_answer,
-            explanation: question.explanation
-        });
-    }
+    // Toggle bookmark using bookmarkManager
+    await bookmarkManager.toggleBookmark({
+        question: question.question,
+        subject: question.subject || subject,
+        options: {
+            A: question.option_a,
+            B: question.option_b,
+            C: question.option_c,
+            D: question.option_d
+        },
+        correctAnswer: question.correct_answer,
+        explanation: question.explanation,
+        difficulty: 'medium'
+    });
     
-    // Update local state
-    if (bookmarkedQuestions.has(question.id)) {
-        bookmarkedQuestions.delete(question.id);
-        icon.classList.remove('fas');
-        icon.classList.add('far');
-    } else {
-        bookmarkedQuestions.add(question.id);
+    // Update icon
+    const isBookmarked = bookmarkManager.isBookmarked({
+        question: question.question,
+        subject: question.subject || subject
+    });
+    
+    if (isBookmarked) {
         icon.classList.remove('far');
         icon.classList.add('fas');
+    } else {
+        icon.classList.remove('fas');
+        icon.classList.add('far');
     }
-    
-    saveBookmarks();
 }
 
 document.getElementById('bookmarkBtn').addEventListener('click', toggleBookmark);
@@ -291,9 +290,9 @@ async function selectOption(option) {
     
     if (isCorrect) correctCount++;
     
-    // Update streak for first answer in session
-    if (currentUser && bookmarksStreaks && userAnswers.filter(a => a !== null).length === 1) {
-        await bookmarksStreaks.updateStreak();
+    // Record streak for first answer in session
+    if (currentUser && userAnswers.filter(a => a !== null).length === 1) {
+        streakTracker.recordPractice();
     }
     
     document.querySelectorAll('.option-btn').forEach(btn => {
@@ -307,11 +306,10 @@ async function selectOption(option) {
     showFeedback();
     updateScore();
     
-    // Show explanation button if answer is wrong or correct
-    if (!isCorrect && currentUser && bookmarksStreaks) {
-        document.getElementById('getExplanationBtn').classList.remove('hidden');
-    } else {
-        document.getElementById('getExplanationBtn').classList.add('hidden');
+    // Show AI explanation button
+    const aiExplainBtn = document.getElementById('aiExplainBtn');
+    if (aiExplainBtn) {
+        aiExplainBtn.classList.remove('hidden');
     }
 }
 
@@ -497,14 +495,13 @@ document.getElementById('newPracticeBtn').addEventListener('click', () => {
 });
 
 // AI Explanation Button Handler
-document.getElementById('getExplanationBtn')?.addEventListener('click', async () => {
+document.getElementById('aiExplainBtn')?.addEventListener('click', async () => {
     const question = currentQuestions[currentQuestionIndex];
     const answer = userAnswers[currentQuestionIndex];
-    const btn = document.getElementById('getExplanationBtn');
-    const explanationSection = document.getElementById('explanationSection');
-    const explanationText = document.getElementById('explanationText');
+    const btn = document.getElementById('aiExplainBtn');
     
     btn.disabled = true;
+    const originalHTML = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Loading...';
     
     try {
@@ -520,34 +517,34 @@ document.getElementById('getExplanationBtn')?.addEventListener('click', async ()
                     D: question.option_d
                 },
                 correctAnswer: question.correct_answer,
-                userAnswer: answer.selected
+                userAnswer: answer?.selected
             })
         });
         
         const data = await response.json();
         
         if (data.success && data.explanation) {
-            explanationText.textContent = data.explanation;
-            explanationSection.classList.remove('hidden');
-            
-            // Save explanation to Firebase
-            if (currentUser && bookmarksStreaks) {
-                await bookmarksStreaks.saveExplanation(question.id, data.explanation);
-            }
+            // Show explanation in feedback area
+            const feedback = document.getElementById('feedback');
+            feedback.className = 'mt-6 p-4 rounded-lg bg-purple-50 border-2 border-purple-200';
+            feedback.innerHTML = `
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-lightbulb text-2xl text-purple-600 mt-1"></i>
+                    <div>
+                        <div class="font-semibold text-purple-900 mb-2">AI Explanation</div>
+                        <div class="text-purple-800">${data.explanation}</div>
+                    </div>
+                </div>
+            `;
+            feedback.classList.remove('hidden');
         } else {
-            explanationText.textContent = 'Unable to generate explanation. Please try again.';
-            explanationSection.classList.remove('hidden');
+            alert('Unable to generate explanation. Please try again.');
         }
     } catch (error) {
         console.error('Error getting explanation:', error);
-        explanationText.textContent = 'Error loading explanation. Please try again.';
-        explanationSection.classList.remove('hidden');
+        alert('Error loading explanation. Please check your connection and try again.');
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-lightbulb mr-2"></i>Get AI Explanation';
+        btn.innerHTML = originalHTML;
     }
-});
-
-document.getElementById('closeExplanationBtn')?.addEventListener('click', () => {
-    document.getElementById('explanationSection').classList.add('hidden');
 });

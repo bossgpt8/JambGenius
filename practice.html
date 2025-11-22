@@ -3,6 +3,7 @@
 <head>
     <script src="suppress-tailwind-warning.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/styles.css?v=1.0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Practice Mode | JambGenius 💯</title>
@@ -158,9 +159,15 @@
             <div class="mb-6">
                 <div class="flex justify-between items-start">
                     <div class="text-sm font-semibold text-gray-500 mb-2">Question <span id="currentQuestionNum">1</span></div>
-                    <button id="bookmarkBtn" class="text-gray-400 hover:text-yellow-500 transition-colors" title="Bookmark this question">
-                        <i class="far fa-bookmark text-xl"></i>
-                    </button>
+                    <div class="flex items-center space-x-3">
+                        <button id="aiExplainBtn" class="text-gray-400 hover:text-purple-500 transition-colors flex items-center gap-1" title="Get AI explanation">
+                            <i class="fas fa-lightbulb text-lg"></i>
+                            <span class="text-xs">Explain</span>
+                        </button>
+                        <button id="bookmarkBtn" class="text-gray-400 hover:text-yellow-500 transition-colors" title="Bookmark this question">
+                            <i class="far fa-bookmark text-xl"></i>
+                        </button>
+                    </div>
                 </div>
                 <h2 class="text-xl font-semibold text-gray-900" id="questionText">Loading question...</h2>
             </div>
@@ -238,6 +245,11 @@
         </div>
     </div>
 
+    <script type="module">
+        import './firebase-init.js';
+        import './bookmarks.js';
+        import './streak-tracker.js';
+    </script>
     <script src="practice-script.js"></script>
 </body>
 </html>
