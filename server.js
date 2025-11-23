@@ -43,6 +43,12 @@ app.post('/api/verify-captcha', async (req, res) => {
 
   const hcaptchaSecretKey = process.env.HCAPTCHA_SECRET_KEY || '0x0000000000000000000000000000000000000000';
   
+  // Development mode: skip verification if secret key is not set
+  if (!process.env.HCAPTCHA_SECRET_KEY) {
+    console.warn('⚠️ hCaptcha secret key not configured - allowing all requests for development');
+    return res.json({ success: true });
+  }
+  
   const postData = new URLSearchParams({
     secret: hcaptchaSecretKey,
     response: token
