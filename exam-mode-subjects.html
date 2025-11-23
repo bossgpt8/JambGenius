@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exam Mode - Select Subjects | JambGenius 💯</title>
+    <title>Exam Mode - Select Subjects | JambGenius </title>
     <meta name="description" content="Choose 4 subjects for your full JAMB mock exam experience.">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -32,6 +32,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="config.js"></script>
+    <script src="content-protection.js"></script>
+    <script src="modal-component.js"></script>
+    <script type="module">
+        import './firebase-init.js';
+        import './auth-state.js';
+        import './auth-modal.js';
+    </script>
 </head>
 <body class="bg-gray-50 font-sans">
     <!-- Navigation Header -->
@@ -41,7 +48,7 @@
                 <div class="flex items-center space-x-8">
                     <a href="index.html" class="flex-shrink-0 flex items-center">
                         <i class="fas fa-graduation-cap text-2xl text-primary-600 mr-2"></i>
-                        <span class="text-xl font-bold text-gray-900">JambGenius 💯</span>
+                        <span class="text-xl font-bold text-gray-900">JambGenius </span>
                     </a>
                     <div class="hidden md:flex items-center space-x-8">
                         <a href="index.html" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Home</a>
@@ -51,6 +58,13 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
+                    <div id="creditsDisplay" class="hidden items-center bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg shadow-lg">
+                        <i class="fas fa-ticket-alt mr-2"></i>
+                        <div class="flex flex-col">
+                            <span class="text-xs font-medium">Credits</span>
+                            <span id="creditsCount" class="text-xl font-bold">0</span>
+                        </div>
+                    </div>
                     <div id="userSection" class="hidden items-center space-x-4">
                         <span id="userName" class="text-gray-700 font-medium"></span>
                         <button id="signOutBtn" class="text-gray-600 hover:text-red-600 transition-colors">
@@ -334,7 +348,7 @@
     <footer class="bg-gray-900 text-white py-12 mt-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center text-gray-400">
-                <p>&copy; 2025 JambGenius 💯. All rights reserved.</p>
+                <p>&copy; 2025 JambGenius . All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -407,6 +421,8 @@
             const userName = document.getElementById('userName');
             const authBtn = document.getElementById('authBtn');
             const signOutBtn = document.getElementById('signOutBtn');
+            const creditsDisplay = document.getElementById('creditsDisplay');
+            const creditsCount = document.getElementById('creditsCount');
 
             if (user) {
                 userSection.classList.remove('hidden');
@@ -416,7 +432,8 @@
 
                 if (signOutBtn) {
                     signOutBtn.addEventListener('click', async () => {
-                        if (confirm('Are you sure you want to sign out?')) {
+                        const confirmed = await customModal.confirm('Are you sure you want to sign out?', 'Sign Out');
+                        if (confirmed) {
                             await signOut(auth);
                             window.location.href = 'index.html';
                         }
@@ -436,8 +453,18 @@
 
             const credits = await checkExamCredits();
             
+            if (creditsDisplay && creditsCount) {
+                creditsCount.textContent = credits;
+                creditsDisplay.classList.remove('hidden');
+                creditsDisplay.classList.add('flex');
+            }
+            
             if (credits <= 0) {
-                if (confirm('You need to purchase an exam credit (₦1,000 per exam). Would you like to proceed to payment?')) {
+                const proceed = await customModal.confirm(
+                    'You need to purchase exam credits to access mock exams. Each credit costs ₦1,000 and allows one full exam. Would you like to proceed to payment?',
+                    'No Credits Available'
+                );
+                if (proceed) {
                     window.location.href = 'exam-payment.html';
                 } else {
                     window.location.href = 'index.html';
@@ -503,19 +530,30 @@
                 const credits = await checkExamCredits();
                 
                 if (credits <= 0) {
-                    if (confirm('You have no exam credits remaining. Would you like to purchase another exam (₦1,000)?')) {
+                    const buyMore = await customModal.confirm(
+                        'You have no exam credits remaining. Would you like to purchase more credits (₦1,000 per exam)?',
+                        'No Credits'
+                    );
+                    if (buyMore) {
                         window.location.href = 'exam-payment.html';
                     }
                     return;
                 }
 
-                if (confirm(`You have ${credits} exam credit${credits > 1 ? 's' : ''} remaining. Starting the exam will consume 1 credit. Continue?`)) {
+                const confirmStart = await customModal.confirm(
+                    `You have ${credits} exam credit${credits > 1 ? 's' : ''} remaining. Starting the exam will consume 1 credit. Continue?`,
+                    'Start Exam'
+                );
+                if (confirmStart) {
                     const consumed = await consumeExamCredit();
                     if (consumed) {
                         const subjects = Array.from(selectedSubjects).join(',');
                         window.location.href = `exam.html?subjects=${subjects}`;
                     } else {
-                        alert('Failed to start exam. Please try again or contact support.');
+                        await customModal.error(
+                            'Failed to start exam. Please try again or contact support.',
+                            'Error'
+                        );
                     }
                 }
             }

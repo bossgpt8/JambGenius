@@ -6,13 +6,32 @@
     <link rel="stylesheet" href="/styles.css?v=1.0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile - JambGenius 💯</title>
+    <title>My Profile - JambGenius </title>
     <meta name="description" content="Manage your JambGenius profile, update your information, and customize your learning experience.">
     
-    
-    
+     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="suppress-tailwind-warning.js"></script>
     <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        };
     </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -28,7 +47,7 @@
                 <div class="flex items-center space-x-8">
                     <a href="index.html" class="flex-shrink-0 flex items-center">
                         <i class="fas fa-graduation-cap text-2xl text-primary-600 mr-2"></i>
-                        <span class="text-xl font-bold text-gray-900">JambGenius 💯</span>
+                        <span class="text-xl font-bold text-gray-900">JambGenius </span>
                     </a>
                     <div class="hidden md:flex items-center space-x-8">
                         <a href="index.html" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Home</a>
@@ -248,7 +267,7 @@
                 <div>
                     <div class="flex items-center mb-4">
                         <i class="fas fa-graduation-cap text-2xl text-primary-400 mr-2"></i>
-                        <span class="text-xl font-bold">JambGenius 💯</span>
+                        <span class="text-xl font-bold">JambGenius </span>
                     </div>
                     <p class="text-gray-400 mb-4">
                         Nigeria's leading JAMB UTME preparation platform helping students achieve their university dreams.

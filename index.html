@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JAMB Mock System - Nigeria's Premier Exam Preparation Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="suppress-tailwind-warning.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -25,11 +26,13 @@
             }
         };
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
     <script src="config.js"></script>
+    <script src="content-protection.js"></script>
 </head>
 <body class="bg-gray-50 font-sans">
     <!-- Navigation Header -->
@@ -39,7 +42,7 @@
                 <div class="flex items-center space-x-8">
                     <div class="flex-shrink-0 flex items-center">
                         <i class="fas fa-graduation-cap text-2xl text-primary-600 mr-2"></i>
-                        <span class="text-xl font-bold text-gray-900">JambGenius 💯</span>
+                        <span class="text-xl font-bold text-gray-900">JambGenius </span>
                     </div>
                     <div class="hidden md:flex items-center space-x-8">
                         <a href="#home" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Home</a>
@@ -92,127 +95,6 @@
             </div>
         </div>
     </nav>
-
-    <!-- Auth Modal -->
-    <div id="authModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
-            <button id="closeAuthModal" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-            
-            <!-- Sign In Form -->
-            <div id="signInForm">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">Welcome Back!</h2>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input id="signInEmail" type="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="your@email.com">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                        <input id="signInPassword" type="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="••••••••">
-                    </div>
-                    <button id="forgotPasswordLink" class="text-sm text-primary-600 hover:text-primary-700">Forgot password?</button>
-                </div>
-
-                <button id="emailSignInBtn" class="w-full bg-primary-600 text-white py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold mt-6">
-                    Sign In
-                </button>
-
-                <div class="relative my-6">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-white text-gray-500">Or continue with</span>
-                    </div>
-                </div>
-
-                <button id="googleSignIn" class="w-full bg-white border-2 border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-50 transition-colors font-semibold flex items-center justify-center">
-                    <i class="fab fa-google mr-2 text-red-500"></i>
-                    Sign in with Google
-                </button>
-
-                <p class="mt-6 text-center text-sm text-gray-600">
-                    Don't have an account? 
-                    <button id="showSignUpForm" class="text-primary-600 hover:text-primary-700 font-semibold">Sign up</button>
-                </p>
-            </div>
-
-            <!-- Sign Up Form -->
-            <div id="signUpForm" class="hidden">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">Create Account</h2>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                        <input id="signUpName" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="John Doe">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input id="signUpEmail" type="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="your@email.com">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                        <input id="signUpPassword" type="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="••••••••">
-                        <p class="text-xs text-gray-500 mt-1">At least 6 characters</p>
-                    </div>
-                    <div class="flex items-start">
-                        <input id="agreeToTerms" type="checkbox" class="mt-1 h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
-                        <label for="agreeToTerms" class="ml-2 text-sm text-gray-700">
-                            I agree to the <a href="terms-of-service.html" target="_blank" class="text-primary-600 hover:text-primary-700 font-semibold">Terms of Service</a> and <a href="privacy-policy.html" target="_blank" class="text-primary-600 hover:text-primary-700 font-semibold">Privacy Policy</a>
-                        </label>
-                    </div>
-                </div>
-
-                <button id="emailSignUpBtn" class="w-full bg-primary-600 text-white py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold mt-6">
-                    Create Account
-                </button>
-
-                <div class="relative my-6">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-white text-gray-500">Or sign up with</span>
-                    </div>
-                </div>
-
-                <button id="googleSignUpBtn" class="w-full bg-white border-2 border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-50 transition-colors font-semibold flex items-center justify-center">
-                    <i class="fab fa-google mr-2 text-red-500"></i>
-                    Sign up with Google
-                </button>
-
-                <p class="mt-6 text-center text-sm text-gray-600">
-                    Already have an account? 
-                    <button id="showSignInForm" class="text-primary-600 hover:text-primary-700 font-semibold">Sign in</button>
-                </p>
-            </div>
-
-            <!-- Forgot Password Form -->
-            <div id="forgotPasswordForm" class="hidden">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">Reset Password</h2>
-                <p class="text-gray-600 mb-6">Enter your email address and we'll send you a link to reset your password.</p>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input id="resetEmail" type="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="your@email.com">
-                    </div>
-                </div>
-
-                <button id="sendResetEmailBtn" class="w-full bg-primary-600 text-white py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold mt-6">
-                    Send Reset Link
-                </button>
-
-                <p class="mt-6 text-center text-sm text-gray-600">
-                    Remember your password? 
-                    <button id="backToSignIn" class="text-primary-600 hover:text-primary-700 font-semibold">Sign in</button>
-                </p>
-            </div>
-        </div>
-    </div>
 
     <!-- Hero Section -->
     <section id="home" class="bg-gradient-to-br from-primary-50 to-blue-100 py-20">
@@ -602,7 +484,7 @@
             </div>
 
             <!-- Sign In Required -->
-            <div id="analyticsSignInRequired" class="text-center py-12">
+            <div id="analyticsSignInRequired" class="hidden text-center py-12">
                 <i class="fas fa-chart-line text-6xl text-primary-500 mb-6"></i>
                 <h3 class="text-2xl font-bold text-gray-900 mb-4">Sign In to View Analytics</h3>
                 <p class="text-gray-600 mb-8">Track your performance, view detailed statistics, and monitor your progress over time.</p>
@@ -677,7 +559,7 @@
     <section class="py-16 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">Why Choose JambGenius 💯?</h2>
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Why Choose JambGenius ?</h2>
                 <p class="text-lg text-gray-600">Everything you need to excel in your JAMB UTME</p>
             </div>
             <div class="grid md:grid-cols-3 gap-8">
@@ -713,7 +595,7 @@
                 <div>
                     <div class="flex items-center mb-4">
                         <i class="fas fa-graduation-cap text-2xl text-primary-500 mr-2"></i>
-                        <span class="text-xl font-bold">JambGenius 💯</span>
+                        <span class="text-xl font-bold">JambGenius </span>
                     </div>
                     <p class="text-gray-400">Nigeria's premier JAMB UTME preparation platform</p>
                 </div>
@@ -742,520 +624,34 @@
                     </ul>
                 </div>
             </div>
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-                <p>&copy; 2025 JambGenius. All rights reserved.</p>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center">
+                <div class="mb-4">
+                    <a href="https://whatsapp.com/channel/placeholder" target="_blank" class="inline-flex items-center text-green-400 hover:text-green-300 font-medium text-lg transition-colors">
+                        <i class="fab fa-whatsapp mr-2 text-2xl"></i>
+                        Join our WhatsApp channel for more info
+                    </a>
+                </div>
+                <p class="text-gray-400">&copy; 2025 JambGenius. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK and Auth -->
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged, GoogleAuthProvider, updateProfile } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, where, orderBy, limit, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import './firebase-init.js';
+        import './auth-state.js';
+        import { showAuthModal } from './auth-modal.js';
 
-        const app = initializeApp(CONFIG.firebase);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
-
-        // Global state
-        let currentUser = null;
-        let currentSubject = null;
-        let currentQuestion = 1;
-        let totalQuestions = 100;
-        let examTimeRemaining = 7200; // 2 hours in seconds
-
-        // DOM Elements
-        const elements = {
-            authModal: document.getElementById('authModal'),
-            signInForm: document.getElementById('signInForm'),
-            signUpForm: document.getElementById('signUpForm'),
-            forgotPasswordForm: document.getElementById('forgotPasswordForm'),
-            closeAuthModal: document.getElementById('closeAuthModal'),
-            signInBtn: document.getElementById('signInBtn'),
-            signOutBtn: document.getElementById('signOutBtn'),
-            userInfo: document.getElementById('userInfo'),
-            userName: document.getElementById('userName'),
-            userAvatar: document.getElementById('userAvatar'),
-            googleSignIn: document.getElementById('googleSignIn'),
-            googleSignUpBtn: document.getElementById('googleSignUpBtn'),
-            emailSignInBtn: document.getElementById('emailSignInBtn'),
-            emailSignUpBtn: document.getElementById('emailSignUpBtn'),
-            sendResetEmailBtn: document.getElementById('sendResetEmailBtn'),
-            showSignUpForm: document.getElementById('showSignUpForm'),
-            showSignInForm: document.getElementById('showSignInForm'),
-            forgotPasswordLink: document.getElementById('forgotPasswordLink'),
-            backToSignIn: document.getElementById('backToSignIn'),
-            subjectSelection: document.getElementById('subjectSelection'),
-            practiceQuestions: document.getElementById('practiceQuestions'),
-            currentSubject: document.getElementById('currentSubject'),
-            currentQuestionNum: document.getElementById('currentQuestionNum'),
-            practiceProgress: document.getElementById('practiceProgress'),
-            practiceProgressBar: document.getElementById('practiceProgressBar'),
-            answerExplanation: document.getElementById('answerExplanation'),
-            examTimer: document.getElementById('examTimer'),
-            analyticsContent: document.getElementById('analyticsContent'),
-            analyticsLoading: document.getElementById('analyticsLoading'),
-            analyticsEmpty: document.getElementById('analyticsEmpty'),
-            analyticsSignInRequired: document.getElementById('analyticsSignInRequired')
-        };
-
-        const sections = {
-            home: document.getElementById('home'),
-            dashboard: document.getElementById('dashboard'),
-            practiceInterface: document.getElementById('practiceInterface'),
-            examInterface: document.getElementById('examInterface'),
-            analytics: document.getElementById('analytics')
-        };
-
-        // Auth State Observer
-        onAuthStateChanged(auth, async (user) => {
-            currentUser = user;
-            if (user) {
-                elements.userInfo.classList.remove('hidden');
-                elements.userInfo.classList.add('flex');
-                elements.signInBtn.classList.add('hidden');
-                elements.userName.textContent = user.displayName || user.email.split('@')[0];
-                elements.userAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email)}&background=2563eb&color=fff`;
-                
-                // Create or update user document
-                await createUserDocument(user);
-            } else {
-                elements.userInfo.classList.add('hidden');
-                elements.userInfo.classList.remove('flex');
-                elements.signInBtn.classList.remove('hidden');
-            }
-        });
-
-        // Create/Update User Document in Firestore
-        async function createUserDocument(user) {
-            const userRef = doc(db, 'users', user.uid);
-            const userSnap = await getDoc(userRef);
-            
-            if (!userSnap.exists()) {
-                await setDoc(userRef, {
-                    email: user.email,
-                    displayName: user.displayName || user.email.split('@')[0],
-                    photoURL: user.photoURL || '',
-                    createdAt: serverTimestamp(),
-                    lastLogin: serverTimestamp()
-                });
-            } else {
-                await updateDoc(userRef, {
-                    lastLogin: serverTimestamp()
-                });
-            }
-        }
-
-        // Show/Hide Modal Forms
-        function showAuthModal() {
-            elements.authModal.classList.remove('hidden');
-        }
-
-        function hideAuthModal() {
-            elements.authModal.classList.add('hidden');
-            showSignInFormView();
-        }
-
-        function showSignInFormView() {
-            elements.signInForm.classList.remove('hidden');
-            elements.signUpForm.classList.add('hidden');
-            elements.forgotPasswordForm.classList.add('hidden');
-        }
-
-        function showSignUpFormView() {
-            elements.signInForm.classList.add('hidden');
-            elements.signUpForm.classList.remove('hidden');
-            elements.forgotPasswordForm.classList.add('hidden');
-        }
-
-        function showForgotPasswordFormView() {
-            elements.signInForm.classList.add('hidden');
-            elements.signUpForm.classList.add('hidden');
-            elements.forgotPasswordForm.classList.remove('hidden');
-        }
-
-        // Authentication Functions
-        async function signInWithGoogle() {
-            try {
-                const result = await signInWithPopup(auth, provider);
-                console.log('Signed in:', result.user.email);
-                hideAuthModal();
-            } catch (error) {
-                console.error('Error signing in:', error);
-                alert('Sign in failed. Please try again.');
-            }
-        }
-
-        async function signInWithEmail() {
-            const email = document.getElementById('signInEmail').value;
-            const password = document.getElementById('signInPassword').value;
-
-            if (!email || !password) {
-                alert('Please enter both email and password');
-                return;
-            }
-
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                hideAuthModal();
-            } catch (error) {
-                console.error('Error signing in:', error);
-                if (error.code === 'auth/user-not-found') {
-                    alert('No account found with this email. Please sign up first.');
-                } else if (error.code === 'auth/wrong-password') {
-                    alert('Incorrect password. Please try again.');
-                } else if (error.code === 'auth/invalid-email') {
-                    alert('Invalid email address.');
-                } else {
-                    alert('Sign in failed: ' + error.message);
-                }
-            }
-        }
-
-        async function signUpWithEmail() {
-            const name = document.getElementById('signUpName').value;
-            const email = document.getElementById('signUpEmail').value;
-            const password = document.getElementById('signUpPassword').value;
-            const agreeToTerms = document.getElementById('agreeToTerms').checked;
-
-            if (!name || !email || !password) {
-                alert('Please fill in all fields');
-                return;
-            }
-
-            if (!agreeToTerms) {
-                alert('You must agree to the Terms of Service and Privacy Policy to create an account');
-                return;
-            }
-
-            if (password.length < 6) {
-                alert('Password must be at least 6 characters long');
-                return;
-            }
-
-            try {
-                const result = await createUserWithEmailAndPassword(auth, email, password);
-                await updateProfile(result.user, { displayName: name });
-                hideAuthModal();
-            } catch (error) {
-                console.error('Error signing up:', error);
-                if (error.code === 'auth/email-already-in-use') {
-                    alert('This email is already registered. Please sign in instead.');
-                } else if (error.code === 'auth/invalid-email') {
-                    alert('Invalid email address.');
-                } else if (error.code === 'auth/weak-password') {
-                    alert('Password is too weak. Please use a stronger password.');
-                } else {
-                    alert('Sign up failed: ' + error.message);
-                }
-            }
-        }
-
-        async function resetPassword() {
-            const email = document.getElementById('resetEmail').value;
-
-            if (!email) {
-                alert('Please enter your email address');
-                return;
-            }
-
-            try {
-                await sendPasswordResetEmail(auth, email);
-                alert('Password reset email sent! Please check your inbox.');
-                showSignInFormView();
-            } catch (error) {
-                console.error('Error sending reset email:', error);
-                if (error.code === 'auth/user-not-found') {
-                    alert('No account found with this email.');
-                } else if (error.code === 'auth/invalid-email') {
-                    alert('Invalid email address.');
-                } else {
-                    alert('Failed to send reset email: ' + error.message);
-                }
-            }
-        }
-
-        function signOutUser() {
-            signOut(auth)
-                .then(() => {
-                    console.log('User signed out');
-                    showSection('home');
-                })
-                .catch((error) => {
-                    console.error('Error signing out:', error);
-                });
-        }
-
-        // Save Practice Attempt to Firestore
-        async function savePracticeAttempt(subject, score, totalQuestions) {
-            if (!currentUser) return;
-
-            try {
-                const attemptRef = collection(db, 'users', currentUser.uid, 'practiceAttempts');
-                await setDoc(doc(attemptRef), {
-                    subject: subject,
-                    score: score,
-                    totalQuestions: totalQuestions,
-                    percentage: Math.round((score / totalQuestions) * 100),
-                    timestamp: serverTimestamp()
-                });
-            } catch (error) {
-                console.error('Error saving practice attempt:', error);
-            }
-        }
-
-        // Save Exam Attempt to Firestore
-        async function saveExamAttempt(score, subjects) {
-            if (!currentUser) return;
-
-            try {
-                const attemptRef = collection(db, 'users', currentUser.uid, 'examAttempts');
-                await setDoc(doc(attemptRef), {
-                    score: score,
-                    totalScore: 400,
-                    subjects: subjects,
-                    timestamp: serverTimestamp()
-                });
-            } catch (error) {
-                console.error('Error saving exam attempt:', error);
-            }
-        }
-
-        // Load Analytics
-        async function loadAnalytics() {
-            if (!currentUser) {
-                elements.analyticsSignInRequired.classList.remove('hidden');
-                elements.analyticsContent.classList.add('hidden');
-                elements.analyticsEmpty.classList.add('hidden');
-                elements.analyticsLoading.classList.add('hidden');
-                return;
-            }
-
-            elements.analyticsSignInRequired.classList.add('hidden');
-            elements.analyticsLoading.classList.remove('hidden');
-            elements.analyticsContent.classList.add('hidden');
-            elements.analyticsEmpty.classList.add('hidden');
-
-            try {
-                // Fetch exam attempts
-                const attemptsRef = collection(db, 'users', currentUser.uid, 'examAttempts');
-                const q = query(attemptsRef, orderBy('timestamp', 'desc'), limit(10));
-                const querySnapshot = await getDocs(q);
-
-                if (querySnapshot.empty) {
-                    elements.analyticsLoading.classList.add('hidden');
-                    elements.analyticsEmpty.classList.remove('hidden');
-                    return;
-                }
-
-                // Calculate statistics
-                let totalExams = 0;
-                let totalScore = 0;
-                let bestScore = 0;
-                const attempts = [];
-
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    totalExams++;
-                    totalScore += data.score;
-                    if (data.score > bestScore) bestScore = data.score;
-                    attempts.push({
-                        id: doc.id,
-                        ...data
-                    });
-                });
-
-                const averageScore = Math.round(totalScore / totalExams);
-
-                // Update stats
-                document.getElementById('totalExams').textContent = totalExams;
-                document.getElementById('averageScore').textContent = averageScore;
-                document.getElementById('bestScore').textContent = bestScore;
-
-                // Display recent attempts
-                const recentAttemptsContainer = document.getElementById('recentAttempts');
-                recentAttemptsContainer.innerHTML = '';
-
-                attempts.forEach((attempt) => {
-                    const date = attempt.timestamp ? new Date(attempt.timestamp.toDate()).toLocaleDateString('en-NG', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }) : 'Recent';
-
-                    const percentage = Math.round((attempt.score / attempt.totalScore) * 100);
-                    const scoreColor = percentage >= 70 ? 'text-green-600' : percentage >= 50 ? 'text-yellow-600' : 'text-red-600';
-
-                    const attemptHTML = `
-                        <div class="p-6 hover:bg-gray-50 transition-colors">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <h4 class="font-semibold text-gray-900">Mock Exam</h4>
-                                    <p class="text-sm text-gray-500">${date}</p>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-2xl font-bold ${scoreColor}">${attempt.score}/400</p>
-                                    <p class="text-sm text-gray-500">${percentage}%</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    recentAttemptsContainer.innerHTML += attemptHTML;
-                });
-
-                elements.analyticsLoading.classList.add('hidden');
-                elements.analyticsContent.classList.remove('hidden');
-
-            } catch (error) {
-                console.error('Error loading analytics:', error);
-                elements.analyticsLoading.classList.add('hidden');
-                alert('Failed to load analytics. Please try again.');
-            }
-        }
-
-        // Section Navigation
-        function showSection(sectionName) {
-            Object.values(sections).forEach(section => {
-                if (section) section.classList.add('hidden');
-            });
-            if (sections[sectionName]) {
-                sections[sectionName].classList.remove('hidden');
-            }
-
-            // Load analytics when showing that section
-            if (sectionName === 'analytics') {
-                loadAnalytics();
-            }
-        }
-
-        // Practice Mode Functions
-        function selectSubject(subject) {
-            currentSubject = subject;
-            const subjectNames = {
-                'english': 'Use of English',
-                'mathematics': 'Mathematics',
-                'physics': 'Physics',
-                'chemistry': 'Chemistry',
-                'biology': 'Biology',
-                'government': 'Government'
-            };
-            elements.currentSubject.textContent = subjectNames[subject] + ' Practice';
-            elements.subjectSelection.classList.add('hidden');
-            elements.practiceQuestions.classList.remove('hidden');
-            currentQuestion = 1;
-            updatePracticeProgress();
-        }
-
-        function updatePracticeProgress() {
-            const progress = Math.round((currentQuestion / totalQuestions) * 100);
-            elements.currentQuestionNum.textContent = currentQuestion;
-            elements.practiceProgress.textContent = progress + '%';
-            elements.practiceProgressBar.style.width = progress + '%';
-        }
-
-        function submitAnswer() {
-            const selectedAnswer = document.querySelector('input[name="answer"]:checked');
-            if (selectedAnswer) {
-                elements.answerExplanation.classList.remove('hidden');
-            } else {
-                alert('Please select an answer before submitting.');
-            }
-        }
-
-        function nextQuestion() {
-            if (currentQuestion < totalQuestions) {
-                currentQuestion++;
-                updatePracticeProgress();
-                elements.answerExplanation.classList.add('hidden');
-                const radioButtons = document.querySelectorAll('input[name="answer"]');
-                radioButtons.forEach(radio => radio.checked = false);
-            }
-        }
-
-        function previousQuestion() {
-            if (currentQuestion > 1) {
-                currentQuestion--;
-                updatePracticeProgress();
-                elements.answerExplanation.classList.add('hidden');
-            }
-        }
-
-        function startPracticeMode() {
-            window.location.href = 'practice-mode-subjects.html';
-        }
-
-        function startExamMode() {
-            window.location.href = 'exam-payment.html';
-        }
-
-        function startExamTimer() {
-            const timerInterval = setInterval(() => {
-                if (examTimeRemaining <= 0) {
-                    clearInterval(timerInterval);
-                    alert('Time up! Exam submitted automatically.');
-                    return;
-                }
-                examTimeRemaining--;
-                updateTimerDisplay();
-            }, 1000);
-        }
-
-        function updateTimerDisplay() {
-            const hours = Math.floor(examTimeRemaining / 3600);
-            const minutes = Math.floor((examTimeRemaining % 3600) / 60);
-            const seconds = examTimeRemaining % 60;
-            const timeString = String(hours).padStart(2, '0') + ':' + 
-                             String(minutes).padStart(2, '0') + ':' + 
-                             String(seconds).padStart(2, '0');
-            elements.examTimer.textContent = timeString;
-        }
+        // Navigation event handlers
+        const startPracticeMode = () => window.location.href = 'practice-mode-subjects.html';
+        const startExamMode = () => window.location.href = 'exam-payment.html';
 
         // Event Listeners
-        elements.signInBtn.addEventListener('click', showAuthModal);
-        elements.signOutBtn.addEventListener('click', signOutUser);
-        elements.googleSignIn.addEventListener('click', signInWithGoogle);
-        elements.googleSignUpBtn.addEventListener('click', signInWithGoogle);
-        elements.emailSignInBtn.addEventListener('click', signInWithEmail);
-        elements.emailSignUpBtn.addEventListener('click', signUpWithEmail);
-        elements.sendResetEmailBtn.addEventListener('click', resetPassword);
-        elements.closeAuthModal.addEventListener('click', hideAuthModal);
-        elements.showSignUpForm.addEventListener('click', showSignUpFormView);
-        elements.showSignInForm.addEventListener('click', showSignInFormView);
-        elements.forgotPasswordLink.addEventListener('click', showForgotPasswordFormView);
-        elements.backToSignIn.addEventListener('click', showSignInFormView);
-
-        document.getElementById('start-practice').addEventListener('click', startPracticeMode);
-        document.getElementById('take-mock-exam').addEventListener('click', startExamMode);
-        document.getElementById('startPracticeBtn').addEventListener('click', startPracticeMode);
-        document.getElementById('startExamBtn').addEventListener('click', startExamMode);
-        document.getElementById('examSignIn').addEventListener('click', showAuthModal);
-        document.getElementById('analyticsSignIn').addEventListener('click', showAuthModal);
+        document.getElementById('start-practice')?.addEventListener('click', startPracticeMode);
+        document.getElementById('take-mock-exam')?.addEventListener('click', startExamMode);
+        document.getElementById('startPracticeBtn')?.addEventListener('click', startPracticeMode);
+        document.getElementById('startExamBtn')?.addEventListener('click', startExamMode);
         document.getElementById('startFirstExam')?.addEventListener('click', startExamMode);
-
-        document.querySelectorAll('.subject-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const subject = e.currentTarget.dataset.subject;
-                selectSubject(subject);
-            });
-        });
-
-        document.getElementById('submitAnswer').addEventListener('click', submitAnswer);
-        document.getElementById('nextQuestion').addEventListener('click', nextQuestion);
-        document.getElementById('prevQuestion').addEventListener('click', previousQuestion);
-        document.getElementById('exitPractice').addEventListener('click', () => {
-            showSection('dashboard');
-            currentQuestion = 1;
-        });
-
-        elements.authModal.addEventListener('click', (e) => {
-            if (e.target === elements.authModal) {
-                hideAuthModal();
-            }
-        });
 
         // Mobile Menu Toggle
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
@@ -1273,30 +669,19 @@
             });
         }
 
-        // Navigation Links
+        // Hash navigation handlers
         document.querySelectorAll('nav a[href^="#"]').forEach(link => {
             link.addEventListener('click', (e) => {
-                e.preventDefault();
                 const targetSection = e.target.getAttribute('href').substring(1);
                 if (targetSection === 'practice') {
+                    e.preventDefault();
                     startPracticeMode();
                 } else if (targetSection === 'exam') {
+                    e.preventDefault();
                     startExamMode();
-                } else if (targetSection === 'analytics') {
-                    if (currentUser) {
-                        showSection('analytics');
-                    } else {
-                        showAuthModal();
-                    }
-                } else if (sections[targetSection]) {
-                    showSection(targetSection);
                 }
             });
         });
-
-        // Initialize
-        showSection('home');
-        updateTimerDisplay();
     </script>
 </body>
 </html>

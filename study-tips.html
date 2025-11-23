@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="suppress-tailwind-warning.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/styles.css?v=1.0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Tips & Strategies - JambGenius 💯</title>
+    <title>Study Tips & Strategies - JambGenius </title>
     <meta name="description" content="Proven strategies and expert advice to help you study more effectively and achieve excellent JAMB scores.">
     
-    <script src="https://cdn.tailwindcss.com"></script>
+     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="suppress-tailwind-warning.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -27,10 +31,13 @@
             }
         };
     </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="config.js"></script>
+    <script src="content-protection.js"></script>
 </head>
 <body class="bg-gray-50 font-sans">
     <!-- Navigation Header -->
@@ -40,7 +47,7 @@
                 <div class="flex items-center space-x-8">
                     <a href="index.html" class="flex-shrink-0 flex items-center">
                         <i class="fas fa-graduation-cap text-2xl text-primary-600 mr-2"></i>
-                        <span class="text-xl font-bold text-gray-900">JambGenius 💯</span>
+                        <span class="text-xl font-bold text-gray-900">JambGenius </span>
                     </a>
                     <div class="hidden md:flex items-center space-x-8">
                         <a href="index.html" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Home</a>
@@ -52,9 +59,19 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <a href="index.html" class="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium">
-                        Get Started
+                    <a href="profile.html" class="profile-link hidden text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                        <i class="fas fa-user-circle mr-1"></i>Profile
                     </a>
+                    <div id="userSection" class="hidden items-center space-x-3">
+                        <img id="userAvatar" src="" alt="User" class="w-8 h-8 rounded-full">
+                        <span id="userName" class="text-gray-700 font-medium"></span>
+                        <button id="signOutBtn" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                    <button id="authBtn" class="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium">
+                        Sign In
+                    </button>
                 </div>
             </div>
         </div>
@@ -353,7 +370,7 @@
                 <div>
                     <div class="flex items-center mb-4">
                         <i class="fas fa-graduation-cap text-2xl text-primary-500 mr-2"></i>
-                        <span class="text-xl font-bold">JambGenius 💯</span>
+                        <span class="text-xl font-bold">JambGenius </span>
                     </div>
                     <p class="text-gray-400">Nigeria's premier JAMB UTME preparation platform</p>
                 </div>
@@ -392,5 +409,11 @@
             </div>
         </div>
     </footer>
+    
+    <script type="module">
+        import './firebase-init.js';
+        import './auth-state.js';
+        import './auth-modal.js';
+    </script>
 </body>
 </html>

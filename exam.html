@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mock Exam | JambGenius 💯</title>
+    <title>Mock Exam | JambGenius </title>
     <meta name="description" content="Full JAMB mock exam simulation with 180 questions and 2-hour timer">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -33,7 +33,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
+    <script src="supabase-config.js"></script>
     <script src="supabaseClient.js"></script>
+    <script src="content-protection.js"></script>
+    <script src="calculator.js"></script>
+    <script src="anti-cheat.js"></script>
+    <script type="module">
+        import './firebase-init.js';
+        import './auth-state.js';
+        import './auth-modal.js';
+        import './bookmarks.js';
+        import './streak-tracker.js';
+    </script>
 </head>
 <body class="bg-gray-50 font-sans">
     <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
@@ -42,7 +53,7 @@
                 <div class="flex items-center space-x-8">
                     <div class="flex-shrink-0 flex items-center">
                         <i class="fas fa-graduation-cap text-2xl text-primary-600 mr-2"></i>
-                        <span class="text-xl font-bold text-gray-900">JambGenius 💯</span>
+                        <span class="text-xl font-bold text-gray-900">JambGenius </span>
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
@@ -63,8 +74,8 @@
         </div>
     </div>
 
-    <div id="setupAlert" class="hidden min-h-screen flex items-center justify-center p-4">
-        <div class="max-w-2xl w-full bg-yellow-50 border-2 border-yellow-200 rounded-xl p-8">
+    <div id="setupAlert" class="hidden min-h-screen flex items-center justify-center p-2 sm:p-4">
+        <div class="max-w-2xl w-full bg-yellow-50 border-2 border-yellow-200 rounded-xl p-4 sm:p-8">
             <div class="flex items-start space-x-4">
                 <i class="fas fa-exclamation-triangle text-3xl text-yellow-600 mt-1"></i>
                 <div class="flex-1">
@@ -122,6 +133,9 @@
                                     <span class="text-sm font-semibold text-primary-600" id="currentSubject">Use of English</span>
                                     <div class="text-sm text-gray-500">Question <span id="currentQuestionNum">1</span> of <span id="totalQuestions">180</span></div>
                                 </div>
+                                <button id="aiExplainBtn" class="text-gray-400 hover:text-purple-500 transition-colors" title="Get AI explanation">
+                                    <i class="fas fa-lightbulb text-lg"></i>
+                                </button>
                             </div>
                             <h2 class="text-xl font-semibold text-gray-900" id="questionText">Loading question...</h2>
                         </div>
@@ -181,6 +195,9 @@
             </div>
 
             <div class="space-y-3">
+                <button id="downloadPdfBtn" class="w-full bg-green-600 text-white py-4 rounded-lg hover:bg-green-700 transition-colors font-bold text-lg">
+                    <i class="fas fa-download mr-2"></i>Download Result as PDF
+                </button>
                 <button id="newExamBtn" class="w-full bg-primary-600 text-white py-4 rounded-lg hover:bg-primary-700 transition-colors font-bold text-lg">
                     <i class="fas fa-redo mr-2"></i>Take Another Exam
                 </button>
@@ -214,6 +231,7 @@
         let timeRemaining = 7200;
         let timerInterval = null;
         let useMockData = false;
+        let antiCheat = null;
 
         const urlParams = new URLSearchParams(window.location.search);
         const subjectsParam = urlParams.get('subjects');
@@ -223,6 +241,11 @@
         } else {
             selectedSubjects = ['english', 'mathematics', 'physics', 'chemistry'];
         }
+
+        antiCheat = new AntiCheatSystem((violations) => {
+            alert(`Maximum violations reached (${violations.length} violations). Your exam will be submitted automatically.`);
+            submitExam();
+        });
 
         async function initializeExam() {
             const supabaseConfigured = isSupabaseConfigured();
@@ -271,11 +294,14 @@
                 userAnswers = new Array(examQuestions.length).fill(null);
                 
                 document.getElementById('loadingScreen').classList.add('hidden');
-                document.getElementById('examInterface').classList.remove('hidden');
                 
-                initializeUI();
-                renderQuestion();
-                startTimer();
+                showExamRules(() => {
+                    document.getElementById('examInterface').classList.remove('hidden');
+                    initializeUI();
+                    renderQuestion();
+                    startTimer();
+                    antiCheat.startMonitoring();
+                });
             } catch (error) {
                 console.error('Error loading exam questions:', error);
                 alert('Failed to load exam questions. Please try again.');
@@ -414,6 +440,9 @@
 
         function submitExam() {
             clearInterval(timerInterval);
+            if (antiCheat) {
+                antiCheat.stopMonitoring();
+            }
             
             let correctCount = 0;
             const subjectScores = {};
@@ -494,6 +523,213 @@
         document.getElementById('newExamBtn').addEventListener('click', () => {
             window.location.href = 'exam-mode-subjects.html';
         });
+
+        document.getElementById('downloadPdfBtn').addEventListener('click', () => {
+            generatePdfReport();
+        });
+
+        function generatePdfReport() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Get current date and time
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-NG', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            const timeStr = now.toLocaleTimeString('en-NG', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            // Get results data
+            const totalScore = document.getElementById('totalScore').textContent;
+            const percentage = document.getElementById('percentage').textContent;
+            const correctAnswers = document.getElementById('correctAnswers').textContent;
+            const wrongAnswers = document.getElementById('wrongAnswers').textContent;
+            
+            // Calculate subject scores
+            const subjectScores = {};
+            selectedSubjects.forEach(subject => {
+                subjectScores[subject] = { correct: 0, total: 0 };
+            });
+            
+            examQuestions.forEach((question, index) => {
+                const subject = question.subject.toLowerCase();
+                if (!subjectScores[subject]) {
+                    subjectScores[subject] = { correct: 0, total: 0 };
+                }
+                
+                const isCorrect = userAnswers[index] === question.correct_answer;
+                if (isCorrect) {
+                    subjectScores[subject].correct++;
+                }
+                subjectScores[subject].total++;
+            });
+            
+            // Colors
+            const primaryColor = [37, 99, 235];
+            const greenColor = [34, 197, 94];
+            const redColor = [239, 68, 68];
+            const grayColor = [107, 114, 128];
+            
+            // Header with gradient background
+            doc.setFillColor(37, 99, 235);
+            doc.rect(0, 0, 210, 45, 'F');
+            
+            // Logo and Title
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(28);
+            doc.setFont(undefined, 'bold');
+            doc.text('JambGenius', 105, 20, { align: 'center' });
+            
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'normal');
+            doc.text('JAMB Mock Exam Result', 105, 32, { align: 'center' });
+            
+            // Date and Time
+            doc.setFontSize(10);
+            doc.text(dateStr + ' at ' + timeStr, 105, 40, { align: 'center' });
+            
+            // Reset text color
+            doc.setTextColor(0, 0, 0);
+            
+            // Overall Score Section
+            let yPos = 60;
+            
+            // Score box with border
+            doc.setDrawColor(...primaryColor);
+            doc.setLineWidth(0.5);
+            doc.roundedRect(15, yPos, 180, 35, 3, 3);
+            
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text('Overall Performance', 105, yPos + 10, { align: 'center' });
+            
+            doc.setFontSize(32);
+            doc.setTextColor(...primaryColor);
+            doc.text(totalScore, 70, yPos + 27, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.setTextColor(...grayColor);
+            doc.text('Total Score', 70, yPos + 32, { align: 'center' });
+            
+            doc.setFontSize(32);
+            doc.setTextColor(...primaryColor);
+            doc.text(percentage, 140, yPos + 27, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.setTextColor(...grayColor);
+            doc.text('Percentage', 140, yPos + 32, { align: 'center' });
+            
+            // Correct vs Wrong
+            yPos += 45;
+            
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.setFont(undefined, 'bold');
+            doc.text('Answer Summary', 15, yPos);
+            
+            yPos += 8;
+            
+            // Correct box
+            doc.setFillColor(...greenColor);
+            doc.setDrawColor(...greenColor);
+            doc.roundedRect(15, yPos, 85, 20, 2, 2, 'FD');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(10);
+            doc.text('Correct Answers', 57.5, yPos + 8, { align: 'center' });
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            doc.text(correctAnswers, 57.5, yPos + 16, { align: 'center' });
+            
+            // Wrong box
+            doc.setFillColor(...redColor);
+            doc.setDrawColor(...redColor);
+            doc.roundedRect(110, yPos, 85, 20, 2, 2, 'FD');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            doc.text('Wrong Answers', 152.5, yPos + 8, { align: 'center' });
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            doc.text(wrongAnswers, 152.5, yPos + 16, { align: 'center' });
+            
+            // Subject Breakdown
+            yPos += 30;
+            
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('Subject Breakdown', 15, yPos);
+            
+            yPos += 8;
+            
+            // Table headers
+            doc.setFillColor(240, 240, 240);
+            doc.rect(15, yPos, 180, 10, 'F');
+            
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(0, 0, 0);
+            doc.text('Subject', 20, yPos + 7);
+            doc.text('Score', 120, yPos + 7);
+            doc.text('Percentage', 160, yPos + 7);
+            
+            yPos += 10;
+            
+            // Subject rows
+            doc.setFont(undefined, 'normal');
+            Object.entries(subjectScores).forEach(([subject, scores], index) => {
+                const subjectPercentage = Math.round((scores.correct / scores.total) * 100);
+                
+                // Alternating row colors
+                if (index % 2 === 0) {
+                    doc.setFillColor(250, 250, 250);
+                    doc.rect(15, yPos, 180, 10, 'F');
+                }
+                
+                doc.setTextColor(0, 0, 0);
+                doc.text(capitalizeFirst(subject), 20, yPos + 7);
+                doc.text(`${scores.correct}/${scores.total}`, 120, yPos + 7);
+                
+                // Color code percentage
+                if (subjectPercentage >= 70) {
+                    doc.setTextColor(...greenColor);
+                } else if (subjectPercentage >= 50) {
+                    doc.setTextColor(245, 158, 11); // Orange
+                } else {
+                    doc.setTextColor(...redColor);
+                }
+                doc.setFont(undefined, 'bold');
+                doc.text(`${subjectPercentage}%`, 160, yPos + 7);
+                doc.setFont(undefined, 'normal');
+                
+                yPos += 10;
+            });
+            
+            // Footer
+            yPos = 270;
+            doc.setDrawColor(200, 200, 200);
+            doc.line(15, yPos, 195, yPos);
+            
+            yPos += 8;
+            doc.setFontSize(9);
+            doc.setTextColor(...grayColor);
+            doc.setFont(undefined, 'italic');
+            doc.text('Generated by JambGenius - Nigeria\'s Premier JAMB Preparation Platform', 105, yPos, { align: 'center' });
+            doc.text('© 2025 JambGenius. All rights reserved.', 105, yPos + 5, { align: 'center' });
+            
+            // Save the PDF
+            const filename = `JambGenius_Exam_Result_${dateStr.replace(/\s/g, '_')}.pdf`;
+            doc.save(filename);
+        }
+
+        function capitalizeFirst(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
 
         window.addEventListener('beforeunload', (e) => {
             if (timerInterval) {
