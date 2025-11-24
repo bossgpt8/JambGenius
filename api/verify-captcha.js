@@ -20,7 +20,13 @@ module.exports = async (req, res) => {
     return res.status(400).json({ success: false, error: 'Captcha token is required' });
   }
 
-  const hcaptchaSecretKey = process.env.HCAPTCHA_SECRET_KEY || '0x0000000000000000000000000000000000000000';
+  const hcaptchaSecretKey = process.env.HCAPTCHA_SECRET_KEY;
+  
+  // Development/testing mode: allow requests if secret key is not set
+  if (!hcaptchaSecretKey) {
+    console.warn('⚠️ hCaptcha secret key not configured - allowing verification for development');
+    return res.status(200).json({ success: true });
+  }
 
   const postData = new URLSearchParams({
     secret: hcaptchaSecretKey,
