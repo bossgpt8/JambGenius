@@ -1,7 +1,3 @@
-// Import required modules
-import { bookmarkManager } from './bookmarks.js';
-import { streakTracker } from './streak-tracker.js';
-
 // Mock questions for fallback
 const MOCK_QUESTIONS = {
     english: [
