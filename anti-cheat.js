@@ -156,9 +156,14 @@ class AntiCheatSystem {
         document.body.appendChild(warningModal);
 
         if (remaining > 0) {
-            document.getElementById('continueExamBtn').addEventListener('click', () => {
-                warningModal.remove();
-            });
+            const continueBtn = document.getElementById('continueExamBtn');
+            if (continueBtn) {
+                continueBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    warningModal.remove();
+                });
+            }
         } else {
             setTimeout(() => {
                 if (this.onViolationLimit) {

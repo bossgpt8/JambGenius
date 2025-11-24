@@ -345,10 +345,13 @@
 
         function renderQuestion() {
             const question = examQuestions[currentQuestionIndex];
+            const currentSubject = question.subject.toLowerCase();
+            const subjectQuestions = examQuestions.filter(q => q.subject.toLowerCase() === currentSubject);
+            const questionIndexInSubject = subjectQuestions.findIndex((q, idx) => examQuestions.indexOf(q) === currentQuestionIndex) + 1;
             
             document.getElementById('currentSubject').textContent = capitalizeFirst(question.subject);
-            document.getElementById('currentQuestionNum').textContent = currentQuestionIndex + 1;
-            document.getElementById('totalQuestions').textContent = examQuestions.length;
+            document.getElementById('currentQuestionNum').textContent = questionIndexInSubject;
+            document.getElementById('totalQuestions').textContent = subjectQuestions.length;
             document.getElementById('questionText').textContent = question.question;
             
             const optionsContainer = document.getElementById('optionsContainer');
