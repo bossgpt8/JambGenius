@@ -371,11 +371,23 @@ export function initializeAuthModal() {
     }
     
     if (elements.emailSignInBtn) {
-        elements.emailSignInBtn.addEventListener('click', signInWithEmail);
+        elements.emailSignInBtn.addEventListener('click', async () => {
+            elements.emailSignInBtn.disabled = true;
+            elements.emailSignInBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Signing In...';
+            await signInWithEmail();
+            elements.emailSignInBtn.disabled = false;
+            elements.emailSignInBtn.textContent = 'Sign In';
+        });
     }
     
     if (elements.emailSignUpBtn) {
-        elements.emailSignUpBtn.addEventListener('click', signUpWithEmail);
+        elements.emailSignUpBtn.addEventListener('click', async () => {
+            elements.emailSignUpBtn.disabled = true;
+            elements.emailSignUpBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating Account...';
+            await signUpWithEmail();
+            elements.emailSignUpBtn.disabled = false;
+            elements.emailSignUpBtn.textContent = 'Sign Up';
+        });
     }
     
     if (elements.sendResetEmailBtn) {
