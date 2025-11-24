@@ -34,6 +34,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://js.paystack.co/v1/inline.js"></script>
     <script src="config.js"></script>
+    <script src="custom-modal.js"></script>
     <script src="content-protection.js"></script>
     <script src="modal-component.js"></script>
     <script type="module">
@@ -566,13 +567,12 @@
                                     }, { merge: true });
                                 }
 
+                                loadingModal.classList.add('hidden');
                                 await customModal.success(
-                                    `Payment successful! You now have ${selectedCredits} exam credit${selectedCredits > 1 ? 's' : ''}. Redirecting to exam selection...`,
+                                    `Payment successful! You now have ${selectedCredits} exam credit${selectedCredits > 1 ? 's' : ''}.\n\nRedirecting to exam selection...`,
                                     'Payment Successful!'
                                 );
-                                setTimeout(() => {
-                                    window.location.href = 'exam-mode-subjects.html?payment=success';
-                                }, 1500);
+                                window.location.href = 'exam-mode-subjects.html?payment=success';
                             } else {
                                 const errorMessage = result.error || 'Payment verification failed';
                                 throw new Error(errorMessage);
@@ -581,17 +581,17 @@
                             console.error('Payment verification error:', error);
                             const errorMsg = error.message || 'Payment verification failed';
                             
+                            loadingModal.classList.add('hidden');
                             await customModal.error(
                                 `${errorMsg}\n\nReference: ${response.reference}\n\nPlease contact support if you were charged.`,
                                 'Payment Error'
                             );
-                        } finally {
-                            loadingModal.classList.add('hidden');
                         }
                     })();
                 },
                 onClose: function() {
-                    customModal.alert('Payment was cancelled', 'Payment Cancelled', 'warning');
+                    loadingModal.classList.add('hidden');
+                    customModal.warning('Your payment was cancelled. You can try again anytime.', 'Payment Cancelled');
                 }
             });
 

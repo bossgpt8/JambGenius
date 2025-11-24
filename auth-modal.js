@@ -164,7 +164,7 @@ async function signInWithGoogle() {
         hideAuthModal();
     } catch (error) {
         console.error('Error signing in:', error);
-        alert('Sign In Error: Sign in failed. Please try again.');
+        throw new Error('Sign in failed. Please check your credentials and try again.');
     }
 }
 
@@ -173,25 +173,25 @@ async function signInWithEmail() {
     const password = document.getElementById('signInPassword').value;
 
     if (!email || !password) {
-        alert('Please enter both email and password');
+        throw new Error('Please enter both email and password');
         return;
     }
 
     if (typeof hcaptcha === 'undefined' || !window.signInHcaptchaId) {
-        alert('Please Wait: Verification is still loading. Please wait a moment and try again.');
+        throw new Error('Verification still loading. Please wait a moment and try again.');
         return;
     }
 
     const hcaptchaResponse = hcaptcha.getResponse(window.signInHcaptchaId);
     if (!hcaptchaResponse) {
-        alert('Please complete the verification');
+        throw new Error('Please complete the hCaptcha verification');
         return;
     }
 
     try {
         const verifyResult = await verifyCaptcha(hcaptchaResponse);
         if (!verifyResult.success) {
-            alert('Verification Error: Verification failed. Please try again.');
+            throw new Error(' Verification failed. Please try again.');
             hcaptcha.reset(window.signInHcaptchaId);
             return;
         }
@@ -202,11 +202,11 @@ async function signInWithEmail() {
         console.error('Error signing in:', error);
         hcaptcha.reset(window.signInHcaptchaId);
         if (error.code === 'auth/user-not-found') {
-            alert('Account Not Found: No account found with this email. Please sign up first.');
+            throw new Error(' No account found with this email. Please sign up first.');
         } else if (error.code === 'auth/wrong-password') {
-            alert('Incorrect Password: Incorrect password. Please try again.');
+            throw new Error(' Incorrect password. Please try again.');
         } else if (error.code === 'auth/invalid-email') {
-            alert('Invalid Email: Invalid email address.');
+            throw new Error(' Invalid email address.');
         } else {
             alert('Sign In Error: Sign in failed - ' + error.message);
         }
@@ -220,42 +220,42 @@ async function signUpWithEmail() {
     const agreeToTerms = document.getElementById('agreeToTerms');
 
     if (!name || !email || !password) {
-        alert('Please fill in all fields');
+        throw new Error('Please fill in all required fields');
         return;
     }
 
     // Validate password
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,})/;
     if (!passwordRegex.test(password)) {
-        alert('Weak Password: Password must be at least 8 characters with 1 uppercase, 1 lowercase, and 1 special character');
+        throw new Error('Password must be at least Password must be at least 8 characters with 1 uppercase, 1 lowercase, and 1 special character');
         return;
     }
 
     if (agreeToTerms && !agreeToTerms.checked) {
-        alert('Terms Required: You must agree to the Terms of Service and Privacy Policy to create an account');
+        throw new Error('You must agree to Terms You must agree to the Terms of Service and Privacy Policy to create an account');
         return;
     }
 
     if (password.length < 6) {
-        alert('Weak Password: Password must be at least 6 characters long');
+        throw new Error('Password must be at least Password must be at least 6 characters long');
         return;
     }
 
     if (typeof hcaptcha === 'undefined' || !window.signUpHcaptchaId) {
-        alert('Please Wait: Verification is still loading. Please wait a moment and try again.');
+        throw new Error('Verification still loading. Please wait a moment and try again.');
         return;
     }
 
     const hcaptchaResponse = hcaptcha.getResponse(window.signUpHcaptchaId);
     if (!hcaptchaResponse) {
-        alert('Please complete the verification');
+        throw new Error('Please complete the hCaptcha verification');
         return;
     }
 
     try {
         const verifyResult = await verifyCaptcha(hcaptchaResponse);
         if (!verifyResult.success) {
-            alert('Verification Error: Verification failed. Please try again.');
+            throw new Error(' Verification failed. Please try again.');
             hcaptcha.reset(window.signUpHcaptchaId);
             return;
         }
@@ -268,13 +268,13 @@ async function signUpWithEmail() {
         console.error('Error signing up:', error);
         hcaptcha.reset(window.signUpHcaptchaId);
         if (error.code === 'auth/email-already-in-use') {
-            alert('Email Already In Use: This email is already registered. Please sign in instead.');
+            throw new Error('This email is already registered This email is already registered. Please sign in instead.');
         } else if (error.code === 'auth/invalid-email') {
-            alert('Invalid Email: Invalid email address.');
+            throw new Error(' Invalid email address.');
         } else if (error.code === 'auth/weak-password') {
-            alert('Weak Password: Password is too weak. Please use a stronger password.');
+            throw new Error('Password must be at least Password is too weak. Please use a stronger password.');
         } else {
-            alert('Sign Up Error: Sign up failed - ' + error.message);
+            throw new Error(' Sign up failed - ' + error.message);
         }
     }
 }
@@ -294,9 +294,9 @@ async function resetPassword() {
     } catch (error) {
         console.error('Error sending reset email:', error);
         if (error.code === 'auth/user-not-found') {
-            alert('Account Not Found: No account found with this email.');
+            throw new Error(' No account found with this email.');
         } else if (error.code === 'auth/invalid-email') {
-            alert('Invalid Email: Invalid email address.');
+            throw new Error(' Invalid email address.');
         } else {
             alert('Error: Failed to send reset email - ' + error.message);
         }
@@ -374,9 +374,13 @@ export function initializeAuthModal() {
         elements.emailSignInBtn.addEventListener('click', async () => {
             elements.emailSignInBtn.disabled = true;
             elements.emailSignInBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Signing In...';
-            await signInWithEmail();
+            try {
+                await signInWithEmail();
+            } catch (error) {
+                await customModal.error(error.message || 'Sign in failed. Please try again.', 'Sign In Error');
+            }
             elements.emailSignInBtn.disabled = false;
-            elements.emailSignInBtn.textContent = 'Sign In';
+            elements.emailSignInBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Sign In';
         });
     }
     
@@ -384,9 +388,13 @@ export function initializeAuthModal() {
         elements.emailSignUpBtn.addEventListener('click', async () => {
             elements.emailSignUpBtn.disabled = true;
             elements.emailSignUpBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating Account...';
-            await signUpWithEmail();
+            try {
+                await signUpWithEmail();
+            } catch (error) {
+                await customModal.error(error.message || 'Sign up failed. Please try again.', 'Sign Up Error');
+            }
             elements.emailSignUpBtn.disabled = false;
-            elements.emailSignUpBtn.textContent = 'Sign Up';
+            elements.emailSignUpBtn.innerHTML = '<i class="fas fa-user-plus mr-2"></i>Sign Up';
         });
     }
     
