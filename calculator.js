@@ -88,7 +88,8 @@ class Calculator {
                     position: fixed;
                     bottom: 20px;
                     right: 20px;
-                    width: 320px;
+                    width: 280px;
+                    max-height: 50vh;
                     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                     border-radius: 16px;
                     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
@@ -96,77 +97,94 @@ class Calculator {
                     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
                     user-select: none;
                     overflow: hidden;
+                    display: flex;
+                    flex-direction: column;
                 }
 
                 .calculator-header {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    padding: 12px 16px;
+                    padding: 10px 14px;
                     background: rgba(255,255,255,0.1);
                     backdrop-filter: blur(10px);
                     cursor: move;
+                    flex-shrink: 0;
                 }
 
                 .calculator-title {
                     color: white;
                     font-weight: 600;
-                    font-size: 14px;
+                    font-size: 13px;
                 }
 
                 .calculator-controls {
                     display: flex;
-                    gap: 8px;
+                    gap: 4px;
                 }
 
                 .calc-minimize, .calc-close {
-                    background: rgba(255,255,255,0.2);
+                    background: rgba(255,255,255,0.25);
                     border: none;
                     color: white;
-                    width: 24px;
-                    height: 24px;
-                    border-radius: 50%;
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 6px;
                     cursor: pointer;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 12px;
+                    font-size: 14px;
                     transition: all 0.2s;
+                    font-weight: bold;
                 }
 
                 .calc-minimize:hover, .calc-close:hover {
-                    background: rgba(255,255,255,0.3);
-                    transform: scale(1.1);
+                    background: rgba(255,255,255,0.4);
+                    transform: scale(1.05);
+                }
+
+                .calc-close {
+                    background: rgba(239, 68, 68, 0.3);
+                }
+
+                .calc-close:hover {
+                    background: rgba(239, 68, 68, 0.5);
                 }
 
                 .calculator-body {
-                    padding: 16px;
+                    padding: 12px;
                     background: white;
+                    flex: 1;
+                    overflow-y: auto;
+                    display: flex;
+                    flex-direction: column;
                 }
 
                 .calculator-display {
                     background: #f8f9fa;
-                    border-radius: 12px;
-                    padding: 16px;
-                    margin-bottom: 16px;
-                    min-height: 80px;
+                    border-radius: 10px;
+                    padding: 12px;
+                    margin-bottom: 12px;
+                    min-height: 50px;
                     display: flex;
                     flex-direction: column;
                     justify-content: flex-end;
+                    flex-shrink: 0;
                 }
 
                 .display-history {
-                    font-size: 12px;
+                    font-size: 10px;
                     color: #6c757d;
-                    min-height: 18px;
-                    margin-bottom: 8px;
+                    min-height: 14px;
+                    margin-bottom: 4px;
                     text-align: right;
                 }
 
                 .display-current {
                     background: transparent;
                     border: none;
-                    font-size: 32px;
+                    font-size: 24px;
                     font-weight: 600;
                     color: #212529;
                     text-align: right;
@@ -177,18 +195,19 @@ class Calculator {
                 .calculator-buttons {
                     display: grid;
                     grid-template-columns: repeat(4, 1fr);
-                    gap: 8px;
+                    gap: 6px;
                 }
 
                 .calc-btn {
                     border: none;
-                    border-radius: 8px;
-                    font-size: 18px;
+                    border-radius: 7px;
+                    font-size: 13px;
                     font-weight: 500;
-                    padding: 16px;
+                    padding: 10px 4px;
                     cursor: pointer;
                     transition: all 0.2s;
                     outline: none;
+                    min-height: 32px;
                 }
 
                 .calc-btn:active {
@@ -284,6 +303,7 @@ class Calculator {
                 @media (max-width: 768px) {
                     .calculator-container {
                         width: calc(100vw - 32px);
+                        max-height: 45vh;
                         bottom: 16px;
                         right: 16px;
                         left: 16px;
@@ -293,6 +313,18 @@ class Calculator {
                         width: 56px;
                         height: 56px;
                         font-size: 22px;
+                        bottom: 16px;
+                        right: 16px;
+                    }
+
+                    .calc-btn {
+                        font-size: 12px;
+                        padding: 8px 2px;
+                        min-height: 28px;
+                    }
+
+                    .display-current {
+                        font-size: 20px;
                     }
                 }
             </style>
