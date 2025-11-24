@@ -379,8 +379,14 @@
         
         subjectCards.forEach(card => {
             card.addEventListener('click', () => {
+                card.style.opacity = '0.7';
+                card.style.pointerEvents = 'none';
+                card.innerHTML = `<div class="text-center"><div class="animate-spin rounded-full h-8 w-8 border-b-4 border-primary-500 mx-auto"></div><p class="text-gray-600 mt-2">Loading...</p></div>`;
+                
                 const subject = card.dataset.subject;
-                window.location.href = `practice-enhanced.html?subject=${subject}`;
+                setTimeout(() => {
+                    window.location.href = `practice-enhanced.html?subject=${subject}`;
+                }, 500);
             });
         });
     </script>
