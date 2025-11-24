@@ -570,7 +570,9 @@
                                     `Payment successful! You now have ${selectedCredits} exam credit${selectedCredits > 1 ? 's' : ''}. Redirecting to exam selection...`,
                                     'Payment Successful!'
                                 );
-                                window.location.href = 'exam-mode-subjects.html?payment=success';
+                                setTimeout(() => {
+                                    window.location.href = 'exam-mode-subjects.html?payment=success';
+                                }, 1500);
                             } else {
                                 const errorMessage = result.error || 'Payment verification failed';
                                 throw new Error(errorMessage);
