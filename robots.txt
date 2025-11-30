@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /exam.html
+Allow: /practice.html
+Allow: /analytics.html
+Allow: /daily-challenge.html
+Disallow: /.env
+Disallow: /node_modules/
+Disallow: /api/
+Disallow: /admin/
+
+Sitemap: https://jambgenius.vercel.app/sitemap.xml
+
+# Google bot specific
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Bing bot specific
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1

@@ -3,7 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JAMB Mock System - Nigeria's Premier Exam Preparation Platform</title>
+    <title>JambGenius - JAMB Exam Preparation | Mock Exams & Practice Questions</title>
+    <meta name="description" content="JambGenius is Nigeria's leading JAMB exam preparation platform with full mock exams, practice questions, performance analytics, and study materials to help you ace your JAMB UTME examination.">
+    <meta name="keywords" content="JAMB, UTME, exam preparation, mock exam, Nigeria, study materials, practice questions, JambGenius">
+    <meta name="author" content="JambGenius">
+    <meta property="og:title" content="JambGenius - JAMB Exam Preparation Platform">
+    <meta property="og:description" content="Master JAMB UTME with our comprehensive mock exams, practice questions, and study resources. Join thousands of successful students.">
+    <meta property="og:image" content="https://jamb-genius.vercel.app/logo.png">
+    <meta property="og:url" content="https://jambg-enius.vercel.app/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="JambGenius - JAMB Exam Preparation">
+    <meta name="twitter:description" content="JAMB mock exams and practice questions for successful UTME preparation.">
+    <link rel="canonical" href="https://jamb-genius.vercel.app/">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="suppress-tailwind-warning.js"></script>
     <script>
@@ -34,8 +47,18 @@
     <script src="config.js"></script>
     <script src="custom-modal.js"></script>
     <script src="content-protection.js"></script>
+    <script src="offline-manager.js"></script>
+    <script src="app-detection.js"></script>
+    <script src="footer-hide.js"></script>
+    <script src="notification-manager.js"></script>
 </head>
 <body class="bg-gray-50 font-sans">
+    <!-- Offline Indicator -->
+    <div id="offline-indicator" class="hidden fixed top-0 left-0 right-0 bg-amber-500 text-white px-4 py-2 flex items-center justify-center space-x-2 z-[60]" style="display: none;">
+        <i class="fas fa-wifi-off"></i>
+        <span>📵 Offline Mode - Changes will sync when online</span>
+    </div>
+
     <!-- Navigation Header -->
     <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -90,6 +113,23 @@
                 <a href="daily-challenge.html" class="block text-orange-600 hover:text-orange-700 font-bold py-2 bg-orange-50 rounded-lg px-3">
                     <i class="fas fa-trophy mr-2"></i>🔥 Daily Challenge
                 </a>
+                <a href="notifications.html" class="block text-gray-700 hover:text-primary-600 font-medium py-2">
+                    <i class="fas fa-bell mr-2"></i>Notifications
+                </a>
+                <hr class="my-2 border-gray-200">
+                <a href="help-center.html" class="block text-gray-700 hover:text-primary-600 font-medium py-2">
+                    <i class="fas fa-question-circle mr-2"></i>FAQ
+                </a>
+                <a href="help-center.html" class="block text-gray-700 hover:text-primary-600 font-medium py-2">
+                    <i class="fas fa-info-circle mr-2"></i>About Us
+                </a>
+                <a href="contact-us.html" class="block text-gray-700 hover:text-primary-600 font-medium py-2">
+                    <i class="fas fa-envelope mr-2"></i>Contact
+                </a>
+                <hr class="my-2 border-gray-200">
+                <button onclick="appDetector.downloadApp()" class="w-full block bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold py-2 px-3 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all text-center">
+                    <i class="fas fa-download mr-2"></i>Get App on GitHub
+                </button>
                 <a href="#exam" class="block bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all font-bold text-center">
                     <i class="fas fa-trophy mr-2"></i>Take Mock Exam
                 </a>
@@ -109,12 +149,18 @@
                         Practice with authentic questions, take timed exams, and track your progress. Join thousands of students achieving their university dreams.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4">
-                      <button id="start-practice" class="bg-white border-2 border-primary-600 text-primary-600 px-8 py-4 rounded-lg hover:bg-primary-50 transition-colors font-semibold text-lg">
-                        <i class="fas fa-book-open mr-2"></i>Start Free Practice
+                      <button id="start-practice" class="bg-white border-2 border-primary-600 text-primary-600 px-8 py-4 rounded-lg hover:bg-primary-50 transition-colors font-semibold text-lg relative">
+                        <span class="loading-spinner hidden absolute inset-0 flex items-center justify-center">
+                          <span class="animate-spin inline-block w-5 h-5 border-2 border-primary-600 border-t-transparent rounded-full"></span>
+                        </span>
+                        <span class="button-text"><i class="fas fa-book-open mr-2"></i>Start Free Practice</span>
                       </button>
                       <button id="take-mock-exam" class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-4 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all font-bold text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 relative overflow-hidden">
+                        <span class="loading-spinner hidden absolute inset-0 flex items-center justify-center">
+                          <span class="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full"></span>
+                        </span>
                         <span class="absolute top-0 right-0 bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded-bl-lg">₦1,000</span>
-                        <i class="fas fa-trophy mr-2"></i>Take Mock Exam
+                        <span class="button-text"><i class="fas fa-trophy mr-2"></i>Take Mock Exam</span>
                       </button>
                     </div>
                 </div>
@@ -173,8 +219,11 @@
                             No time pressure
                         </li>
                     </ul>
-                    <button id="startPracticeBtn" class="w-full bg-green-500 text-white py-3 rounded-xl hover:bg-green-600 transition-colors font-semibold">
-                        Start Practice
+                    <button id="startPracticeBtn" class="w-full bg-green-500 text-white py-3 rounded-xl hover:bg-green-600 transition-colors font-semibold relative">
+                        <span class="loading-spinner hidden absolute inset-0 flex items-center justify-center">
+                          <span class="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full"></span>
+                        </span>
+                        <span class="button-text">Start Practice</span>
                     </button>
                 </div>
 
@@ -214,8 +263,11 @@
                             Detailed score report
                         </li>
                     </ul>
-                    <button id="startExamBtn" class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-4 rounded-xl hover:from-orange-600 hover:to-red-600 transition-all font-bold shadow-lg hover:shadow-xl text-lg">
-                        <i class="fas fa-rocket mr-2"></i>Unlock Mock Exam - ₦1,000
+                    <button id="startExamBtn" class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-4 rounded-xl hover:from-orange-600 hover:to-red-600 transition-all font-bold shadow-lg hover:shadow-xl text-lg relative">
+                        <span class="loading-spinner hidden absolute inset-0 flex items-center justify-center">
+                          <span class="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full"></span>
+                        </span>
+                        <span class="button-text"><i class="fas fa-rocket mr-2"></i>Unlock Mock Exam - ₦1,000</span>
                     </button>
                 </div>
             </div>
@@ -422,79 +474,6 @@
         </div>
     </section>
 
-    <!-- Performance Analytics -->
-    <section id="analytics" class="py-16 bg-white">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">Your Performance Analytics</h2>
-                <p class="text-lg text-gray-600">Track your progress and identify areas for improvement</p>
-            </div>
-
-            <!-- Loading State -->
-            <div id="analyticsLoading" class="hidden text-center py-12">
-                <i class="fas fa-spinner fa-spin text-6xl text-primary-500 mb-6"></i>
-                <p class="text-gray-600">Loading your analytics...</p>
-            </div>
-
-            <!-- Analytics Content -->
-            <div id="analyticsContent" class="hidden">
-                <!-- Stats Overview -->
-                <div class="grid md:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6">
-                        <div class="flex items-center justify-between mb-2">
-                            <h3 class="text-gray-700 font-medium">Total Exams</h3>
-                            <i class="fas fa-file-alt text-blue-600 text-2xl"></i>
-                        </div>
-                        <p class="text-3xl font-bold text-gray-900" id="totalExams">0</p>
-                    </div>
-                    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6">
-                        <div class="flex items-center justify-between mb-2">
-                            <h3 class="text-gray-700 font-medium">Average Score</h3>
-                            <i class="fas fa-chart-line text-green-600 text-2xl"></i>
-                        </div>
-                        <p class="text-3xl font-bold text-gray-900" id="averageScore">0</p>
-                    </div>
-                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6">
-                        <div class="flex items-center justify-between mb-2">
-                            <h3 class="text-gray-700 font-medium">Best Score</h3>
-                            <i class="fas fa-trophy text-purple-600 text-2xl"></i>
-                        </div>
-                        <p class="text-3xl font-bold text-gray-900" id="bestScore">0</p>
-                    </div>
-                </div>
-
-                <!-- Recent Attempts -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="p-6 border-b border-gray-200">
-                        <h3 class="text-xl font-bold text-gray-900">Recent Attempts</h3>
-                    </div>
-                    <div id="recentAttempts" class="divide-y divide-gray-200">
-                        <!-- Attempts will be loaded here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Empty State -->
-            <div id="analyticsEmpty" class="hidden text-center py-12">
-                <i class="fas fa-chart-line text-6xl text-gray-300 mb-6"></i>
-                <h3 class="text-2xl font-bold text-gray-900 mb-4">No Exam History Yet</h3>
-                <p class="text-gray-600 mb-8">Take your first exam to see your performance analytics here.</p>
-                <button id="startFirstExam" class="bg-primary-600 text-white px-8 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold">
-                    Take Your First Exam
-                </button>
-            </div>
-
-            <!-- Sign In Required -->
-            <div id="analyticsSignInRequired" class="hidden text-center py-12">
-                <i class="fas fa-chart-line text-6xl text-primary-500 mb-6"></i>
-                <h3 class="text-2xl font-bold text-gray-900 mb-4">Sign In to View Analytics</h3>
-                <p class="text-gray-600 mb-8">Track your performance, view detailed statistics, and monitor your progress over time.</p>
-                <button id="analyticsSignIn" class="bg-primary-600 text-white px-8 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold">
-                    Sign In
-                </button>
-            </div>
-        </div>
-    </section>
 
     <!-- Community Chat Section -->
     <section class="py-16 bg-gradient-to-r from-blue-600 to-purple-600">
@@ -590,7 +569,7 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-12">
+    <footer class="bg-white md:bg-gray-900 text-gray-900 md:text-white py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-4 gap-8">
                 <div>
@@ -598,41 +577,41 @@
                         <i class="fas fa-graduation-cap text-2xl text-primary-500 mr-2"></i>
                         <span class="text-xl font-bold">JambGenius </span>
                     </div>
-                    <p class="text-gray-400">Nigeria's premier JAMB UTME preparation platform</p>
+                    <p class="text-gray-600 md:text-gray-400">Nigeria's premier JAMB UTME preparation platform</p>
                 </div>
                 <div>
                     <h4 class="font-semibold mb-4">Quick Links</h4>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="#home" class="hover:text-white">Home</a></li>
-                        <li><a href="#practice" class="hover:text-white">Practice</a></li>
-                        <li><a href="#exam" class="hover:text-white">Exam Mode</a></li>
-                        <li><a href="#analytics" class="hover:text-white">Analytics</a></li>
+                    <ul class="space-y-2 text-gray-600 md:text-gray-400">
+                        <li><a href="#home" class="hover:text-gray-900 md:hover:text-white">Home</a></li>
+                        <li><a href="#practice" class="hover:text-gray-900 md:hover:text-white">Practice</a></li>
+                        <li><a href="#exam" class="hover:text-gray-900 md:hover:text-white">Exam Mode</a></li>
+                        <li><a href="#analytics" class="hover:text-gray-900 md:hover:text-white">Analytics</a></li>
                     </ul>
                 </div>
                 <div>
                     <h4 class="font-semibold mb-4">Resources</h4>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="jamb-syllabus.html" class="hover:text-white">JAMB Syllabus</a></li>
-                        <li><a href="study-tips.html" class="hover:text-white">Study Tips</a></li>
-                        <li><a href="help-center.html" class="hover:text-white">Help Center</a></li>
+                    <ul class="space-y-2 text-gray-600 md:text-gray-400">
+                        <li><a href="jamb-syllabus.html" class="hover:text-gray-900 md:hover:text-white">JAMB Syllabus</a></li>
+                        <li><a href="study-tips.html" class="hover:text-gray-900 md:hover:text-white">Study Tips</a></li>
+                        <li><a href="help-center.html" class="hover:text-gray-900 md:hover:text-white">Help Center</a></li>
                     </ul>
                 </div>
                 <div>
                     <h4 class="font-semibold mb-4">Contact</h4>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="contact-us.html" class="hover:text-white">Contact Us</a></li>
-                        <li><a href="#" class="hover:text-white">Support</a></li>
+                    <ul class="space-y-2 text-gray-600 md:text-gray-400">
+                        <li><a href="contact-us.html" class="hover:text-gray-900 md:hover:text-white">Contact Us</a></li>
+                        <li><a href="#" class="hover:text-gray-900 md:hover:text-white">Support</a></li>
                     </ul>
                 </div>
             </div>
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center">
+            <div class="border-t border-gray-200 md:border-gray-800 mt-8 pt-8 text-center">
                 <div class="mb-4">
-                    <a href="https://whatsapp.com/channel/placeholder" target="_blank" class="inline-flex items-center text-green-400 hover:text-green-300 font-medium text-lg transition-colors">
+                    <a href="https://whatsapp.com/channel/placeholder" target="_blank" class="inline-flex items-center text-green-600 md:text-green-400 hover:text-green-700 md:hover:text-green-300 font-medium text-lg transition-colors">
                         <i class="fab fa-whatsapp mr-2 text-2xl"></i>
                         Join our WhatsApp channel for more info
                     </a>
                 </div>
-                <p class="text-gray-400">&copy; 2025 JambGenius. All rights reserved.</p>
+                <p class="text-gray-600 md:text-gray-400">&copy; 2025 JambGenius. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -642,6 +621,10 @@
         import './firebase-init.js';
         import './auth-state.js';
         import { showAuthModal } from './auth-modal.js';
+        import { initButtonLoaders } from './button-loader.js';
+
+        // Initialize button loaders for all navigation buttons
+        document.addEventListener('DOMContentLoaded', initButtonLoaders);
 
         // Navigation event handlers
         const startPracticeMode = () => window.location.href = 'practice-mode-subjects.html';

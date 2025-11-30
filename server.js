@@ -212,6 +212,80 @@ app.post('/api/verify-payment', async (req, res) => {
   paystackRequest.end();
 });
 
+// Download APK from GitHub releases
+// Usage: /download/v1.0.0/JambGenius.apk
+app.get('/download/:version/:filename', (req, res) => {
+  try {
+    const { version, filename } = req.params;
+    
+    // Build GitHub releases download URL
+    const githubUrl = `https://github.com/bossgpt8/JambGeniusWebWrapper/releases/download/${version}/${filename}`;
+    
+    console.log(`📥 Downloading from GitHub: ${githubUrl}`);
+    
+    // Fetch the file from GitHub releases
+    https.get(githubUrl, (githubRes) => {
+      // Check if file exists
+      if (githubRes.statusCode === 404) {
+        console.error(`❌ File not found on GitHub: ${githubUrl}`);
+        return res.status(404).json({ error: 'App not found. Please check the release version.' });
+      }
+      
+      if (githubRes.statusCode !== 200) {
+        console.error(`❌ GitHub error: ${githubRes.statusCode}`);
+        return res.status(500).json({ error: 'Failed to download from GitHub' });
+      }
+      
+      // Set download headers
+      res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      
+      // Copy headers from GitHub response
+      if (githubRes.headers['content-length']) {
+        res.setHeader('Content-Length', githubRes.headers['content-length']);
+      }
+      
+      // Pipe the file directly to the user
+      githubRes.pipe(res);
+      
+      githubRes.on('end', () => {
+        console.log(`✅ APK download completed: ${filename}`);
+      });
+      
+    }).on('error', (error) => {
+      console.error('❌ GitHub download error:', error);
+      res.status(500).json({ error: 'Failed to download from GitHub' });
+    });
+    
+  } catch (error) {
+    console.error('Download error:', error);
+    res.status(500).json({ error: 'Failed to process download' });
+  }
+});
+
+// Fallback: Direct download from server if GitHub not available
+app.get('/download/app.apk', (req, res) => {
+  try {
+    const apkPath = path.join(__dirname, 'downloads', 'app.apk');
+    
+    res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+    res.setHeader('Content-Disposition', 'attachment; filename="JambGenius.apk"');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    
+    res.download(apkPath, 'JambGenius.apk', (err) => {
+      if (err) {
+        console.log('APK download started successfully');
+      }
+    });
+  } catch (error) {
+    console.error('Download error:', error);
+    res.status(500).json({ error: 'Failed to download app' });
+  }
+});
+
 // SPA Fallback Route - Serve index.html for all non-API requests
 // This allows client-side routing to work properly
 app.get('*', (req, res) => {

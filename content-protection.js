@@ -244,16 +244,53 @@
     // Check for DevTools periodically
     setInterval(detectDevTools, 1000);
     
-    // Disable Print Screen (doesn't work on all browsers but worth trying)
-    document.addEventListener('keyup', function(e) {
-        if (e.key === 'PrintScreen') {
+    // Disable Print Screen and screenshot detection
+    document.addEventListener('keydown', function(e) {
+        // Block Print Screen key
+        if (e.key === 'PrintScreen' || e.keyCode === 44) {
+            e.preventDefault();
             navigator.clipboard.writeText('');
-            showProtectionAlert('Screenshots are discouraged');
+            showProtectionAlert('📸 Screenshots are disabled');
+            return false;
         }
     });
+
+    // Detect and block screenshots on mobile (Android/iOS)
+    if (navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+        // Block volume down + power (Android screenshot)
+        let volumeDownCount = 0;
+        document.addEventListener('keydown', function(e) {
+            // Volume down key (varies by device)
+            if (e.keyCode === 177 || e.keyCode === 24) {
+                volumeDownCount++;
+                if (volumeDownCount > 2) {
+                    showProtectionAlert('📸 Screenshots are blocked');
+                    volumeDownCount = 0;
+                }
+            }
+        });
+    }
+
+    // Detect if screenshot was taken (via visibility changes)
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'hidden') {
+            console.log('Screenshot or app minimize detected');
+            showProtectionAlert('📸 Content is protected');
+        }
+    });
+
+    // Block certain Android intents that trigger screenshots
+    if (window.Android && typeof window.Android.preventScreenshot === 'function') {
+        try {
+            window.Android.preventScreenshot();
+        } catch(e) {
+            console.log('Screenshot prevention not available');
+        }
+    }
     
     console.log('%c⚠️ Content Protection Active', 'color: #e74c3c; font-size: 20px; font-weight: bold;');
     console.log('%cThis website is protected against unauthorized copying and content theft.', 'color: #95a5a6; font-size: 14px;');
     console.log('%cAll content is © 2025 JambGenius. Unauthorized use is prohibited.', 'color: #95a5a6; font-size: 14px;');
+    console.log('%c📸 Screenshots and screen recording are disabled', 'color: #e74c3c; font-size: 14px;');
     
 })();

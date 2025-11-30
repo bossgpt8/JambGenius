@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - JambGenius</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+            <h1 class="text-2xl font-bold text-blue-600"><i class="fas fa-bell mr-2"></i>Notifications</h1>
+            <button onclick="goBack()" class="text-gray-600 hover:text-gray-900">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8 max-w-2xl">
+        <!-- Notification Preferences -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-6">
+                <i class="fas fa-cog mr-2 text-gray-600"></i>Notification Preferences
+            </h2>
+
+            <div class="space-y-4">
+                <!-- Study Reminders -->
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-book text-blue-600 text-lg"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-900">Daily Study Reminders</p>
+                            <p class="text-sm text-gray-600">Get reminded to practice daily</p>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="reminderToggle" class="sr-only peer" checked onchange="toggleReminders()">
+                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+
+                <!-- Chat Messages -->
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-comments text-green-600 text-lg"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-900">Chat Messages</p>
+                            <p class="text-sm text-gray-600">Notifications for new chat messages</p>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="chatToggle" class="sr-only peer" checked onchange="toggleChat()">
+                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                    </label>
+                </div>
+
+                <!-- Exam Alerts -->
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-clipboard-check text-orange-600 text-lg"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-900">Exam Alerts</p>
+                            <p class="text-sm text-gray-600">Important exam notifications</p>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="examsToggle" class="sr-only peer" checked onchange="toggleExams()">
+                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+                    </label>
+                </div>
+
+                <!-- Study Streaks -->
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-fire text-red-600 text-lg"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-900">Streak Notifications</p>
+                            <p class="text-sm text-gray-600">Celebrate your study streaks</p>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="streakToggle" class="sr-only peer" checked onchange="toggleStreaks()">
+                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Notification -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">
+                <i class="fas fa-flask mr-2 text-gray-600"></i>Test Notifications
+            </h2>
+            <p class="text-gray-600 mb-4">Send a test notification to see how they work on your device</p>
+            <button onclick="sendTestNotification()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-all">
+                <i class="fas fa-paper-plane mr-2"></i>Send Test Notification
+            </button>
+        </div>
+
+        <!-- Information -->
+        <div class="bg-blue-50 border-l-4 border-blue-600 rounded p-4">
+            <p class="text-blue-800">
+                <i class="fas fa-info-circle mr-2"></i>
+                <strong>Note:</strong> Notifications work best when JambGenius app is installed on your phone. Web notifications require enabling browser notifications.
+            </p>
+        </div>
+    </div>
+
+    <script src="notification-manager.js"></script>
+    <script>
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function toggleReminders() {
+            const enabled = document.getElementById('reminderToggle').checked;
+            notificationManager.setPreferences({ reminders: enabled });
+        }
+
+        function toggleChat() {
+            const enabled = document.getElementById('chatToggle').checked;
+            notificationManager.setPreferences({ chat: enabled });
+        }
+
+        function toggleExams() {
+            const enabled = document.getElementById('examsToggle').checked;
+            notificationManager.setPreferences({ exams: enabled });
+        }
+
+        function toggleStreaks() {
+            const enabled = document.getElementById('streakToggle').checked;
+            notificationManager.setPreferences({ streaks: enabled });
+        }
+
+        async function sendTestNotification() {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Sending...';
+
+            try {
+                await notificationManager.sendTestNotification();
+                btn.innerHTML = '<i class="fas fa-check mr-2"></i>Test notification sent!';
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Send Test Notification';
+                }, 2000);
+            } catch (error) {
+                alert('Error sending test notification: ' + error.message);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Send Test Notification';
+            }
+        }
+
+        // Load preferences on page load
+        window.addEventListener('load', () => {
+            document.getElementById('reminderToggle').checked = notificationManager.preferences.reminders;
+            document.getElementById('chatToggle').checked = notificationManager.preferences.chat;
+            document.getElementById('examsToggle').checked = notificationManager.preferences.exams;
+            document.getElementById('streakToggle').checked = notificationManager.preferences.streaks;
+        });
+    </script>
+</body>
+</html>

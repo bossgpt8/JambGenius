@@ -158,13 +158,21 @@ async function createUserDocument(user) {
 
 async function signInWithGoogle() {
     try {
+        // Detect if running in WebView (mobile app)
+        const isWebView = /JambGeniusApp|webview/i.test(navigator.userAgent);
+        
+        if (isWebView) {
+            // In WebView, show message to use email/password or try opening browser
+            throw new Error('Google Sign-In is not available in the mobile app. Please use Email/Password login or open the website in your browser.');
+        }
+        
         const result = await signInWithPopup(auth, provider);
         await createUserDocument(result.user);
         console.log('Signed in:', result.user.email);
         hideAuthModal();
     } catch (error) {
         console.error('Error signing in:', error);
-        throw new Error('Sign in failed. Please check your credentials and try again.');
+        throw new Error(error.message || 'Sign in failed. Please check your credentials and try again.');
     }
 }
 

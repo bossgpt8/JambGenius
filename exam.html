@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mock Exam | JambGenius </title>
-    <meta name="description" content="Full JAMB mock exam simulation with 180 questions and 2-hour timer">
+    <title>Full JAMB Mock Exam | 180 Questions in 2 Hours | JambGenius</title>
+    <meta name="description" content="Take a full JAMB mock exam simulation with 180 questions across all 4 subjects with a realistic 2-hour timer. Get instant feedback and performance analytics.">
+    <meta name="keywords" content="JAMB mock exam, UTME simulation, practice test, exam timer, question bank">
+    <meta property="og:title" content="JAMB Mock Exam - JambGenius">
+    <meta property="og:description" content="Full 180-question mock exam with 2-hour timer and performance analytics.">
+    <meta property="og:url" content="https://jambgenius.vercel.app/exam.html">
+    <link rel="canonical" href="https://jambgenius.vercel.app/exam.html">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -32,21 +37,33 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="config.js"></script>
     <script src="supabase-config.js"></script>
     <script src="supabaseClient.js"></script>
     <script src="content-protection.js"></script>
     <script src="calculator.js"></script>
     <script src="anti-cheat.js"></script>
+    <script src="offline-manager.js"></script>
+    <script src="offline-exam.js"></script>
+    <script src="app-detection.js"></script>
     <script type="module">
         import './firebase-init.js';
         import './auth-state.js';
         import './auth-modal.js';
         import './bookmarks.js';
         import './streak-tracker.js';
+        import { saveExamResult } from './performance-analytics.js';
+        window.saveExamResult = saveExamResult;
     </script>
 </head>
 <body class="bg-gray-50 font-sans">
+    <!-- Offline Indicator -->
+    <div id="offline-indicator" class="hidden fixed top-0 left-0 right-0 bg-amber-500 text-white px-4 py-2 flex items-center justify-center space-x-2 z-[60]" style="display: none;">
+        <i class="fas fa-wifi-off"></i>
+        <span>📵 Offline Mode</span>
+    </div>
+
     <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -313,30 +330,48 @@
             const questionGrid = document.getElementById('questionGrid');
             
             selectedSubjects.forEach(subject => {
-                const button = document.createElement('button');
-                button.className = 'w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium text-gray-700';
-                button.textContent = capitalizeFirst(subject);
-                button.addEventListener('click', () => {
-                    const firstQuestionOfSubject = examQuestions.findIndex(q => q.subject.toLowerCase() === subject.toLowerCase());
-                    if (firstQuestionOfSubject !== -1) {
-                        currentQuestionIndex = firstQuestionOfSubject;
-                        renderQuestion();
+                const container = document.createElement('div');
+                container.className = 'mb-4 border-t border-gray-200 pt-3';
+                
+                const header = document.createElement('button');
+                header.className = 'w-full text-left px-3 py-2 rounded-lg hover:bg-primary-50 transition-colors text-sm font-bold text-primary-700 flex items-center justify-between';
+                
+                const subjectCount = examQuestions.filter(q => q.subject.toLowerCase() === subject.toLowerCase()).length;
+                header.innerHTML = `
+                    <span>${capitalizeFirst(subject)} (${subjectCount} Q)</span>
+                    <i class="fas fa-chevron-down text-xs"></i>
+                `;
+                
+                const gridContainer = document.createElement('div');
+                gridContainer.className = 'grid grid-cols-5 gap-2 mt-3';
+                gridContainer.id = `${subject}-grid`;
+                
+                let questionNum = 1;
+                examQuestions.forEach((question, index) => {
+                    if (question.subject.toLowerCase() === subject.toLowerCase()) {
+                        const btn = document.createElement('button');
+                        btn.className = 'w-10 h-10 rounded-lg border-2 border-gray-300 hover:border-primary-500 transition-all text-xs font-semibold';
+                        btn.textContent = questionNum;
+                        btn.dataset.index = index;
+                        btn.addEventListener('click', () => {
+                            currentQuestionIndex = index;
+                            renderQuestion();
+                        });
+                        gridContainer.appendChild(btn);
+                        questionNum++;
                     }
                 });
-                subjectTabs.appendChild(button);
-            });
-            
-            for (let i = 0; i < examQuestions.length; i++) {
-                const btn = document.createElement('button');
-                btn.className = 'w-10 h-10 rounded-lg border-2 border-gray-300 hover:border-primary-500 transition-all text-sm font-semibold';
-                btn.textContent = i + 1;
-                btn.dataset.index = i;
-                btn.addEventListener('click', () => {
-                    currentQuestionIndex = i;
-                    renderQuestion();
+                
+                header.addEventListener('click', () => {
+                    gridContainer.classList.toggle('hidden');
+                    header.querySelector('i').classList.toggle('fa-chevron-down');
+                    header.querySelector('i').classList.toggle('fa-chevron-up');
                 });
-                questionGrid.appendChild(btn);
-            }
+                
+                container.appendChild(header);
+                container.appendChild(gridContainer);
+                subjectTabs.appendChild(container);
+            });
         }
 
         function capitalizeFirst(str) {
@@ -397,16 +432,22 @@
         }
 
         function updateQuestionGrid() {
-            const gridButtons = document.querySelectorAll('#questionGrid button');
-            gridButtons.forEach((btn, index) => {
-                btn.className = 'w-10 h-10 rounded-lg border-2 transition-all text-sm font-semibold';
-                
-                if (userAnswers[index]) {
-                    btn.className += ' bg-green-100 border-green-500 text-green-700';
-                } else if (index === currentQuestionIndex) {
-                    btn.className += ' bg-primary-100 border-primary-500 text-primary-700';
-                } else {
-                    btn.className += ' border-gray-300 hover:border-primary-500 text-gray-700';
+            selectedSubjects.forEach(subject => {
+                const gridContainer = document.getElementById(`${subject}-grid`);
+                if (gridContainer) {
+                    const buttons = gridContainer.querySelectorAll('button');
+                    buttons.forEach((btn) => {
+                        const index = parseInt(btn.dataset.index);
+                        btn.className = 'w-10 h-10 rounded-lg border-2 transition-all text-xs font-semibold';
+                        
+                        if (userAnswers[index]) {
+                            btn.className += ' bg-green-100 border-green-500 text-green-700 font-bold';
+                        } else if (index === currentQuestionIndex) {
+                            btn.className += ' bg-primary-100 border-primary-500 text-primary-700 font-bold';
+                        } else {
+                            btn.className += ' border-gray-300 hover:border-primary-500 text-gray-700';
+                        }
+                    });
                 }
             });
         }
@@ -492,6 +533,18 @@
                 breakdown.appendChild(div);
             });
             
+            // Save exam result to Firestore
+            if (typeof window.saveExamResult === 'function') {
+                window.saveExamResult({
+                    totalScore,
+                    percentage,
+                    correctAnswers: correctCount,
+                    wrongAnswers: examQuestions.length - correctCount,
+                    subjectScores,
+                    timeSpent: 7200 - timeRemaining
+                }).catch(err => console.error('Failed to save exam result:', err));
+            }
+            
             document.getElementById('resultsModal').classList.remove('hidden');
         }
 
@@ -513,15 +566,56 @@
             const answered = userAnswers.filter(a => a !== null).length;
             const unanswered = examQuestions.length - answered;
             
-            let message = 'Are you sure you want to submit your exam?';
-            if (unanswered > 0) {
-                message = `You have ${unanswered} unanswered questions. Are you sure you want to submit?`;
-            }
-            
-            if (confirm(message)) {
-                submitExam();
-            }
+            // Show custom confirmation modal (doesn't trigger anti-cheat)
+            showSubmitConfirmation(unanswered);
         });
+
+        function showSubmitConfirmation(unanswered) {
+            // Notify anti-cheat that modal is open
+            if (antiCheat) antiCheat.setModalOpen(true);
+            
+            const confirmModal = document.createElement('div');
+            confirmModal.className = 'fixed inset-0 bg-black bg-opacity-75 z-[150] flex items-center justify-center p-4';
+            confirmModal.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-question-circle text-3xl text-primary-600"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Submit Exam?</h2>
+                    ${unanswered > 0 ? `
+                        <p class="text-gray-600 mb-6">
+                            You have <span class="font-bold text-red-600">${unanswered} unanswered questions</span>. 
+                            Are you sure you want to submit now?
+                        </p>
+                    ` : `
+                        <p class="text-gray-600 mb-6">
+                            Once submitted, you cannot make changes. Are you sure?
+                        </p>
+                    `}
+                    <div class="flex gap-3">
+                        <button id="cancelSubmitBtn" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-400 transition-colors font-semibold">
+                            <i class="fas fa-times mr-2"></i>Cancel
+                        </button>
+                        <button id="confirmSubmitBtn" class="flex-1 bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition-colors font-semibold">
+                            <i class="fas fa-check mr-2"></i>Submit Now
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(confirmModal);
+            
+            document.getElementById('cancelSubmitBtn').addEventListener('click', () => {
+                confirmModal.remove();
+                if (antiCheat) antiCheat.setModalOpen(false);
+            });
+            
+            document.getElementById('confirmSubmitBtn').addEventListener('click', () => {
+                confirmModal.remove();
+                if (antiCheat) antiCheat.setModalOpen(false);
+                submitExam();
+            });
+        }
 
         document.getElementById('newExamBtn').addEventListener('click', () => {
             window.location.href = 'exam-mode-subjects.html';
@@ -532,7 +626,7 @@
         });
 
         function generatePdfReport() {
-            const { jsPDF } = window.jspdf;
+            const jsPDF = window.jspdf.jsPDF;
             const doc = new jsPDF();
             
             // Get current date and time
@@ -552,6 +646,9 @@
             const percentage = document.getElementById('percentage').textContent;
             const correctAnswers = document.getElementById('correctAnswers').textContent;
             const wrongAnswers = document.getElementById('wrongAnswers').textContent;
+            
+            // User's name
+            const userName = localStorage.getItem('user_name') || 'Exam Taker';
             
             // Calculate subject scores
             const subjectScores = {};
@@ -580,6 +677,14 @@
             
             // Header with gradient background
             doc.setFillColor(37, 99, 235);
+            
+            // Add title
+            doc.setFontSize(24);
+            doc.setTextColor(255, 255, 255);
+            doc.text('JambGenius Exam Report', 105, 20, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.text(`Exam Date: ${dateStr} at ${timeStr}`, 105, 28, { align: 'center' });
             doc.rect(0, 0, 210, 45, 'F');
             
             // Logo and Title

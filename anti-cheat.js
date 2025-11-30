@@ -5,6 +5,8 @@ class AntiCheatSystem {
         this.onViolationLimit = onViolationLimit;
         this.isExamStarted = false;
         this.violations = [];
+        this.isModalOpen = false;
+        this.wasWindowVisible = true;
         this.initialize();
     }
 
@@ -82,7 +84,9 @@ class AntiCheatSystem {
     detectTabSwitch() {
         document.addEventListener('visibilitychange', () => {
             if (!this.isExamStarted) return;
+            if (this.isModalOpen) return; // Don't trigger if modal is open
 
+            // Only record if actually hidden (not just focus lost)
             if (document.hidden) {
                 this.recordViolation('Left exam page / switched tab');
                 this.showWarning();
@@ -91,9 +95,16 @@ class AntiCheatSystem {
 
         window.addEventListener('blur', () => {
             if (!this.isExamStarted) return;
-            this.recordViolation('Window lost focus');
-            this.showWarning();
+            if (this.isModalOpen) return; // Don't trigger if modal is open
+            if (document.hidden) return; // Only count if page is actually hidden
+            
+            // Allow blur without recording if modal is open or page is still visible
         });
+    }
+
+    // Call this when opening/closing confirmation dialogs
+    setModalOpen(isOpen) {
+        this.isModalOpen = isOpen;
     }
 
     preventRightClick() {

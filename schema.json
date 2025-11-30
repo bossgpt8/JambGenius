@@ -1,0 +1,25 @@
+{
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  "name": "JambGenius",
+  "description": "Nigeria's leading JAMB exam preparation platform with mock exams, practice questions, and study materials",
+  "url": "https://jambgenius.vercel.app",
+  "logo": "https://jambgenius.vercel.app/logo.png",
+  "sameAs": [
+    "https://www.facebook.com/jambgenius",
+    "https://twitter.com/jambgenius"
+  ],
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "NG"
+  },
+  "educationalLevel": "Secondary",
+  "learningResourceType": "JAMB Exam Preparation",
+  "offers": {
+    "@type": "Offer",
+    "name": "Mock Exam Access",
+    "price": "1000",
+    "priceCurrency": "NGN",
+    "availability": "https://schema.org/InStock"
+  }
+}

@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Performance Analytics | JambGenius </title>
-    <meta name="description" content="Track your JAMB preparation progress and performance">
+    <title>Performance Analytics Dashboard | JAMB Exam Stats | JambGenius</title>
+    <meta name="description" content="View your detailed JAMB performance analytics, exam scores, subject-wise breakdown, progress tracking, and performance trends.">
+    <meta name="keywords" content="analytics, performance tracking, exam results, progress dashboard, JAMB">
+    <meta property="og:title" content="Your JAMB Performance Analytics - JambGenius">
+    <meta property="og:description" content="Track and analyze your JAMB exam performance with detailed statistics and insights.">
+    <meta property="og:url" content="https://jambgenius.vercel.app/analytics.html">
+    <link rel="canonical" href="https://jambgenius.vercel.app/analytics.html">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="suppress-tailwind-warning.js"></script>
     <script>
@@ -34,6 +39,7 @@
     <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
     <script src="config.js"></script>
     <script src="content-protection.js"></script>
+    <script src="app-detection.js"></script>
 </head>
     <body class="bg-gray-50 font-sans">
         <nav
@@ -190,138 +196,166 @@
             </div>
         </div>
 
-        <script>
-            // Load analytics data
-            const sessions = JSON.parse(
+        <script type="module">
+            import { getAnalyticsSummary } from './performance-analytics.js';
+            import { auth } from './firebase-init.js';
+            import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+            // Load analytics data from both localStorage and Firestore
+            let sessions = JSON.parse(
                 localStorage.getItem("jambgenius_sessions") || "[]",
             );
             const bookmarks = JSON.parse(
                 localStorage.getItem("jambgenius_bookmarks") || "[]",
             );
 
-            // Calculate overall stats
-            const totalSessions = sessions.length;
-            const totalQuestions = sessions.reduce(
-                (sum, s) => sum + s.answered,
-                0,
-            );
-            const totalCorrect = sessions.reduce(
-                (sum, s) => sum + s.correct,
-                0,
-            );
-            const avgAccuracy =
-                totalQuestions > 0
-                    ? Math.round((totalCorrect / totalQuestions) * 100)
-                    : 0;
-
-            // Calculate streak
-            function calculateStreak() {
-                if (sessions.length === 0) return 0;
-
-                const dates = sessions.map((s) =>
-                    new Date(s.date).toDateString(),
-                );
-                const uniqueDates = [...new Set(dates)].sort(
-                    (a, b) => new Date(b) - new Date(a),
-                );
-
-                let streak = 0;
-                const today = new Date().toDateString();
-                const yesterday = new Date(
-                    Date.now() - 86400000,
-                ).toDateString();
-
-                if (uniqueDates[0] === today || uniqueDates[0] === yesterday) {
-                    streak = 1;
-                    for (let i = 1; i < uniqueDates.length; i++) {
-                        const current = new Date(uniqueDates[i]);
-                        const previous = new Date(uniqueDates[i - 1]);
-                        const diffDays = Math.floor(
-                            (previous - current) / 86400000,
-                        );
-
-                        if (diffDays === 1) {
-                            streak++;
-                        } else {
-                            break;
-                        }
+            // Load Firestore exam results
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    const summary = await getAnalyticsSummary();
+                    if (summary && summary.results) {
+                        // Merge Firestore exam results with localStorage sessions
+                        const examSessions = summary.results.map(result => ({
+                            subject: 'Full Exam',
+                            correct: result.correctAnswers,
+                            answered: result.correctAnswers + result.wrongAnswers,
+                            date: result.completedAt?.toISOString?.() || new Date().toISOString(),
+                            score: result.totalScore,
+                            percentage: result.percentage
+                        }));
+                        sessions = [...sessions, ...examSessions];
                     }
+                    updateAnalytics(sessions, bookmarks);
+                } else {
+                    updateAnalytics(sessions, bookmarks);
                 }
-
-                return streak;
-            }
-
-            // Display overall stats
-            document.getElementById("totalSessions").textContent =
-                totalSessions;
-            document.getElementById("avgAccuracy").textContent =
-                `${avgAccuracy}%`;
-            document.getElementById("totalQuestions").textContent =
-                totalQuestions;
-            document.getElementById("streak").textContent = calculateStreak();
-
-            // Subject performance
-            const subjectData = {};
-            sessions.forEach((session) => {
-                if (!subjectData[session.subject]) {
-                    subjectData[session.subject] = {
-                        total: 0,
-                        correct: 0,
-                        sessions: 0,
-                    };
-                }
-                subjectData[session.subject].total += session.answered;
-                subjectData[session.subject].correct += session.correct;
-                subjectData[session.subject].sessions++;
             });
 
-            const subjectStatsContainer =
-                document.getElementById("subjectStats");
-            if (Object.keys(subjectData).length === 0) {
-                subjectStatsContainer.innerHTML =
-                    '<p class="text-gray-500 text-center py-8">No practice sessions yet. Start practicing to see your performance!</p>';
-            } else {
-                Object.entries(subjectData).forEach(([subject, data]) => {
-                    const accuracy = Math.round(
-                        (data.correct / data.total) * 100,
-                    );
-                    const div = document.createElement("div");
-                    div.className = "border-l-4 border-primary-500 pl-4";
-                    div.innerHTML = `
-                    <div class="flex justify-between items-center mb-2">
-                        <div>
-                            <div class="font-semibold text-gray-900 capitalize">${subject}</div>
-                            <div class="text-sm text-gray-600">${data.sessions} session${data.sessions > 1 ? "s" : ""} • ${data.total} questions</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-2xl font-bold ${accuracy >= 70 ? "text-green-600" : accuracy >= 50 ? "text-yellow-600" : "text-red-600"}">${accuracy}%</div>
-                            <div class="text-sm text-gray-600">${data.correct}/${data.total}</div>
-                        </div>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="h-2 rounded-full ${accuracy >= 70 ? "bg-green-600" : accuracy >= 50 ? "bg-yellow-600" : "bg-red-600"}" style="width: ${accuracy}%"></div>
-                    </div>
-                `;
-                    subjectStatsContainer.appendChild(div);
-                });
-            }
+            function updateAnalytics(sessions, bookmarks) {
 
-            // Recent sessions
-            const recentSessionsContainer =
-                document.getElementById("recentSessions");
-            if (sessions.length === 0) {
-                recentSessionsContainer.innerHTML =
-                    '<p class="text-gray-500 text-center py-8">No practice sessions yet</p>';
-            } else {
-                const recent = sessions.slice(-10).reverse();
-                recent.forEach((session) => {
-                    const div = document.createElement("div");
-                    div.className =
-                        "flex justify-between items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors";
-                    div.innerHTML = `
-                    <div>
-                        <div class="font-semibold text-gray-900 capitalize">${session.subject}</div>
-                        <div class="text-sm text-gray-600">
+                // Calculate overall stats
+                const totalSessions = sessions.length;
+                const totalQuestions = sessions.reduce(
+                    (sum, s) => sum + s.answered,
+                    0,
+                );
+                const totalCorrect = sessions.reduce(
+                    (sum, s) => sum + s.correct,
+                    0,
+                );
+                const avgAccuracy =
+                    totalQuestions > 0
+                        ? Math.round((totalCorrect / totalQuestions) * 100)
+                        : 0;
+
+                // Calculate streak
+                function calculateStreak() {
+                    if (sessions.length === 0) return 0;
+
+                    const dates = sessions.map((s) =>
+                        new Date(s.date).toDateString(),
+                    );
+                    const uniqueDates = [...new Set(dates)].sort(
+                        (a, b) => new Date(b) - new Date(a),
+                    );
+
+                    let streak = 0;
+                    const today = new Date().toDateString();
+                    const yesterday = new Date(
+                        Date.now() - 86400000,
+                    ).toDateString();
+
+                    if (uniqueDates[0] === today || uniqueDates[0] === yesterday) {
+                        streak = 1;
+                        for (let i = 1; i < uniqueDates.length; i++) {
+                            const current = new Date(uniqueDates[i]);
+                            const previous = new Date(uniqueDates[i - 1]);
+                            const diffDays = Math.floor(
+                                (previous - current) / 86400000,
+                            );
+
+                            if (diffDays === 1) {
+                                streak++;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+
+                    return streak;
+                }
+
+                // Display overall stats
+                document.getElementById("totalSessions").textContent =
+                    totalSessions;
+                document.getElementById("avgAccuracy").textContent =
+                    `${avgAccuracy}%`;
+                document.getElementById("totalQuestions").textContent =
+                    totalQuestions;
+                document.getElementById("streak").textContent = calculateStreak();
+
+                // Subject performance
+                const subjectData = {};
+                sessions.forEach((session) => {
+                    if (!subjectData[session.subject]) {
+                        subjectData[session.subject] = {
+                            total: 0,
+                            correct: 0,
+                            sessions: 0,
+                        };
+                    }
+                    subjectData[session.subject].total += session.answered;
+                    subjectData[session.subject].correct += session.correct;
+                    subjectData[session.subject].sessions++;
+                });
+
+                const subjectStatsContainer =
+                    document.getElementById("subjectStats");
+                if (Object.keys(subjectData).length === 0) {
+                    subjectStatsContainer.innerHTML =
+                        '<p class="text-gray-500 text-center py-8">No practice sessions yet. Start practicing to see your performance!</p>';
+                } else {
+                    Object.entries(subjectData).forEach(([subject, data]) => {
+                        const accuracy = Math.round(
+                            (data.correct / data.total) * 100,
+                        );
+                        const div = document.createElement("div");
+                        div.className = "border-l-4 border-primary-500 pl-4";
+                        div.innerHTML = `
+                        <div class="flex justify-between items-center mb-2">
+                            <div>
+                                <div class="font-semibold text-gray-900 capitalize">${subject}</div>
+                                <div class="text-sm text-gray-600">${data.sessions} session${data.sessions > 1 ? "s" : ""} • ${data.total} questions</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-2xl font-bold ${accuracy >= 70 ? "text-green-600" : accuracy >= 50 ? "text-yellow-600" : "text-red-600"}">${accuracy}%</div>
+                                <div class="text-sm text-gray-600">${data.correct}/${data.total}</div>
+                            </div>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="h-2 rounded-full ${accuracy >= 70 ? "bg-green-600" : accuracy >= 50 ? "bg-yellow-600" : "bg-red-600"}" style="width: ${accuracy}%"></div>
+                        </div>
+                    `;
+                        subjectStatsContainer.appendChild(div);
+                    });
+                }
+
+                // Recent sessions
+                const recentSessionsContainer =
+                    document.getElementById("recentSessions");
+                if (sessions.length === 0) {
+                    recentSessionsContainer.innerHTML =
+                        '<p class="text-gray-500 text-center py-8">No practice sessions yet</p>';
+                } else {
+                    const recent = sessions.slice(-10).reverse();
+                    recent.forEach((session) => {
+                        const div = document.createElement("div");
+                        div.className =
+                            "flex justify-between items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors";
+                        div.innerHTML = `
+                        <div>
+                            <div class="font-semibold text-gray-900 capitalize">${session.subject}</div>
+                            <div class="text-sm text-gray-600">
                             ${session.mode === "timed" ? '<i class="fas fa-clock mr-1"></i>Timed' : '<i class="fas fa-infinity mr-1"></i>Free'} • 
                             ${new Date(session.date).toLocaleDateString()}
                         </div>
@@ -332,25 +366,27 @@
                     </div>
                 `;
                     recentSessionsContainer.appendChild(div);
-                });
-            }
+                    });
+                }
 
-            // Bookmarked questions
-            document.getElementById("bookmarkCount").textContent =
-                bookmarks.length;
-            const bookmarkedListContainer =
-                document.getElementById("bookmarkedList");
-            if (bookmarks.length === 0) {
-                bookmarkedListContainer.innerHTML =
-                    '<p class="text-gray-500 text-center py-8">No bookmarked questions yet. Click the bookmark icon during practice to save questions for later review.</p>';
-            } else {
-                bookmarkedListContainer.innerHTML = `
-                <p class="text-gray-600 mb-4">You have ${bookmarks.length} bookmarked question${bookmarks.length > 1 ? "s" : ""} saved for review.</p>
-                <a href="practice-mode-subjects.html" class="inline-block bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold">
-                    <i class="fas fa-book-open mr-2"></i>Practice Bookmarked Questions
-                </a>
-            `;
+                // Bookmarked questions
+                document.getElementById("bookmarkCount").textContent =
+                    bookmarks.length;
+                const bookmarkedListContainer =
+                    document.getElementById("bookmarkedList");
+                if (bookmarks.length === 0) {
+                    bookmarkedListContainer.innerHTML =
+                        '<p class="text-gray-500 text-center py-8">No bookmarked questions yet. Click the bookmark icon during practice to save questions for later review.</p>';
+                } else {
+                    bookmarkedListContainer.innerHTML = `
+                    <p class="text-gray-600 mb-4">You have ${bookmarks.length} bookmarked question${bookmarks.length > 1 ? "s" : ""} saved for review.</p>
+                    <a href="practice-mode-subjects.html" class="inline-block bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold">
+                        <i class="fas fa-book-open mr-2"></i>Practice Bookmarked Questions
+                    </a>
+                `;
+                }
             }
         </script>
+    <script src="footer-hide.js"></script>
     </body>
 </html>

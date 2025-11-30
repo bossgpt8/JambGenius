@@ -166,30 +166,37 @@ class Calculator {
                     border-radius: 10px;
                     padding: 12px;
                     margin-bottom: 12px;
-                    min-height: 50px;
+                    min-height: 70px;
                     display: flex;
                     flex-direction: column;
                     justify-content: flex-end;
                     flex-shrink: 0;
+                    overflow: hidden;
                 }
 
                 .display-history {
-                    font-size: 10px;
+                    font-size: 9px;
                     color: #6c757d;
-                    min-height: 14px;
+                    min-height: 12px;
                     margin-bottom: 4px;
                     text-align: right;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
                 }
 
                 .display-current {
                     background: transparent;
                     border: none;
-                    font-size: 24px;
+                    font-size: 18px;
                     font-weight: 600;
                     color: #212529;
                     text-align: right;
                     outline: none;
                     width: 100%;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
                 }
 
                 .calculator-buttons {
