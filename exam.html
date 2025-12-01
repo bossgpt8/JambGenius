@@ -47,6 +47,7 @@
     <script src="offline-manager.js"></script>
     <script src="offline-exam.js"></script>
     <script src="app-detection.js"></script>
+    <script src="viewport-manager.js"></script>
     <script type="module">
         import './firebase-init.js';
         import './auth-state.js';
@@ -55,6 +56,13 @@
         import './streak-tracker.js';
         import { saveExamResult } from './performance-analytics.js';
         window.saveExamResult = saveExamResult;
+        
+        // Enter desktop view when exam loads
+        window.addEventListener('load', () => {
+            if (document.getElementById('examInterface') && !document.getElementById('examInterface').classList.contains('hidden')) {
+                viewportManager.enterExamMode();
+            }
+        });
     </script>
 </head>
 <body class="bg-gray-50 font-sans">
@@ -72,6 +80,9 @@
                         <i class="fas fa-graduation-cap text-2xl text-primary-600 mr-2"></i>
                         <span class="text-xl font-bold text-gray-900">JambGenius </span>
                     </div>
+                    <button id="exitExamBtn" class="hidden md:flex items-center text-gray-600 hover:text-red-600 transition-colors" onclick="if(confirm('Exit exam? Progress will be saved.')) { viewportManager.exitExamMode(false); window.location.href='exam-mode-subjects.html'; }">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Exit Exam
+                    </button>
                 </div>
                 <div class="flex items-center space-x-4">
                     <div id="timer" class="bg-red-100 text-red-700 px-4 py-2 rounded-lg font-bold text-lg">

@@ -99,6 +99,7 @@ class Calculator {
                     overflow: hidden;
                     display: flex;
                     flex-direction: column;
+                    box-sizing: border-box;
                 }
 
                 .calculator-header {
@@ -309,11 +310,24 @@ class Calculator {
 
                 @media (max-width: 768px) {
                     .calculator-container {
-                        width: calc(100vw - 32px);
-                        max-height: 45vh;
+                        width: calc(100vw - 32px) !important;
+                        max-width: calc(100vw - 32px) !important;
+                        max-height: 50vh;
                         bottom: 16px;
                         right: 16px;
                         left: 16px;
+                        overflow-y: auto;
+                    }
+
+                    .calculator-body {
+                        overflow-y: auto;
+                        max-height: 100%;
+                    }
+
+                    .calculator-buttons {
+                        display: grid;
+                        grid-template-columns: repeat(4, 1fr);
+                        gap: 4px;
                     }
 
                     .calculator-toggle {
@@ -327,11 +341,19 @@ class Calculator {
                     .calc-btn {
                         font-size: 12px;
                         padding: 8px 2px;
-                        min-height: 28px;
+                        min-height: 30px;
                     }
 
                     .display-current {
-                        font-size: 20px;
+                        font-size: 16px;
+                    }
+
+                    .calculator-header {
+                        padding: 8px 10px;
+                    }
+
+                    .calculator-title {
+                        font-size: 12px;
                     }
                 }
             </style>

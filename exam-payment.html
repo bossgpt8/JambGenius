@@ -36,10 +36,19 @@
     <script src="config.js"></script>
     <script src="custom-modal.js"></script>
     <script src="content-protection.js"></script>
+    <script src="viewport-manager.js"></script>
     <script type="module">
         import './firebase-init.js';
         import './auth-state.js';
         import './auth-modal.js';
+        
+        // Exit exam mode if navigating back
+        const backBtn = document.querySelector('a[href="index.html"]');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                viewportManager.exitExamMode(false);
+            });
+        }
     </script>
 </head>
 <body class="bg-gray-50 font-sans">

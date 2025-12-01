@@ -162,17 +162,27 @@ async function signInWithGoogle() {
         const isWebView = /JambGeniusApp|webview/i.test(navigator.userAgent);
         
         if (isWebView) {
-            // In WebView, show message to use email/password or try opening browser
-            throw new Error('Google Sign-In is not available in the mobile app. Please use Email/Password login or open the website in your browser.');
+            throw new Error('Google Sign-In not available in mobile app. Use Email/Password or open browser.');
         }
         
+        // Allow popups before sign in
+        const popupBlocker = window.open('', 'popup-test');
+        if (!popupBlocker || popupBlocker.closed || typeof popupBlocker.closed === 'undefined') {
+            throw new Error('Popup blocked! Please allow popups in your browser settings and try again.');
+        }
+        popupBlocker.close();
+        
+        // Attempt Google Sign-In with popup
         const result = await signInWithPopup(auth, provider);
         await createUserDocument(result.user);
         console.log('Signed in:', result.user.email);
         hideAuthModal();
     } catch (error) {
         console.error('Error signing in:', error);
-        throw new Error(error.message || 'Sign in failed. Please check your credentials and try again.');
+        const errorMsg = error.message.includes('popup') 
+            ? error.message 
+            : 'Google Sign-In failed. Please check your internet connection or try email login.';
+        throw new Error(errorMsg);
     }
 }
 
