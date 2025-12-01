@@ -2,7 +2,7 @@
 class SplashScreen {
     constructor() {
         this.splashElement = document.getElementById('splashScreen');
-        this.mainContent = document.getElementById('mainContent');
+        this.body = document.body;
         this.init();
     }
 
@@ -13,15 +13,15 @@ class SplashScreen {
         const isInApp = this.checkIfInApp();
         
         if (!isInApp) {
-            // Not in app - skip splash screen
+            // Not in app - skip splash screen, show content immediately
             this.splashElement.style.display = 'none';
-            this.mainContent.style.display = 'block';
+            this.body.style.display = 'block';
             return;
         }
 
         // Show splash screen only in app
         this.splashElement.style.display = 'flex';
-        this.mainContent.style.display = 'none';
+        this.body.style.opacity = '0';
 
         // Hide splash after 3 seconds and show main content
         setTimeout(() => {
@@ -29,10 +29,7 @@ class SplashScreen {
             
             setTimeout(() => {
                 this.splashElement.style.display = 'none';
-                this.mainContent.style.display = 'block';
-                
-                // Trigger fade-in animation for main content
-                this.mainContent.style.animation = 'fadeInContent 0.6s ease-in forwards';
+                this.body.style.opacity = '1';
             }, 500);
         }, 3000);
     }
