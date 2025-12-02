@@ -1,4 +1,4 @@
-// Splash Screen Manager - Only shows in app wrapper
+// Splash Screen Manager - Only shows in app wrapper, only once per session
 class SplashScreen {
     constructor() {
         this.splashElement = document.getElementById('splashScreen');
@@ -9,37 +9,36 @@ class SplashScreen {
     init() {
         if (!this.splashElement) return;
 
-        // Check if running in app wrapper
         const isInApp = this.checkIfInApp();
+        const hasShownSplash = sessionStorage.getItem('jambgenius_splash_shown') === 'true';
         
-        if (!isInApp) {
-            // Not in app - skip splash screen, show content immediately
+        const mainContent = document.getElementById('mainContent');
+        
+        if (!isInApp || hasShownSplash) {
             this.splashElement.style.display = 'none';
-            
-            // Show main content
-            const mainContent = document.getElementById('mainContent');
             if (mainContent) {
+                mainContent.classList.remove('splash-hidden');
                 mainContent.style.opacity = '1';
             }
             return;
         }
 
-        // Show splash screen only in app
+        sessionStorage.setItem('jambgenius_splash_shown', 'true');
+        
         this.splashElement.style.display = 'flex';
         
-        // Hide main content while splash shows
-        const mainContent = document.getElementById('mainContent');
         if (mainContent) {
+            mainContent.classList.add('splash-hidden');
             mainContent.style.opacity = '0';
         }
 
-        // Hide splash after 3 seconds and show main content
         setTimeout(() => {
             this.splashElement.style.animation = 'fadeOutSplash 0.5s ease-out forwards';
             
             setTimeout(() => {
                 this.splashElement.style.display = 'none';
                 if (mainContent) {
+                    mainContent.classList.remove('splash-hidden');
                     mainContent.style.opacity = '1';
                 }
             }, 500);
@@ -47,24 +46,39 @@ class SplashScreen {
     }
 
     checkIfInApp() {
-        // Only show splash screen if explicitly in app mode
-        // Check localStorage flag set by app wrapper
         const appFlag = localStorage.getItem('isInApp');
-        
-        // Check if it's a WebView app (Android APK or iOS app)
         const isWebView = /webview|wv|version\/[\d.]+.*version.*safari|;wv\)/i.test(navigator.userAgent);
         
-        // Check if it's explicitly marked as app
         if (appFlag === 'true' || isWebView) {
+            localStorage.setItem('isInApp', 'true');
             return true;
         }
         
-        // Default: not in app (regular website)
         return false;
     }
 }
 
-// Initialize splash screen
-document.addEventListener('DOMContentLoaded', () => {
+(function() {
+    const splashElement = document.getElementById('splashScreen');
+    const mainContent = document.getElementById('mainContent');
+    
+    if (splashElement && mainContent) {
+        const isInApp = localStorage.getItem('isInApp') === 'true' || 
+                       /webview|wv|version\/[\d.]+.*version.*safari|;wv\)/i.test(navigator.userAgent);
+        const hasShownSplash = sessionStorage.getItem('jambgenius_splash_shown') === 'true';
+        
+        if (isInApp && !hasShownSplash) {
+            splashElement.style.display = 'flex';
+            mainContent.style.opacity = '0';
+        } else {
+            splashElement.style.display = 'none';
+            mainContent.style.opacity = '1';
+        }
+    }
+})();
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => new SplashScreen());
+} else {
     new SplashScreen();
-});
+}

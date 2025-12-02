@@ -36,10 +36,19 @@
     <script src="config.js"></script>
     <script src="custom-modal.js"></script>
     <script src="content-protection.js"></script>
+    <script src="viewport-manager.js"></script>
     <script type="module">
         import './firebase-init.js';
         import './auth-state.js';
         import './auth-modal.js';
+        
+        // Exit exam mode if navigating back
+        const backBtn = document.querySelector('a[href="index.html"]');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                viewportManager.exitExamMode(false);
+            });
+        }
     </script>
 </head>
 <body class="bg-gray-50 font-sans">
@@ -414,47 +423,60 @@
             if (payButton) payButton.disabled = false;
         });
 
+        async function checkUserCredits(user, retryCount = 0) {
+            const MAX_RETRIES = 2;
+            const TIMEOUT_MS = 10000;
+            
+            try {
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Request timed out')), TIMEOUT_MS);
+                });
+                
+                const fetchPromise = getDoc(doc(db, 'users', user.uid));
+                const userDoc = await Promise.race([fetchPromise, timeoutPromise]);
+                const examCredits = userDoc.exists() ? (userDoc.data().examCredits || 0) : 0;
+                
+                checkingCreditsSection.classList.add('hidden');
+                
+                if (examCredits > 0) {
+                    document.getElementById('currentCreditsDisplay').textContent = examCredits;
+                    hasCreditsSection.classList.remove('hidden');
+                    paymentSection.classList.add('hidden');
+                    bankTransferGuide.classList.add('hidden');
+                    if (payButton) payButton.disabled = true;
+                } else {
+                    hasCreditsSection.classList.add('hidden');
+                    paymentSection.classList.remove('hidden');
+                    bankTransferGuide.classList.remove('hidden');
+                    if (payButton) payButton.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error checking credits:', error);
+                
+                if (retryCount < MAX_RETRIES) {
+                    console.log(`Retrying... attempt ${retryCount + 1}`);
+                    await new Promise(r => setTimeout(r, 1000));
+                    return checkUserCredits(user, retryCount + 1);
+                }
+                
+                checkingCreditsSection.classList.add('hidden');
+                hasCreditsSection.classList.add('hidden');
+                paymentSection.classList.remove('hidden');
+                bankTransferGuide.classList.remove('hidden');
+                if (payButton) payButton.disabled = false;
+                
+                customModal.warning(
+                    'Could not load your credit balance. You can still make a purchase, and your credits will be updated automatically.',
+                    'Connection Issue'
+                );
+            }
+        }
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 emailInput.value = user.email || '';
                 fullNameInput.value = user.displayName || '';
-
-                try {
-                    const userDoc = await getDoc(doc(db, 'users', user.uid));
-                    const examCredits = userDoc.exists() ? (userDoc.data().examCredits || 0) : 0;
-                    
-                    checkingCreditsSection.classList.add('hidden');
-                    
-                    if (examCredits > 0) {
-                        document.getElementById('currentCreditsDisplay').textContent = examCredits;
-                        hasCreditsSection.classList.remove('hidden');
-                        paymentSection.classList.add('hidden');
-                        bankTransferGuide.classList.add('hidden');
-                        if (payButton) payButton.disabled = true;
-                    } else {
-                        hasCreditsSection.classList.add('hidden');
-                        paymentSection.classList.remove('hidden');
-                        bankTransferGuide.classList.remove('hidden');
-                        if (payButton) payButton.disabled = false;
-                    }
-                } catch (error) {
-                    console.error('Error checking credits:', error);
-                    
-                    const retry = await customModal.confirm(
-                        'Unable to check your credit balance. Would you like to refresh the page to try again?',
-                        'Error Loading Account'
-                    );
-                    
-                    if (retry) {
-                        window.location.reload();
-                    } else {
-                        checkingCreditsSection.classList.remove('hidden');
-                        hasCreditsSection.classList.add('hidden');
-                        paymentSection.classList.add('hidden');
-                        bankTransferGuide.classList.add('hidden');
-                        if (payButton) payButton.disabled = true;
-                    }
-                }
+                await checkUserCredits(user);
             } else {
                 checkingCreditsSection.classList.add('hidden');
                 hasCreditsSection.classList.add('hidden');
@@ -502,66 +524,93 @@
                         }
                     ]
                 },
-                 callback: function(response) {
-    loadingModal.classList.remove('hidden');
+                callback: function(response) {
+                    loadingModal.classList.remove('hidden');
+                    
+                    (async () => {
+                        try {
+                            const verifyResponse = await fetch('/api/verify-payment', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    reference: response.reference,
+                                    email: email,
+                                    fullName: fullName,
+                                    expectedCredits: selectedCredits,
+                                    uid: auth.currentUser?.uid
+                                })
+                            });
 
-    (async () => {
-        try {
-            const verifyResponse = await fetch('/api/verify-payment', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
+                            let result;
+                            const responseText = await verifyResponse.text();
+                            
+                            try {
+                                result = JSON.parse(responseText);
+                            } catch (parseError) {
+                                console.error('Failed to parse response as JSON:', responseText);
+                                throw new Error('A server error occurred. Please ensure the payment server is running properly.');
+                            }
+                            
+                            if (!verifyResponse.ok && !result.error) {
+                                throw new Error(`Server error: ${verifyResponse.status}`);
+                            }
+
+                            if (result.success) {
+                                if (auth.currentUser) {
+                                    const userDocRef = doc(db, 'users', auth.currentUser.uid);
+                                    const userDoc = await getDoc(userDocRef);
+                                    const currentCredits = userDoc.exists() ? (userDoc.data().examCredits || 0) : 0;
+
+                                    await setDoc(userDocRef, {
+                                        examCredits: currentCredits + selectedCredits,
+                                        lastPaymentReference: response.reference,
+                                        lastPaymentAt: new Date().toISOString(),
+                                        lastPaymentAmount: result.data.amount,
+                                        lastPaymentCurrency: result.data.currency,
+                                        email: email,
+                                        fullName: fullName,
+                                        paymentHistory: userDoc.exists() && userDoc.data().paymentHistory 
+                                            ? [...userDoc.data().paymentHistory, {
+                                                reference: response.reference,
+                                                amount: result.data.amount,
+                                                currency: result.data.currency,
+                                                credits: selectedCredits,
+                                                paidAt: new Date().toISOString()
+                                            }]
+                                            : [{
+                                                reference: response.reference,
+                                                amount: result.data.amount,
+                                                currency: result.data.currency,
+                                                credits: selectedCredits,
+                                                paidAt: new Date().toISOString()
+                                            }]
+                                    }, { merge: true });
+                                }
+
+                                loadingModal.classList.add('hidden');
+                                await customModal.success(
+                                    `Payment successful! You now have ${selectedCredits} exam credit${selectedCredits > 1 ? 's' : ''}.\n\nRedirecting to exam selection...`,
+                                    'Payment Successful!'
+                                );
+                                window.location.href = 'exam-mode-subjects.html?payment=success';
+                            } else {
+                                const errorMessage = result.error || 'Payment verification failed';
+                                throw new Error(errorMessage);
+                            }
+                        } catch (error) {
+                            console.error('Payment verification error:', error);
+                            const errorMsg = error.message || 'Payment verification failed';
+                            
+                            loadingModal.classList.add('hidden');
+                            await customModal.error(
+                                `${errorMsg}\n\nReference: ${response.reference}\n\nPlease contact support if you were charged.`,
+                                'Payment Error'
+                            );
+                        }
+                    })();
                 },
-                body: JSON.stringify({
-                    reference: response.reference,
-                    email: email,
-                    fullName: fullName,
-                    expectedCredits: selectedCredits,
-                    uid: auth.currentUser.uid
-                })
-            });
-
-            let result;
-            const responseText = await verifyResponse.text();
-
-            try {
-                result = JSON.parse(responseText);
-            } catch (parseError) {
-                console.error('Failed to parse JSON:', responseText);
-                throw new Error('Server error: Could not parse response from backend.');
-            }
-
-            if (!verifyResponse.ok && !result.error) {
-                throw new Error(`Server error: ${verifyResponse.status}`);
-            }
-
-            if (result.success) {
-
-                // 🔥 REMOVE ALL setDoc/write code
-                // Backend already updated credits.
-
-                loadingModal.classList.add('hidden');
-                await customModal.success(
-                    `Payment successful! Your credits have been added.`,
-                    'Payment Successful!'
-                );
-
-                window.location.href = 'exam-mode-subjects.html?payment=success';
-            } else {
-                throw new Error(result.error || 'Payment verification failed.');
-            }
-
-        } catch (error) {
-            console.error('Payment verification error:', error);
-
-            loadingModal.classList.add('hidden');
-            await customModal.error(
-                `${error.message}\n\nReference: ${response.reference}`,
-                'Payment Error'
-            );
-        }
-    })();
-}
                 onClose: function() {
                     loadingModal.classList.add('hidden');
                     customModal.warning('Your payment was cancelled. You can try again anytime.', 'Payment Cancelled');
