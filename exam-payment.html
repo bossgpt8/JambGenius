@@ -502,93 +502,66 @@
                         }
                     ]
                 },
-                callback: function(response) {
-                    loadingModal.classList.remove('hidden');
-                    
-                    (async () => {
-                        try {
-                            const verifyResponse = await fetch('/api/verify-payment', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                reference: response.reference,
-                                email: email,
-                                fullName: fullName,
-                                expectedCredits: selectedCredits,
-                                uid: auth.currentUser.uid
-                               })
-                            });
+                 callback: function(response) {
+    loadingModal.classList.remove('hidden');
 
-                            let result;
-                            const responseText = await verifyResponse.text();
-                            
-                            try {
-                                result = JSON.parse(responseText);
-                            } catch (parseError) {
-                                console.error('Failed to parse response as JSON:', responseText);
-                                throw new Error('A server error occurred. Please ensure the payment server is running properly.');
-                            }
-                            
-                            if (!verifyResponse.ok && !result.error) {
-                                throw new Error(`Server error: ${verifyResponse.status}`);
-                            }
-
-                            if (result.success) {
-                                if (auth.currentUser) {
-                                    const userDocRef = doc(db, 'users', auth.currentUser.uid);
-                                    const userDoc = await getDoc(userDocRef);
-                                    const currentCredits = userDoc.exists() ? (userDoc.data().examCredits || 0) : 0;
-
-                                    await setDoc(userDocRef, {
-                                        examCredits: currentCredits + selectedCredits,
-                                        lastPaymentReference: response.reference,
-                                        lastPaymentAt: new Date().toISOString(),
-                                        lastPaymentAmount: result.data.amount,
-                                        lastPaymentCurrency: result.data.currency,
-                                        email: email,
-                                        fullName: fullName,
-                                        paymentHistory: userDoc.exists() && userDoc.data().paymentHistory 
-                                            ? [...userDoc.data().paymentHistory, {
-                                                reference: response.reference,
-                                                amount: result.data.amount,
-                                                currency: result.data.currency,
-                                                credits: selectedCredits,
-                                                paidAt: new Date().toISOString()
-                                            }]
-                                            : [{
-                                                reference: response.reference,
-                                                amount: result.data.amount,
-                                                currency: result.data.currency,
-                                                credits: selectedCredits,
-                                                paidAt: new Date().toISOString()
-                                            }]
-                                    }, { merge: true });
-                                }
-
-                                loadingModal.classList.add('hidden');
-                                await customModal.success(
-                                    `Payment successful! You now have ${selectedCredits} exam credit${selectedCredits > 1 ? 's' : ''}.\n\nRedirecting to exam selection...`,
-                                    'Payment Successful!'
-                                );
-                                window.location.href = 'exam-mode-subjects.html?payment=success';
-                            } else {
-                                const errorMessage = result.error || 'Payment verification failed';
-                                throw new Error(errorMessage);
-                            }
-                        } catch (error) {
-                            console.error('Payment verification error:', error);
-                            const errorMsg = error.message || 'Payment verification failed';
-                            
-                            loadingModal.classList.add('hidden');
-                            await customModal.error(
-                                `${errorMsg}\n\nReference: ${response.reference}\n\nPlease contact support if you were charged.`,
-                                'Payment Error'
-                            );
-                        }
-                    })();
+    (async () => {
+        try {
+            const verifyResponse = await fetch('/api/verify-payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
                 },
+                body: JSON.stringify({
+                    reference: response.reference,
+                    email: email,
+                    fullName: fullName,
+                    expectedCredits: selectedCredits,
+                    uid: auth.currentUser.uid
+                })
+            });
+
+            let result;
+            const responseText = await verifyResponse.text();
+
+            try {
+                result = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('Failed to parse JSON:', responseText);
+                throw new Error('Server error: Could not parse response from backend.');
+            }
+
+            if (!verifyResponse.ok && !result.error) {
+                throw new Error(`Server error: ${verifyResponse.status}`);
+            }
+
+            if (result.success) {
+
+                // 🔥 REMOVE ALL setDoc/write code
+                // Backend already updated credits.
+
+                loadingModal.classList.add('hidden');
+                await customModal.success(
+                    `Payment successful! Your credits have been added.`,
+                    'Payment Successful!'
+                );
+
+                window.location.href = 'exam-mode-subjects.html?payment=success';
+            } else {
+                throw new Error(result.error || 'Payment verification failed.');
+            }
+
+        } catch (error) {
+            console.error('Payment verification error:', error);
+
+            loadingModal.classList.add('hidden');
+            await customModal.error(
+                `${error.message}\n\nReference: ${response.reference}`,
+                'Payment Error'
+            );
+        }
+    })();
+}
                 onClose: function() {
                     loadingModal.classList.add('hidden');
                     customModal.warning('Your payment was cancelled. You can try again anytime.', 'Payment Cancelled');
