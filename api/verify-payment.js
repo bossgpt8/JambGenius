@@ -1,144 +1,136 @@
 const https = require('https');
-const { initializeApp, cert } = require('firebase-admin/app');
-const { getFirestore } = require('firebase-admin/firestore');
-
-// Initialize Firebase Admin once
-if (!global.firebaseAdminInitialized) {
-    initializeApp({
-        credential: cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT))
-    });
-    global.firebaseAdminInitialized = true;
-}
-const db = getFirestore();
 
 module.exports = async function handler(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    if (req.method === 'OPTIONS') return res.status(200).end();
-    if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
-    const { reference, email, fullName, expectedCredits, uid } = req.body;
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
-    console.log('Verifying payment:', { reference, email, fullName, expectedCredits, uid });
+  const { reference, email, fullName, expectedCredits } = req.body;
 
-    if (!reference) return res.status(400).json({ error: 'Payment reference is required' });
-    if (!uid) return res.status(400).json({ error: 'User ID (uid) is required' });
+  console.log('Verifying payment:', { reference, email, fullName, expectedCredits });
 
-    const credits = Number(expectedCredits) || 1;
-    const PRICE_PER_CREDIT = 1000 * 100; // ₦1,000 in kobo
-    const expectedAmount = credits * PRICE_PER_CREDIT;
+  if (!reference) {
+    return res.status(400).json({ error: 'Payment reference is required' });
+  }
 
-    const paystackSecretKey = process.env.PAYSTACK_SECRET_KEY;
-    if (!paystackSecretKey) {
-        return res.status(500).json({
-            success: false,
-            error: 'Payment system not properly configured.'
-        });
+  const credits = expectedCredits || 1;
+  const PRICE_PER_CREDIT = 100000;
+  const expectedAmount = credits * PRICE_PER_CREDIT;
+
+  const paystackSecretKey = process.env.PAYSTACK_SECRET_KEY;
+
+  if (!paystackSecretKey) {
+    console.error('PAYSTACK_SECRET_KEY is not configured!');
+    return res.status(500).json({
+      success: false,
+      error: 'Payment system is not properly configured. Please contact support.'
+    });
+  }
+
+  const options = {
+    hostname: 'api.paystack.co',
+    port: 443,
+    path: `/transaction/verify/${reference}`,
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${paystackSecretKey}`,
+      'Content-Type': 'application/json'
     }
+  };
 
-    const options = {
-        hostname: 'api.paystack.co',
-        port: 443,
-        path: `/transaction/verify/${reference}`,
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${paystackSecretKey}`,
-            'Content-Type': 'application/json'
-        }
-    };
+  return new Promise((resolve) => {
+    const paystackRequest = https.request(options, (paystackRes) => {
+      let data = '';
 
-    const verifyPaystack = () =>
-        new Promise((resolve, reject) => {
-            const reqPaystack = https.request(options, (paystackRes) => {
-                let data = '';
-                paystackRes.on('data', (chunk) => (data += chunk));
-                paystackRes.on('end', () => resolve(JSON.parse(data)));
-            });
-            reqPaystack.on('error', reject);
-            reqPaystack.end();
-        });
+      paystackRes.on('data', (chunk) => {
+        data += chunk;
+      });
 
-    try {
-        const result = await verifyPaystack();
-        console.log('Paystack response:', JSON.stringify(result, null, 2));
-
-        if (!result.status || result.data.status !== 'success') {
-            return res.status(400).json({
-                success: false,
-                error: result.message || `Payment not successful: ${result.data.status}`
-            });
-        }
-
-        const amountDifference = Math.abs(result.data.amount - expectedAmount);
-        if (amountDifference > 100) {
-            return res.status(400).json({
-                success: false,
-                error: `Amount mismatch. Expected ₦${(expectedAmount / 100).toLocaleString()}, got ₦${(result.data.amount / 100).toLocaleString()}.`
-            });
-        }
-
-        // Retrieve user doc
-        const userDocRef = db.collection('users').doc(uid);
-        const userDoc = await userDocRef.get();
-        const currentCredits = userDoc.exists ? (userDoc.data().examCredits || 0) : 0;
-
-        // Save payment history entry
-        const paymentEntry = {
-            reference,
-            amount: result.data.amount,
-            currency: result.data.currency,
-            credits,
-            paidAt: new Date().toISOString()
-        };
-
-        let updatedHistory = [];
-        if (userDoc.exists && Array.isArray(userDoc.data().paymentHistory)) {
-            updatedHistory = [...userDoc.data().paymentHistory, paymentEntry];
-        } else {
-            updatedHistory = [paymentEntry];
-        }
-
-        // 🔥 FIRESTORE UPDATE — WITH SERVER OVERRIDE
+      paystackRes.on('end', () => {
         try {
-            await userDocRef.set(
-                {
-                    examCredits: currentCredits + credits,
-                    lastPaymentReference: reference,
-                    lastPaymentAt: new Date().toISOString(),
-                    lastPaymentAmount: result.data.amount,
-                    lastPaymentCurrency: result.data.currency,
-                    email,
-                    fullName,
-                    paymentHistory: updatedHistory,
+          const result = JSON.parse(data);
+          console.log('=== FULL PAYSTACK RESPONSE ===');
+          console.log('Status:', result.status);
+          console.log('Message:', result.message);
+          console.log('Data:', JSON.stringify(result.data, null, 2));
+          console.log('==============================');
 
-                    // IMPORTANT FLAG — backend bypasses security rule
-                    isServerUpdate: true
-                },
-                { merge: true }
-            );
-        } catch (firestoreError) {
-            console.error('Firestore write error:', firestoreError);
-            return res.status(500).json({
-                success: false,
-                error: `Firestore error: ${firestoreError.code} - ${firestoreError.message}`
+          if (!result.status) {
+            console.error('Paystack request failed:', result.message);
+            return res.status(400).json({
+              success: false,
+              error: result.message || 'Verification failed'
             });
-        }
+          }
 
-        return res.status(200).json({
+          if (result.data.status !== 'success') {
+            return res.status(400).json({
+              success: false,
+              error: `Payment not successful: ${result.data.status}`
+            });
+          }
+
+          // Verify amount is correct (allow small variance for rounding or currency conversion)
+          const amountDifference = Math.abs(result.data.amount - expectedAmount);
+          const percentDifference = (amountDifference / expectedAmount) * 100;
+          
+          // Allow up to 5% variance or ₦500 (whichever is LARGER) for payment processing fees
+          // This ensures large payments (like ₦99,000) accept proportional variance
+          const allowedVariance = Math.max(expectedAmount * 0.05, 50000); // 5% or ₦500, whichever is larger
+          
+          if (amountDifference > allowedVariance) {
+            console.error('Amount mismatch:', {
+              expected: expectedAmount,
+              received: result.data.amount,
+              difference: amountDifference,
+              percentDifference: percentDifference,
+              credits: credits
+            });
+            return res.status(400).json({
+              success: false,
+              error: `Amount variance too high. Expected ₦${(expectedAmount / 100).toFixed(2)}, got ₦${(result.data.amount / 100).toFixed(2)}. This may be due to payment processing fees. Contact support with reference: ${result.data.reference}`
+            });
+          }
+
+          return res.status(200).json({
             success: true,
-            message: 'Payment verified and credits updated successfully',
+            message: 'Payment verified successfully',
             data: {
-                reference: result.data.reference,
-                amount: result.data.amount,
-                currency: result.data.currency || 'NGN',
-                credits,
-                paidAt: result.data.paid_at
+              reference: result.data.reference,
+              amount: result.data.amount,
+              currency: result.data.currency || 'NGN',
+              email: result.data.customer.email,
+              paidAt: result.data.paid_at,
+              status: result.data.status,
+              credits: credits
             }
-        });
-    } catch (error) {
-        console.error('Payment verification error:', error);
-        return res.status(500).json({ success: false, error: error.message });
-    }
+          });
+        } catch (error) {
+          console.error('Error parsing Paystack response:', error);
+          return res.status(500).json({
+            success: false,
+            error: 'Failed to process payment verification'
+          });
+        }
+      });
+    });
+
+    paystackRequest.on('error', (error) => {
+      console.error('Paystack request error:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Payment verification failed'
+      });
+    });
+
+    paystackRequest.end();
+  });
 };
