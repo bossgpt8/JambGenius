@@ -274,6 +274,11 @@
     // Detect if screenshot was taken (via visibility changes)
     document.addEventListener('visibilitychange', function() {
         if (document.visibilityState === 'hidden') {
+            // Skip alert if Google Sign-In popup is open
+            if (window.googleSignInActive) {
+                console.log('Google Sign-In popup opened - skipping protection alert');
+                return;
+            }
             console.log('Screenshot or app minimize detected');
             showProtectionAlert('📸 Content is protected');
         }

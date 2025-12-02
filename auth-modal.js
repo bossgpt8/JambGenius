@@ -165,23 +165,36 @@ async function signInWithGoogle() {
             throw new Error('Google Sign-In not available in mobile app. Use Email/Password or open browser.');
         }
         
-        // Allow popups before sign in
-        const popupBlocker = window.open('', 'popup-test');
-        if (!popupBlocker || popupBlocker.closed || typeof popupBlocker.closed === 'undefined') {
-            throw new Error('Popup blocked! Please allow popups in your browser settings and try again.');
-        }
-        popupBlocker.close();
+        // Set flag to allow Google popup without protection alert
+        window.googleSignInActive = true;
         
         // Attempt Google Sign-In with popup
         const result = await signInWithPopup(auth, provider);
+        
+        // Clear flag
+        window.googleSignInActive = false;
         await createUserDocument(result.user);
         console.log('Signed in:', result.user.email);
         hideAuthModal();
     } catch (error) {
+        // Clear flag
+        window.googleSignInActive = false;
+        
         console.error('Error signing in:', error);
-        const errorMsg = error.message.includes('popup') 
-            ? error.message 
-            : 'Google Sign-In failed. Please check your internet connection or try email login.';
+        
+        // Handle specific error cases
+        let errorMsg = 'Google Sign-In failed. Please try again.';
+        
+        if (error.code === 'auth/popup-blocked') {
+            errorMsg = '⚠️ Popup Blocked!\n\n1. Click the popup icon in your browser address bar\n2. Select "Always allow popups for this site"\n3. Try Google Sign-In again';
+        } else if (error.code === 'auth/popup-closed-by-user') {
+            errorMsg = 'Popup was closed. Please try again.';
+        } else if (error.message && error.message.toLowerCase().includes('popup')) {
+            errorMsg = '⚠️ Popup Blocked!\n\nPlease allow popups in your browser settings:\n- Click the popup/extension icon\n- Allow popups for this site\n- Try Google Sign-In again\n\nOr use Email/Password login instead.';
+        } else if (error.code === 'auth/network-request-failed') {
+            errorMsg = 'Network error. Please check your internet connection.';
+        }
+        
         throw new Error(errorMsg);
     }
 }
