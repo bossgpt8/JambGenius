@@ -15,13 +15,23 @@ class SplashScreen {
         if (!isInApp) {
             // Not in app - skip splash screen, show content immediately
             this.splashElement.style.display = 'none';
-            this.body.style.display = 'block';
+            
+            // Show main content
+            const mainContent = document.getElementById('mainContent');
+            if (mainContent) {
+                mainContent.style.opacity = '1';
+            }
             return;
         }
 
         // Show splash screen only in app
         this.splashElement.style.display = 'flex';
-        this.body.style.opacity = '0';
+        
+        // Hide main content while splash shows
+        const mainContent = document.getElementById('mainContent');
+        if (mainContent) {
+            mainContent.style.opacity = '0';
+        }
 
         // Hide splash after 3 seconds and show main content
         setTimeout(() => {
@@ -29,7 +39,9 @@ class SplashScreen {
             
             setTimeout(() => {
                 this.splashElement.style.display = 'none';
-                this.body.style.opacity = '1';
+                if (mainContent) {
+                    mainContent.style.opacity = '1';
+                }
             }, 500);
         }, 3000);
     }
