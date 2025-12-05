@@ -144,6 +144,49 @@ function showWelcomeMessage(displayName) {
     }, 4000);
 }
 
+// Check if running in Android app
+function isRunningInApp() {
+    return typeof window.AndroidApp !== 'undefined';
+}
+
+// Save user session to Android app for offline access
+function saveToAndroidApp(userData) {
+    if (isRunningInApp()) {
+        try {
+            window.AndroidApp.saveCachedUser(JSON.stringify(userData));
+            console.log('User session saved to Android app for offline access');
+        } catch (error) {
+            console.warn('Could not save to Android app:', error);
+        }
+    }
+}
+
+// Clear session from Android app
+function clearAndroidAppSession() {
+    if (isRunningInApp()) {
+        try {
+            window.AndroidApp.clearSession();
+        } catch (error) {
+            console.warn('Could not clear Android app session:', error);
+        }
+    }
+}
+
+// Restore offline session from Android app
+window.restoreOfflineSession = function(cachedUserJson) {
+    try {
+        const cachedUser = JSON.parse(cachedUserJson);
+        if (cachedUser) {
+            userProfile = cachedUser;
+            currentUser = { uid: cachedUser.uid || 'offline' };
+            updateNavigation();
+            console.log('Restored offline session for:', cachedUser.displayName);
+        }
+    } catch (error) {
+        console.warn('Could not restore offline session:', error);
+    }
+};
+
 async function loadUserProfile(user) {
     try {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
@@ -160,12 +203,20 @@ async function loadUserProfile(user) {
             };
         }
         
-        sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
+        const sessionData = {
             uid: user.uid,
             email: user.email,
             displayName: userProfile.displayName,
             photoURL: userProfile.photoURL
-        }));
+        };
+        
+        sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(sessionData));
+        
+        // Save to Android app for offline access
+        saveToAndroidApp({
+            ...userProfile,
+            uid: user.uid
+        });
     } catch (error) {
         console.error('Error loading user profile:', error);
         userProfile = {
@@ -258,6 +309,7 @@ function updateNavigation() {
 export async function handleSignOut() {
     if (confirm('Are you sure you want to sign out?')) {
         sessionStorage.removeItem('jambgenius_welcome_shown');
+        clearAndroidAppSession();
         await signOut(auth);
     }
 }

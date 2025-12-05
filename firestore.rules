@@ -1,26 +1,150 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow authenticated users to read/write their own user profile
+
+    // ============================
+    //          USERS
+    // ============================
     match /users/{userId} {
-      allow read, write: if request.auth.uid == userId;
+      // Users can read their own data
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      // Users can update their profile EXCEPT examCredits and payment fields
+      // Credit operations are handled by the backend using Firebase Admin SDK
+      // which bypasses security rules entirely
+      allow update: if request.auth != null 
+                    && request.auth.uid == userId
+                    && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+                      'examCredits', 
+                      'lastPaymentReference', 
+                      'lastPaymentAt', 
+                      'lastPaymentAmount',
+                      'lastPaymentCurrency',
+                      'paymentHistory'
+                    ]);
+
+      // Users can create their own doc (initial signup)
+      allow create: if request.auth != null && request.auth.uid == userId;
+
+      // Prevent deletion
+      allow delete: if false;
     }
 
-    // Allow authenticated users to read/write chatroom messages
+    // ============================
+    //     USER BOOKMARKS
+    // ============================
+    match /userBookmarks/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ============================
+    //      USER STREAKS
+    // ============================
+    match /userStreaks/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ============================
+    //   QUESTION EXPLANATIONS
+    // ============================
+    match /questionExplanations/{docId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // ============================
+    //       EXAM RESULTS
+    // ============================
+    match /examResults/{resultId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+    // ============================
+    //      CHAT MESSAGES
+    // ============================
     match /chatMessages/{messageId} {
       allow read: if request.auth != null;
-      allow write: if request.auth != null;
-      allow delete: if request.auth.token.email in ['osanisrael2@gmail.com', 'admin@jambgenius.com'];
+
+      allow create: if request.auth != null && (
+        (request.resource.data.userId == request.auth.uid
+         && !exists(/databases/$(database)/documents/bannedUsers/$(request.auth.uid))
+         && (
+           (request.resource.data.type == 'text'
+            && request.resource.data.text is string
+            && request.resource.data.text.size() > 0
+            && request.resource.data.text.size() <= 500) ||
+           (request.resource.data.type == 'image'
+            && request.resource.data.imageData is string) ||
+           (request.resource.data.type == 'voice'
+            && request.resource.data.voiceData is string)
+         )) ||
+        (request.resource.data.userId == 'ai-boss'
+         && request.resource.data.displayName == 'Boss'
+         && request.resource.data.type == 'text'
+         && request.resource.data.text is string
+         && request.resource.data.text.size() > 0)
+      );
+
+      allow delete: if request.auth != null && (
+        request.auth.uid == resource.data.userId ||
+        request.auth.token.email in ['osanisrael2@gmail.com', 'admin@jambgenius.com']
+      );
+
+      allow update: if false;
     }
 
-    // Allow authenticated users to read/write their progress
+    // ============================
+    //       BANNED USERS
+    // ============================
+    match /bannedUsers/{userId} {
+      allow read, write: if request.auth != null && 
+                          request.auth.token.email in ['osanisrael2@gmail.com', 'admin@jambgenius.com'];
+    }
+
+    // ============================
+    //    CHATROOM MEMBERS
+    // ============================
+    match /chatroomMembers/{userId} {
+      allow read, write: if request.auth != null && 
+                          request.auth.token.email in ['osanisrael2@gmail.com', 'admin@jambgenius.com'];
+    }
+
+    // ============================
+    //      PROGRESS DATA
+    // ============================
     match /progress/{userId} {
-      allow read, write: if request.auth.uid == userId;
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Default deny everything else
+    // ============================
+    //        BOOKMARKS
+    // ============================
+    match /bookmarks/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ============================
+    //        STREAKS
+    // ============================
+    match /streaks/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ============================
+    //     DEFAULT DENY
+    // ============================
     match /{document=**} {
       allow read, write: if false;
     }
+
   }
 }

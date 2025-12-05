@@ -364,7 +364,7 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, getDoc, runTransaction } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const app = initializeApp(CONFIG.firebase);
         const auth = getAuth(app);
@@ -391,36 +391,35 @@
         async function consumeExamCredit() {
             const user = auth.currentUser;
             if (!user) {
-                return false;
+                console.error('User not authenticated');
+                return { success: false, error: 'Please sign in to start the exam' };
             }
 
             try {
-                const userDocRef = doc(db, 'users', user.uid);
+                // Get ID token for verification - REQUIRED
+                const idToken = await user.getIdToken();
                 
-                const result = await runTransaction(db, async (transaction) => {
-                    const userDoc = await transaction.get(userDocRef);
-                    
-                    if (!userDoc.exists()) {
-                        throw new Error('User document does not exist');
-                    }
-
-                    const currentCredits = userDoc.data().examCredits || 0;
-                    if (currentCredits <= 0) {
-                        throw new Error('No exam credits available');
-                    }
-
-                    transaction.update(userDocRef, {
-                        examCredits: currentCredits - 1,
-                        lastExamStartedAt: new Date().toISOString()
-                    });
-
-                    return true;
+                // Call backend API to consume credit atomically
+                const response = await fetch('/api/consume-credit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ idToken })
                 });
-
-                return result;
+                
+                const result = await response.json();
+                
+                if (!response.ok || !result.success) {
+                    console.error('Credit consumption failed:', result.error);
+                    return { success: false, error: result.error || 'Failed to start exam' };
+                }
+                
+                console.log('Credit consumed successfully, remaining:', result.data?.remainingCredits);
+                return { success: true };
             } catch (error) {
                 console.error('Error consuming exam credit:', error);
-                return false;
+                return { success: false, error: 'Network error. Please check your internet connection and try again.' };
             }
         }
 
@@ -553,13 +552,22 @@
                     'Start Exam'
                 );
                 if (confirmStart) {
-                    const consumed = await consumeExamCredit();
-                    if (consumed) {
+                    // Show loading state
+                    startExamBtn.disabled = true;
+                    startExamBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Starting Exam...';
+                    
+                    const result = await consumeExamCredit();
+                    
+                    if (result.success) {
                         const subjects = Array.from(selectedSubjects).join(',');
                         window.location.href = `exam.html?subjects=${subjects}`;
                     } else {
+                        // Reset button state
+                        startExamBtn.disabled = false;
+                        startExamBtn.innerHTML = '<i class="fas fa-rocket mr-2"></i>Start Full Mock Exam';
+                        
                         await customModal.error(
-                            'Failed to start exam. Please try again or contact support.',
+                            result.error || 'Failed to start exam. Please try again or contact support.',
                             'Error'
                         );
                     }

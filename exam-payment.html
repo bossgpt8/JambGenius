@@ -529,6 +529,9 @@
                     
                     (async () => {
                         try {
+                            // Get ID token for secure verification
+                            const idToken = await auth.currentUser.getIdToken();
+                            
                             const verifyResponse = await fetch('/api/verify-payment', {
                                 method: 'POST',
                                 headers: {
@@ -539,7 +542,7 @@
                                     email: email,
                                     fullName: fullName,
                                     expectedCredits: selectedCredits,
-                                    uid: auth.currentUser?.uid
+                                    idToken: idToken
                                 })
                             });
 
@@ -558,37 +561,7 @@
                             }
 
                             if (result.success) {
-                                if (auth.currentUser) {
-                                    const userDocRef = doc(db, 'users', auth.currentUser.uid);
-                                    const userDoc = await getDoc(userDocRef);
-                                    const currentCredits = userDoc.exists() ? (userDoc.data().examCredits || 0) : 0;
-
-                                    await setDoc(userDocRef, {
-                                        examCredits: currentCredits + selectedCredits,
-                                        lastPaymentReference: response.reference,
-                                        lastPaymentAt: new Date().toISOString(),
-                                        lastPaymentAmount: result.data.amount,
-                                        lastPaymentCurrency: result.data.currency,
-                                        email: email,
-                                        fullName: fullName,
-                                        paymentHistory: userDoc.exists() && userDoc.data().paymentHistory 
-                                            ? [...userDoc.data().paymentHistory, {
-                                                reference: response.reference,
-                                                amount: result.data.amount,
-                                                currency: result.data.currency,
-                                                credits: selectedCredits,
-                                                paidAt: new Date().toISOString()
-                                            }]
-                                            : [{
-                                                reference: response.reference,
-                                                amount: result.data.amount,
-                                                currency: result.data.currency,
-                                                credits: selectedCredits,
-                                                paidAt: new Date().toISOString()
-                                            }]
-                                    }, { merge: true });
-                                }
-
+                                // Credits are added by the backend, no need to update Firestore client-side
                                 loadingModal.classList.add('hidden');
                                 await customModal.success(
                                     `Payment successful! You now have ${selectedCredits} exam credit${selectedCredits > 1 ? 's' : ''}.\n\nRedirecting to exam selection...`,

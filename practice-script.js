@@ -34,38 +34,78 @@ let currentUser = null;
 const urlParams = new URLSearchParams(window.location.search);
 const subject = urlParams.get('subject') || 'english';
 
-function waitForCustomModal() {
+// Utility function to shuffle an array
+function shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
+function waitForDependencies() {
     return new Promise((resolve) => {
-        if (typeof window.customModal !== 'undefined') {
+        const checkDependencies = () => {
+            const hasCustomModal = typeof window.customModal !== 'undefined';
+            const hasAntiCheat = typeof window.AntiCheatSystem !== 'undefined';
+            const hasSupabaseCheck = typeof window.isSupabaseConfigured !== 'undefined';
+            
+            if (hasCustomModal && hasAntiCheat && hasSupabaseCheck) {
+                resolve();
+                return true;
+            }
+            return false;
+        };
+        
+        if (checkDependencies()) return;
+        
+        const checkInterval = setInterval(() => {
+            if (checkDependencies()) {
+                clearInterval(checkInterval);
+            }
+        }, 50);
+        
+        // Timeout after 5 seconds to prevent infinite waiting
+        setTimeout(() => {
+            clearInterval(checkInterval);
+            console.warn('Some dependencies not loaded, proceeding anyway');
             resolve();
-        } else {
-            const checkInterval = setInterval(() => {
-                if (typeof window.customModal !== 'undefined') {
-                    clearInterval(checkInterval);
-                    resolve();
-                }
-            }, 50);
-        }
+        }, 5000);
     });
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    await waitForCustomModal();
-    antiCheat = new AntiCheatSystem(() => {
-        customModal.alert('Maximum violations reached. Your practice session will end.', 'Session Ended');
-        showCompletion();
-    });
-    
-    // Get current user
-    const { getAuth } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
-    const auth = getAuth();
-    auth.onAuthStateChanged((user) => {
-        currentUser = user;
-        if (user) {
-            streakTracker.loadFromFirestore();
-            bookmarkManager.loadFromFirestore();
+    try {
+        await waitForDependencies();
+        
+        // Initialize anti-cheat if available
+        if (typeof AntiCheatSystem !== 'undefined') {
+            antiCheat = new AntiCheatSystem(() => {
+                if (typeof customModal !== 'undefined') {
+                    customModal.alert('Maximum violations reached. Your practice session will end.', 'Session Ended');
+                }
+                showCompletion();
+            });
         }
-    });
+        
+        // Get current user
+        const { getAuth } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
+        const auth = getAuth();
+        auth.onAuthStateChanged((user) => {
+            currentUser = user;
+            if (user) {
+                if (typeof streakTracker !== 'undefined' && streakTracker.loadFromFirestore) {
+                    streakTracker.loadFromFirestore();
+                }
+                if (typeof bookmarkManager !== 'undefined' && bookmarkManager.loadFromFirestore) {
+                    bookmarkManager.loadFromFirestore();
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error initializing practice mode:', error);
+    }
 });
 
 // Mode selection
@@ -102,18 +142,14 @@ async function initializePractice() {
     document.getElementById('subjectTitle').textContent = `Practice: ${capitalizeFirst(subject)}`;
     document.getElementById('loadingScreen').classList.remove('hidden');
     
-    const supabaseConfigured = isSupabaseConfigured();
+    // Check if Supabase is configured
+    const supabaseConfigured = typeof isSupabaseConfigured === 'function' ? isSupabaseConfigured() : false;
     
     if (!supabaseConfigured) {
-        document.getElementById('loadingScreen').classList.add('hidden');
-        document.getElementById('setupAlert').classList.remove('hidden');
-        
-        document.getElementById('useMockDataBtn').addEventListener('click', () => {
-            useMockData = true;
-            document.getElementById('setupAlert').classList.add('hidden');
-            loadQuestions();
-        });
-        
+        // If Supabase isn't configured, automatically use mock data
+        console.log('Supabase not configured, using mock data');
+        useMockData = true;
+        await loadQuestions();
         return;
     }
     
@@ -124,15 +160,23 @@ async function loadQuestions() {
     try {
         let questions = null;
         
-        if (!useMockData) {
-            questions = await loadQuestionsFromSupabase(subject, 20);
+        // Try to load from Supabase if not using mock data
+        if (!useMockData && typeof loadQuestionsFromSupabase === 'function') {
+            try {
+                questions = await loadQuestionsFromSupabase(subject, 20);
+            } catch (supabaseError) {
+                console.warn('Supabase load failed, using mock data:', supabaseError);
+            }
         }
         
+        // Fall back to mock data if no questions loaded
         if (!questions || questions.length === 0) {
+            console.log('Using mock questions for subject:', subject);
             const mockQuestions = MOCK_QUESTIONS[subject.toLowerCase()] || MOCK_QUESTIONS.english;
             questions = Array(20).fill(null).map((_, i) => ({
                 ...mockQuestions[i % mockQuestions.length],
-                id: `mock_${i + 1}`
+                id: `mock_${i + 1}`,
+                question: mockQuestions[i % mockQuestions.length].question + (i >= mockQuestions.length ? ` (Question ${i + 1})` : '')
             }));
         }
         
@@ -140,8 +184,14 @@ async function loadQuestions() {
         userAnswers = new Array(currentQuestions.length).fill(null);
         loadBookmarks();
         
-        document.getElementById('loadingScreen').classList.add('hidden');
-        document.getElementById('practiceInterface').classList.remove('hidden');
+        // Hide loading, show interface
+        const loadingScreen = document.getElementById('loadingScreen');
+        const setupAlert = document.getElementById('setupAlert');
+        const practiceInterface = document.getElementById('practiceInterface');
+        
+        if (loadingScreen) loadingScreen.classList.add('hidden');
+        if (setupAlert) setupAlert.classList.add('hidden');
+        if (practiceInterface) practiceInterface.classList.remove('hidden');
         
         if (isTimedMode) {
             startTimer();
@@ -155,7 +205,28 @@ async function loadQuestions() {
         }
     } catch (error) {
         console.error('Error loading questions:', error);
-        customModal.error('Failed to load questions. Please try again.', 'Loading Error');
+        
+        // Show error but also allow continuing with mock data
+        if (typeof customModal !== 'undefined') {
+            customModal.error('Failed to load questions from database. Using sample questions instead.', 'Loading Error');
+        }
+        
+        // Fallback to mock data on error
+        const mockQuestions = MOCK_QUESTIONS[subject.toLowerCase()] || MOCK_QUESTIONS.english;
+        currentQuestions = Array(20).fill(null).map((_, i) => ({
+            ...mockQuestions[i % mockQuestions.length],
+            id: `mock_${i + 1}`
+        }));
+        userAnswers = new Array(currentQuestions.length).fill(null);
+        
+        const loadingScreen = document.getElementById('loadingScreen');
+        const practiceInterface = document.getElementById('practiceInterface');
+        
+        if (loadingScreen) loadingScreen.classList.add('hidden');
+        if (practiceInterface) practiceInterface.classList.remove('hidden');
+        
+        startTime = Date.now();
+        renderQuestion();
     }
 }
 

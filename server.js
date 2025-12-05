@@ -108,12 +108,27 @@ app.post('/api/verify-payment', async (req, res) => {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   
-  const { reference, email, fullName, expectedCredits, uid } = req.body;
+  const { reference, email, fullName, expectedCredits, idToken } = req.body;
   
-  console.log('Verifying payment:', { reference, email, fullName, expectedCredits, uid });
+  console.log('Verifying payment:', { reference, email, fullName, expectedCredits, hasToken: !!idToken });
   
   if (!reference) {
     return res.status(400).json({ error: 'Payment reference is required' });
+  }
+  
+  // Token verification is required to credit accounts
+  let uid = null;
+  if (idToken && admin && admin.apps.length) {
+    try {
+      const decodedToken = await admin.auth().verifyIdToken(idToken);
+      uid = decodedToken.uid;
+      console.log('Verified user for payment:', uid);
+    } catch (tokenError) {
+      console.error('Token verification failed for payment:', tokenError.message);
+      return res.status(401).json({ success: false, error: 'Invalid authentication token' });
+    }
+  } else if (!idToken) {
+    return res.status(401).json({ success: false, error: 'Authentication required for payment verification' });
   }
 
   const credits = Number(expectedCredits) || 1;
@@ -257,6 +272,146 @@ app.post('/api/verify-payment', async (req, res) => {
   } catch (error) {
     console.error('Payment verification error:', error);
     res.status(500).json({ success: false, error: 'Payment verification failed' });
+  }
+});
+
+// Consume exam credit - called when starting an exam
+app.post('/api/consume-credit', async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  const { idToken } = req.body;
+  
+  if (!idToken) {
+    return res.status(401).json({ success: false, error: 'Authentication required' });
+  }
+  
+  if (!admin || !admin.apps.length) {
+    console.error('Firebase Admin not initialized');
+    return res.status(500).json({ 
+      success: false, 
+      error: 'Server configuration error. Please try again later.' 
+    });
+  }
+  
+  let uid;
+  try {
+    // Verify the ID token and extract the uid - MANDATORY
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    uid = decodedToken.uid;
+  } catch (tokenError) {
+    console.error('Token verification failed:', tokenError.message);
+    return res.status(401).json({ success: false, error: 'Invalid authentication token' });
+  }
+    
+  try {
+    const db = admin.firestore();
+    const userRef = db.collection('users').doc(uid);
+    
+    // Use a transaction to ensure atomic credit consumption
+    const result = await db.runTransaction(async (transaction) => {
+      const userDoc = await transaction.get(userRef);
+      
+      if (!userDoc.exists) {
+        throw new Error('USER_NOT_FOUND');
+      }
+      
+      const userData = userDoc.data();
+      const currentCredits = Number(userData.examCredits) || 0;
+      
+      if (currentCredits <= 0) {
+        throw new Error('NO_CREDITS');
+      }
+      
+      const newCredits = currentCredits - 1;
+      
+      transaction.update(userRef, {
+        examCredits: newCredits,
+        lastExamStartedAt: new Date().toISOString()
+      });
+      
+      return { previousCredits: currentCredits, newCredits };
+    });
+    
+    console.log(`✅ Credit consumed for user ${uid}: ${result.previousCredits} -> ${result.newCredits}`);
+    
+    res.json({
+      success: true,
+      message: 'Exam credit consumed',
+      data: {
+        previousCredits: result.previousCredits,
+        remainingCredits: result.newCredits
+      }
+    });
+    
+  } catch (error) {
+    console.error('Consume credit error:', error);
+    
+    if (error.message === 'USER_NOT_FOUND') {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'User profile not found. Please refresh and try again.' 
+      });
+    }
+    
+    if (error.message === 'NO_CREDITS') {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'No exam credits available. Please purchase credits to continue.' 
+      });
+    }
+    
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to start exam. Please try again.' 
+    });
+  }
+});
+
+// Get user credits (for checking without modifying)
+app.post('/api/get-credits', async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
+  const { idToken } = req.body;
+  
+  if (!idToken) {
+    return res.status(401).json({ success: false, error: 'Authentication required' });
+  }
+  
+  if (!admin || !admin.apps.length) {
+    return res.status(500).json({ success: false, error: 'Server not configured' });
+  }
+  
+  let uid;
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    uid = decodedToken.uid;
+  } catch (tokenError) {
+    console.error('Token verification failed:', tokenError.message);
+    return res.status(401).json({ success: false, error: 'Invalid authentication token' });
+  }
+  
+  try {
+    const db = admin.firestore();
+    const userDoc = await db.collection('users').doc(uid).get();
+    
+    if (!userDoc.exists) {
+      return res.json({ success: true, credits: 0 });
+    }
+    
+    const credits = Number(userDoc.data().examCredits) || 0;
+    res.json({ success: true, credits });
+    
+  } catch (error) {
+    console.error('Get credits error:', error);
+    res.status(500).json({ success: false, error: 'Failed to get credits' });
   }
 });
 
