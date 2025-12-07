@@ -489,6 +489,87 @@ app.get('/download/app.apk', (req, res) => {
   }
 });
 
+// AI Chat endpoint - Uses OpenRouter with Amazon Nova model
+app.post('/api/chat', async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Content-Type', 'application/json');
+
+  const { question, history } = req.body;
+
+  if (!question) {
+    return res.status(400).json({ error: 'Question is required' });
+  }
+
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    console.error('OPENROUTER_API_KEY is not configured');
+    return res.status(500).json({ error: 'AI service not configured. Please add your OpenRouter API key.' });
+  }
+
+  try {
+    // Build conversation history
+    const chatHistory = Array.isArray(history) ? history : [];
+    
+    // System prompt for JambGenius AI tutor
+    const systemMessage = {
+      role: 'system',
+      content: `You are JambGenius AI, a highly knowledgeable and friendly JAMB exam tutor assistant for Nigerian students.
+
+Your role is to help students prepare for the Joint Admissions and Matriculation Board (JAMB) examination.
+
+When answering questions:
+- Academic subjects: Explain clearly with examples relevant to JAMB syllabus
+- Exam tips: Give practical, actionable advice for JAMB success
+- Math problems: Show step-by-step solutions
+- Definitions: Give clear, concise explanations
+- Use of English: Help with comprehension, grammar, and vocabulary
+
+Be encouraging, supportive, and use markdown formatting for better readability when appropriate.`
+    };
+
+    // Build messages array
+    const messages = [
+      systemMessage,
+      ...chatHistory,
+      { role: 'user', content: question }
+    ];
+
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'X-Title': 'JambGenius AI'
+      },
+      body: JSON.stringify({
+        model: 'amazon/nova-2-lite-v1:free',
+        messages: messages
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.error) {
+      console.error('OpenRouter API error:', data.error);
+      return res.status(500).json({ error: 'AI service error: ' + (data.error.message || 'Unknown error') });
+    }
+
+    const answer = data?.choices?.[0]?.message?.content || 'I could not generate a response. Please try again.';
+
+    // Return updated history for the frontend to maintain
+    const updatedHistory = [
+      ...chatHistory,
+      { role: 'user', content: question },
+      { role: 'assistant', content: answer }
+    ];
+
+    return res.json({ answer, history: updatedHistory });
+  } catch (error) {
+    console.error('Error calling OpenRouter API:', error);
+    return res.status(500).json({ error: 'Failed to get AI response' });
+  }
+});
+
 // SPA Fallback Route - Serve index.html for all non-API requests
 // This allows client-side routing to work properly
 app.get('*', (req, res) => {
