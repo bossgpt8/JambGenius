@@ -1,4 +1,4 @@
-// AI Boss Chat Handler for Chatroom
+// AI Boss Chat Handler for Chatroom - Uses OpenRouter API
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -19,52 +19,48 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Question is required' });
   }
 
-  const geminiApiKey = process.env.GEMINI_API_KEY;
-  if (!geminiApiKey) {
-    console.error('GEMINI_API_KEY is not configured');
-    return res.status(500).json({ error: 'AI service not configured' });
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    console.error('OPENROUTER_API_KEY is not configured');
+    return res.status(500).json({ error: 'AI service not configured. Please add your OpenRouter API key.' });
   }
 
   try {
-    const prompt = `You are JambGenius Boss, a helpful JAMB exam tutor assistant in a student chatroom. A student asked you: "${question}"
+    const systemMessage = {
+      role: 'system',
+      content: `You are JambGenius Boss, a helpful JAMB exam tutor assistant in a student chatroom. Provide helpful, concise answers (1-2 sentences max) that are relevant to JAMB exam preparation. Be friendly and encouraging!`
+    };
 
-Provide a helpful, concise answer (1-2 sentences max) that's relevant to JAMB exam preparation. Be friendly and encouraging!`;
+    const messages = [
+      systemMessage,
+      { role: 'user', content: question }
+    ];
 
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent', {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-goog-api-key': geminiApiKey
+        'Authorization': `Bearer ${apiKey}`,
+        'X-Title': 'JambGenius Boss'
       },
       body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: prompt
-              }
-            ]
-          }
-        ],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 150
-        }
+        model: 'amazon/nova-2-lite-v1:free',
+        messages: messages
       })
     });
 
     const data = await response.json();
 
     if (data.error) {
-      console.error('Gemini API error:', data.error);
-      return res.status(500).json({ error: 'AI service error' });
+      console.error('OpenRouter API error:', data.error);
+      return res.status(500).json({ error: 'AI service error: ' + (data.error.message || 'Unknown error') });
     }
 
-    const answer = data.candidates?.[0]?.content?.parts?.[0]?.text || 'I could not generate a response. Please try again.';
+    const answer = data?.choices?.[0]?.message?.content || 'I could not generate a response. Please try again.';
 
     return res.status(200).json({ answer });
   } catch (error) {
-    console.error('Error calling Gemini API:', error);
+    console.error('Error calling OpenRouter API:', error);
     return res.status(500).json({ error: 'Failed to get AI response' });
   }
 };

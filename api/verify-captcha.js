@@ -20,47 +20,46 @@ module.exports = async (req, res) => {
     return res.status(400).json({ success: false, error: 'Captcha token is required' });
   }
 
-  const hcaptchaSecretKey = process.env.HCAPTCHA_SECRET_KEY;
+  const turnstileSecretKey = process.env.TURNSTILE_SECRET_KEY;
   
-  // Development/testing mode: allow requests if secret key is not set
-  if (!hcaptchaSecretKey) {
-    console.warn('⚠️ hCaptcha secret key not configured - allowing verification for development');
+  if (!turnstileSecretKey) {
+    console.warn('⚠️ Turnstile secret key not configured - allowing verification for development');
     return res.status(200).json({ success: true });
   }
 
-  const postData = new URLSearchParams({
-    secret: hcaptchaSecretKey,
+  const postData = JSON.stringify({
+    secret: turnstileSecretKey,
     response: token
-  }).toString();
+  });
 
   const options = {
-    hostname: 'hcaptcha.com',
+    hostname: 'challenges.cloudflare.com',
     port: 443,
-    path: '/siteverify',
+    path: '/turnstile/v0/siteverify',
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/json',
       'Content-Length': Buffer.byteLength(postData)
     }
   };
 
   return new Promise((resolve) => {
-    const hcaptchaRequest = https.request(options, (hcaptchaRes) => {
+    const turnstileRequest = https.request(options, (turnstileRes) => {
       let data = '';
 
-      hcaptchaRes.on('data', (chunk) => {
+      turnstileRes.on('data', (chunk) => {
         data += chunk;
       });
 
-      hcaptchaRes.on('end', () => {
+      turnstileRes.on('end', () => {
         try {
           const result = JSON.parse(data);
-          console.log('hCaptcha verification response:', result);
+          console.log('Turnstile verification response:', result);
 
           if (result.success) {
             res.status(200).json({ success: true });
           } else {
-            console.error('hCaptcha verification failed:', result);
+            console.error('Turnstile verification failed:', result);
             res.status(400).json({
               success: false,
               error: 'Verification failed',
@@ -69,20 +68,20 @@ module.exports = async (req, res) => {
           }
           resolve();
         } catch (error) {
-          console.error('Error parsing hCaptcha response:', error);
+          console.error('Error parsing Turnstile response:', error);
           res.status(500).json({ success: false, error: 'Internal server error' });
           resolve();
         }
       });
     });
 
-    hcaptchaRequest.on('error', (error) => {
-      console.error('hCaptcha request error:', error);
+    turnstileRequest.on('error', (error) => {
+      console.error('Turnstile request error:', error);
       res.status(500).json({ success: false, error: 'Verification failed' });
       resolve();
     });
 
-    hcaptchaRequest.write(postData);
-    hcaptchaRequest.end();
+    turnstileRequest.write(postData);
+    turnstileRequest.end();
   });
 };
