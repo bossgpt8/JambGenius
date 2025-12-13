@@ -1,33 +1,34 @@
-// Vercel Serverless Function for AI Answer Explanations using Google Gemini
+// Vercel Serverless Function for AI Answer Explanations using OpenRouter
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Added Authorization
+    res.setHeader('Content-Type', 'application/json');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
 
-  const { question, options, correctAnswer, userAnswer } = req.body;
+    const { question, options, correctAnswer, userAnswer } = req.body;
 
-  if (!question || !correctAnswer) {
-    return res.status(400).json({ error: 'Question and correctAnswer are required' });
-  }
+    if (!question || !correctAnswer) {
+        return res.status(400).json({ error: 'Question and correctAnswer are required' });
+    }
 
-  const geminiApiKey = process.env.GEMINI_API_KEY;
-  if (!geminiApiKey) {
-    console.error('GEMINI_API_KEY is not configured');
-    return res.status(500).json({ error: 'AI service not configured' });
-  }
+    // --- CHANGE 1: Use OpenRouter API Key ---
+    const openRouterApiKey = process.env.OPENROUTER_API_KEY; 
+    if (!openRouterApiKey) {
+        console.error('OPENROUTER_API_KEY is not configured');
+        return res.status(500).json({ error: 'AI service not configured' });
+    }
 
-  try {
-    const prompt = `You are a JAMB exam tutor. A student is practicing for the JAMB UTME exam. 
-
+    try {
+        // Build the prompt as a single string for the Llama model
+        const prompt = `You are a JAMB exam tutor. A student is practicing for the JAMB UTME exam. 
 Question: ${question}
 
 Options:
@@ -42,52 +43,59 @@ Please provide a clear, concise explanation in 2-3 sentences:
 
 Keep it educational and encouraging.`;
 
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': geminiApiKey
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: prompt
-              }
-            ]
-          }
-        ],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 200
+        // --- CHANGE 2 & 3: API URL and Headers ---
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // --- CHANGE 4: Authorization Header ---
+                'Authorization': `Bearer ${openRouterApiKey}`, 
+                // Optional headers for OpenRouter visibility
+                'HTTP-Referer': 'https://your-jamb-app.vercel.app', // Replace with your domain
+                'X-Title': 'JAMB Genius Tutor' 
+            },
+            // --- CHANGE 5: Request Body Format (OpenAI/OpenRouter Style) ---
+            body: JSON.stringify({
+                // --- CHANGE 6: Model Name ---
+                model: 'meta-llama/llama-3.3-70b-instruct:free',
+                messages: [
+                    {
+                        // The entire prompt goes into the user message content
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                // Generation settings are applied to the body
+                temperature: 0.7,
+                max_tokens: 200 // Note: Changed to max_tokens for consistency with OpenAI/OpenRouter
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.text();
+            console.error('OpenRouter API error:', response.status, errorData);
+            return res.status(response.status).json({ error: 'Failed to generate explanation from AI service' });
         }
-      })
-    });
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('Gemini API error:', response.status, errorData);
-      return res.status(response.status).json({ error: 'Failed to generate explanation' });
+        const data = await response.json();
+
+        // --- CHANGE 7: Response Parsing ---
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+            const explanation = data.choices[0].message.content;
+            return res.status(200).json({
+                success: true,
+                explanation: explanation
+            });
+        }
+
+        console.error('No explanation generated by Llama model:', JSON.stringify(data));
+        return res.status(200).json({
+            success: false,
+            error: 'No explanation generated'
+        });
+
+    } catch (error) {
+        console.error('Error calling OpenRouter API:', error);
+        return res.status(500).json({ error: 'Internal server error' });
     }
-
-    const data = await response.json();
-
-    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-      const explanation = data.candidates[0].content.parts[0].text;
-      return res.status(200).json({
-        success: true,
-        explanation: explanation
-      });
-    }
-
-    return res.status(200).json({
-      success: false,
-      error: 'No explanation generated'
-    });
-
-  } catch (error) {
-    console.error('Error calling Gemini API:', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
 };
