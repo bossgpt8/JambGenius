@@ -41,66 +41,41 @@ app.post('/api/verify-captcha', async (req, res) => {
     return res.status(400).json({ success: false, error: 'Captcha token is required' });
   }
 
-  const hcaptchaSecretKey = process.env.HCAPTCHA_SECRET_KEY || '0x0000000000000000000000000000000000000000';
+  const turnstileSecretKey = process.env.TURNSTILE_SECRET_KEY;
   
-  // Development mode: skip verification if secret key is not set
-  if (!process.env.HCAPTCHA_SECRET_KEY) {
-    console.warn('⚠️ hCaptcha secret key not configured - allowing all requests for development');
+  if (!turnstileSecretKey) {
+    console.warn('⚠️ Turnstile secret key not configured - allowing all requests for development');
     return res.json({ success: true });
   }
   
-  const postData = new URLSearchParams({
-    secret: hcaptchaSecretKey,
-    response: token
-  }).toString();
-  
-  const options = {
-    hostname: 'hcaptcha.com',
-    port: 443,
-    path: '/siteverify',
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Content-Length': Buffer.byteLength(postData)
+  try {
+    const formData = new URLSearchParams();
+    formData.append('secret', turnstileSecretKey);
+    formData.append('response', token);
+    
+    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formData.toString()
+    });
+    
+    const result = await response.json();
+    console.log('Turnstile verification response:', result);
+    
+    if (result.success) {
+      return res.json({ success: true });
+    } else {
+      console.error('Turnstile verification failed:', result);
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Verification failed',
+        errorCodes: result['error-codes']
+      });
     }
-  };
-
-  const hcaptchaRequest = https.request(options, (hcaptchaRes) => {
-    let data = '';
-    
-    hcaptchaRes.on('data', (chunk) => {
-      data += chunk;
-    });
-    
-    hcaptchaRes.on('end', () => {
-      try {
-        const result = JSON.parse(data);
-        console.log('hCaptcha verification response:', result);
-        
-        if (result.success) {
-          return res.json({ success: true });
-        } else {
-          console.error('hCaptcha verification failed:', result);
-          return res.status(400).json({ 
-            success: false, 
-            error: 'Verification failed',
-            errorCodes: result['error-codes']
-          });
-        }
-      } catch (error) {
-        console.error('Error parsing hCaptcha response:', error);
-        res.status(500).json({ success: false, error: 'Internal server error' });
-      }
-    });
-  });
-
-  hcaptchaRequest.on('error', (error) => {
-    console.error('hCaptcha request error:', error);
+  } catch (error) {
+    console.error('Turnstile verification error:', error);
     res.status(500).json({ success: false, error: 'Verification failed' });
-  });
-
-  hcaptchaRequest.write(postData);
-  hcaptchaRequest.end();
+  }
 });
 
 app.post('/api/verify-payment', async (req, res) => {

@@ -34,6 +34,87 @@ let currentUser = null;
 const urlParams = new URLSearchParams(window.location.search);
 const subject = urlParams.get('subject') || 'english';
 
+// Helper function to validate image URLs (prevent XSS via data URIs, javascript:, or SVG)
+function isValidImageUrl(url) {
+    if (!url || typeof url !== 'string') return false;
+    const trimmed = url.trim();
+    
+    try {
+        // Parse the URL to extract components
+        let parsedUrl;
+        if (trimmed.startsWith('/')) {
+            // Relative URL - construct with a base to parse
+            parsedUrl = new URL(trimmed, window.location.origin);
+        } else {
+            parsedUrl = new URL(trimmed);
+        }
+        
+        // Only allow http and https protocols
+        if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+            return false;
+        }
+        
+        // Get the pathname without query strings or fragments
+        const pathname = parsedUrl.pathname.toLowerCase();
+        
+        // Whitelist safe image extensions only
+        const safeExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp'];
+        const hasValidExtension = safeExtensions.some(ext => pathname.endsWith(ext));
+        
+        return hasValidExtension;
+    } catch (e) {
+        // Invalid URL format
+        return false;
+    }
+}
+
+// Helper function to escape HTML and convert math notation for MathJax
+function escapeHtmlPreserveMath(text) {
+    if (!text) return '';
+    
+    // First, escape HTML to prevent XSS
+    const escapeHtml = (str) => {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    };
+    
+    let processed = escapeHtml(text);
+    
+    // Convert common Unicode math notation to LaTeX wrapped in $ delimiters
+    // Superscripts with preceding character: x² → $x^{2}$
+    processed = processed.replace(/(\w)²/g, '$$$1^{2}$$');
+    processed = processed.replace(/(\w)³/g, '$$$1^{3}$$');
+    processed = processed.replace(/(\w)⁴/g, '$$$1^{4}$$');
+    processed = processed.replace(/(\w)⁵/g, '$$$1^{5}$$');
+    processed = processed.replace(/(\w)⁶/g, '$$$1^{6}$$');
+    processed = processed.replace(/(\w)ⁿ/g, '$$$1^{n}$$');
+    
+    // Subscripts with preceding character: x₁ → $x_{1}$
+    processed = processed.replace(/(\w)₀/g, '$$$1_{0}$$');
+    processed = processed.replace(/(\w)₁/g, '$$$1_{1}$$');
+    processed = processed.replace(/(\w)₂/g, '$$$1_{2}$$');
+    processed = processed.replace(/(\w)₃/g, '$$$1_{3}$$');
+    
+    // Math symbols - wrap individually
+    processed = processed.replace(/√(\d+)/g, '$$\\sqrt{$1}$$'); // √25 → $\sqrt{25}$
+    processed = processed.replace(/√(\w)/g, '$$\\sqrt{$1}$$');  // √x → $\sqrt{x}$
+    processed = processed.replace(/π/g, '$$\\pi$$');
+    processed = processed.replace(/θ/g, '$$\\theta$$');
+    processed = processed.replace(/α/g, '$$\\alpha$$');
+    processed = processed.replace(/β/g, '$$\\beta$$');
+    processed = processed.replace(/∞/g, '$$\\infty$$');
+    processed = processed.replace(/≤/g, '$$\\leq$$');
+    processed = processed.replace(/≥/g, '$$\\geq$$');
+    processed = processed.replace(/×/g, '$$\\times$$');
+    processed = processed.replace(/÷/g, '$$\\div$$');
+    processed = processed.replace(/±/g, '$$\\pm$$');
+    processed = processed.replace(/≠/g, '$$\\neq$$');
+    processed = processed.replace(/∴/g, '$$\\therefore$$');
+    
+    return processed;
+}
+
 // Utility function to shuffle an array
 function shuffleArray(array) {
     const shuffled = [...array];
@@ -308,7 +389,32 @@ function renderQuestion() {
     
     document.getElementById('currentQuestionNum').textContent = currentQuestionIndex + 1;
     document.getElementById('questionCounter').textContent = `${currentQuestionIndex + 1}/${currentQuestions.length}`;
-    document.getElementById('questionText').textContent = question.question;
+    
+    // Use innerHTML for math rendering, escape HTML but preserve LaTeX
+    const questionTextEl = document.getElementById('questionText');
+    questionTextEl.innerHTML = escapeHtmlPreserveMath(question.question);
+    
+    // Render diagram if available (with URL sanitization)
+    const diagramContainer = document.getElementById('diagramContainer');
+    if (diagramContainer) {
+        if (question.diagram_url && isValidImageUrl(question.diagram_url)) {
+            const img = document.createElement('img');
+            img.src = question.diagram_url;
+            img.alt = 'Question diagram';
+            img.className = 'max-w-full h-auto rounded-lg border border-gray-200 my-4';
+            diagramContainer.innerHTML = '';
+            diagramContainer.appendChild(img);
+            diagramContainer.classList.remove('hidden');
+        } else {
+            diagramContainer.innerHTML = '';
+            diagramContainer.classList.add('hidden');
+        }
+    }
+    
+    // Trigger MathJax to render any math in the question
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+        MathJax.typesetPromise([questionTextEl]).catch(err => console.log('MathJax error:', err));
+    }
     
     // Update bookmark icon
     const bookmarkBtn = document.getElementById('bookmarkBtn');
@@ -335,18 +441,24 @@ function renderQuestion() {
             optionDiv.classList.add('border-primary-500', 'bg-primary-50');
         }
         
+        const optionText = escapeHtmlPreserveMath(question[`option_${opt.toLowerCase()}`] || '');
         optionDiv.innerHTML = `
             <div class="flex items-center">
                 <div class="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center mr-3 font-semibold">
                     ${opt}
                 </div>
-                <div class="flex-1">${question[`option_${opt.toLowerCase()}`]}</div>
+                <div class="flex-1 option-text">${optionText}</div>
             </div>
         `;
         
         optionDiv.addEventListener('click', () => selectOption(opt));
         optionsContainer.appendChild(optionDiv);
     });
+    
+    // Trigger MathJax to render math in all options
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+        MathJax.typesetPromise([optionsContainer]).catch(err => console.log('MathJax options error:', err));
+    }
     
     if (userAnswers[currentQuestionIndex]) {
         showFeedback();

@@ -51,7 +51,7 @@ export function showAuthModal() {
         };
         
         setTimeout(() => {
-            initializeHcaptcha();
+            initializeTurnstile();
             document.addEventListener('keydown', handleEscape);
             setTimeout(() => {
                 if (elements.emailSignInBtn) elements.emailSignInBtn.disabled = false;
@@ -82,7 +82,7 @@ function showSignInFormView() {
     if (elements.forgotPasswordForm) elements.forgotPasswordForm.classList.add('hidden');
     if (elements.emailSignInBtn) elements.emailSignInBtn.disabled = true;
     setTimeout(() => {
-        initializeHcaptcha();
+        initializeTurnstile();
         setTimeout(() => {
             if (elements.emailSignInBtn) elements.emailSignInBtn.disabled = false;
         }, 300);
@@ -96,7 +96,7 @@ function showSignUpFormView() {
     if (elements.forgotPasswordForm) elements.forgotPasswordForm.classList.add('hidden');
     if (elements.emailSignUpBtn) elements.emailSignUpBtn.disabled = true;
     setTimeout(() => {
-        initializeHcaptcha();
+        initializeTurnstile();
         setTimeout(() => {
             if (elements.emailSignUpBtn) elements.emailSignUpBtn.disabled = false;
         }, 300);
@@ -208,30 +208,23 @@ async function signInWithEmail() {
         return;
     }
 
-    if (typeof hcaptcha === 'undefined' || !window.signInHcaptchaId) {
-        throw new Error('Verification still loading. Please wait a moment and try again.');
-        return;
-    }
-
-    const hcaptchaResponse = hcaptcha.getResponse(window.signInHcaptchaId);
-    if (!hcaptchaResponse) {
-        throw new Error('Please complete the hCaptcha verification');
-        return;
+    const turnstileResponse = window.signInTurnstileToken;
+    if (!turnstileResponse) {
+        throw new Error('Please wait for verification to complete');
     }
 
     try {
-        const verifyResult = await verifyCaptcha(hcaptchaResponse);
+        const verifyResult = await verifyCaptcha(turnstileResponse);
         if (!verifyResult.success) {
-            throw new Error(' Verification failed. Please try again.');
-            hcaptcha.reset(window.signInHcaptchaId);
-            return;
+            resetTurnstileWidget('signIn');
+            throw new Error('Verification failed. Please try again.');
         }
 
         await signInWithEmailAndPassword(auth, email, password);
         hideAuthModal();
     } catch (error) {
         console.error('Error signing in:', error);
-        hcaptcha.reset(window.signInHcaptchaId);
+        resetTurnstileWidget('signIn');
         if (error.code === 'auth/user-not-found') {
             throw new Error(' No account found with this email. Please sign up first.');
         } else if (error.code === 'auth/wrong-password') {
@@ -272,23 +265,16 @@ async function signUpWithEmail() {
         return;
     }
 
-    if (typeof hcaptcha === 'undefined' || !window.signUpHcaptchaId) {
-        throw new Error('Verification still loading. Please wait a moment and try again.');
-        return;
-    }
-
-    const hcaptchaResponse = hcaptcha.getResponse(window.signUpHcaptchaId);
-    if (!hcaptchaResponse) {
-        throw new Error('Please complete the hCaptcha verification');
-        return;
+    const turnstileResponse = window.signUpTurnstileToken;
+    if (!turnstileResponse) {
+        throw new Error('Please wait for verification to complete');
     }
 
     try {
-        const verifyResult = await verifyCaptcha(hcaptchaResponse);
+        const verifyResult = await verifyCaptcha(turnstileResponse);
         if (!verifyResult.success) {
-            throw new Error(' Verification failed. Please try again.');
-            hcaptcha.reset(window.signUpHcaptchaId);
-            return;
+            resetTurnstileWidget('signUp');
+            throw new Error('Verification failed. Please try again.');
         }
 
         const result = await createUserWithEmailAndPassword(auth, email, password);
@@ -297,7 +283,7 @@ async function signUpWithEmail() {
         hideAuthModal();
     } catch (error) {
         console.error('Error signing up:', error);
-        hcaptcha.reset(window.signUpHcaptchaId);
+        resetTurnstileWidget('signUp');
         if (error.code === 'auth/email-already-in-use') {
             throw new Error('This email is already registered This email is already registered. Please sign in instead.');
         } else if (error.code === 'auth/invalid-email') {
@@ -334,49 +320,78 @@ async function resetPassword() {
     }
 }
 
-function initializeHcaptcha() {
-    if (typeof hcaptcha === 'undefined' || typeof CONFIG === 'undefined') {
-        console.warn('hCaptcha or CONFIG not yet available, retrying...');
-        setTimeout(initializeHcaptcha, 100);
+function initializeTurnstile() {
+    if (typeof turnstile === 'undefined' || typeof CONFIG === 'undefined') {
+        console.warn('Turnstile or CONFIG not yet available, retrying...');
+        setTimeout(initializeTurnstile, 100);
         return;
     }
 
     try {
-        const signInHcaptchaElement = document.getElementById('signInHcaptcha');
-        const signUpHcaptchaElement = document.getElementById('signUpHcaptcha');
+        const signInTurnstileElement = document.getElementById('signInTurnstile');
+        const signUpTurnstileElement = document.getElementById('signUpTurnstile');
 
-        if (signInHcaptchaElement) {
-            if (window.signInHcaptchaId !== undefined) {
+        if (signInTurnstileElement) {
+            if (window.signInTurnstileId !== undefined) {
                 try {
-                    hcaptcha.remove(window.signInHcaptchaId);
+                    turnstile.remove(window.signInTurnstileId);
                 } catch (e) {
                     console.log('Could not remove existing sign-in widget:', e);
                 }
             }
-            signInHcaptchaElement.setAttribute('data-sitekey', CONFIG.hcaptcha.siteKey);
-            window.signInHcaptchaId = hcaptcha.render('signInHcaptcha', {
-                sitekey: CONFIG.hcaptcha.siteKey,
-                theme: 'light'
+            signInTurnstileElement.innerHTML = '';
+            window.signInTurnstileToken = null;
+            window.signInTurnstileId = turnstile.render('#signInTurnstile', {
+                sitekey: CONFIG.turnstile.siteKey,
+                theme: 'light',
+                callback: function(token) {
+                    window.signInTurnstileToken = token;
+                },
+                'expired-callback': function() {
+                    window.signInTurnstileToken = null;
+                }
             });
         }
 
-        if (signUpHcaptchaElement) {
-            if (window.signUpHcaptchaId !== undefined) {
+        if (signUpTurnstileElement) {
+            if (window.signUpTurnstileId !== undefined) {
                 try {
-                    hcaptcha.remove(window.signUpHcaptchaId);
+                    turnstile.remove(window.signUpTurnstileId);
                 } catch (e) {
                     console.log('Could not remove existing sign-up widget:', e);
                 }
             }
-            signUpHcaptchaElement.setAttribute('data-sitekey', CONFIG.hcaptcha.siteKey);
-            window.signUpHcaptchaId = hcaptcha.render('signUpHcaptcha', {
-                sitekey: CONFIG.hcaptcha.siteKey,
-                theme: 'light'
+            signUpTurnstileElement.innerHTML = '';
+            window.signUpTurnstileToken = null;
+            window.signUpTurnstileId = turnstile.render('#signUpTurnstile', {
+                sitekey: CONFIG.turnstile.siteKey,
+                theme: 'light',
+                callback: function(token) {
+                    window.signUpTurnstileToken = token;
+                },
+                'expired-callback': function() {
+                    window.signUpTurnstileToken = null;
+                }
             });
         }
-        console.log('hCaptcha widgets initialized successfully');
+        console.log('Turnstile widgets initialized successfully');
     } catch (error) {
-        console.error('Error initializing hCaptcha widgets:', error);
+        console.error('Error initializing Turnstile widgets:', error);
+    }
+}
+
+function resetTurnstileWidget(formType) {
+    if (typeof turnstile === 'undefined') return;
+    try {
+        if (formType === 'signIn' && window.signInTurnstileId) {
+            turnstile.reset(window.signInTurnstileId);
+            window.signInTurnstileToken = null;
+        } else if (formType === 'signUp' && window.signUpTurnstileId) {
+            turnstile.reset(window.signUpTurnstileId);
+            window.signUpTurnstileToken = null;
+        }
+    } catch (e) {
+        console.log('Could not reset Turnstile widget:', e);
     }
 }
 
@@ -387,7 +402,7 @@ export function initializeAuthModal() {
     
     if (!elements.authModal) return;
 
-    initializeHcaptcha();
+    initializeTurnstile();
 
     if (elements.signInBtn) {
         elements.signInBtn.addEventListener('click', showAuthModal);

@@ -282,6 +282,21 @@ function updateNavigation() {
             userAvatar.src = userProfile.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(userProfile.displayName)}&background=3b82f6&color=fff`;
         }
         
+        // Update profile dropdown elements
+        const dropdownAvatar = document.getElementById('dropdownAvatar');
+        const dropdownName = document.getElementById('dropdownName');
+        const dropdownEmail = document.getElementById('dropdownEmail');
+        
+        if (dropdownAvatar) {
+            dropdownAvatar.src = userProfile.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(userProfile.displayName)}&background=3b82f6&color=fff`;
+        }
+        if (dropdownName) {
+            dropdownName.textContent = userProfile.displayName;
+        }
+        if (dropdownEmail) {
+            dropdownEmail.textContent = userProfile.email || '';
+        }
+        
         const profileLinks = document.querySelectorAll('.profile-link');
         profileLinks.forEach(link => {
             link.classList.remove('hidden');

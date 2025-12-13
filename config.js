@@ -12,8 +12,8 @@ let CONFIG = {
   paystack: {
     publicKey: "pk_test_56ea9fe6dc1cc19b965031a6297e3a683f9804af",
   },
-  hcaptcha: {
-    siteKey: "b88a27ee-0c12-42c8-94aa-eb5827ca0c42",
+  turnstile: {
+    siteKey: "0x4AAAAAACGI8VseTrezhqX1",
   },
   pricing: {
     mockExamPrice: 100000,

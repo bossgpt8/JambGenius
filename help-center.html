@@ -107,12 +107,9 @@
                     <a href="profile.html" class="profile-link hidden text-gray-700 hover:text-primary-600 font-medium transition-colors">
                         <i class="fas fa-user-circle mr-1"></i>Profile
                     </a>
-                    <div id="userSection" class="hidden items-center space-x-3">
+                    <div id="userSection" class="hidden items-center space-x-3 cursor-pointer" onclick="window.location.href='profile.html'" title="Go to profile">
                         <img id="userAvatar" src="" alt="User" class="w-8 h-8 rounded-full">
-                        <span id="userName" class="text-gray-700 font-medium"></span>
-                        <button id="signOutBtn" class="text-gray-500 hover:text-gray-700">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </button>
+                        <span id="userName" class="text-gray-700 font-medium hover:text-primary-600 transition-colors"></span>
                     </div>
                     <button id="authBtn" class="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium">
                         Sign In

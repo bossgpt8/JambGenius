@@ -41,148 +41,52 @@
         };
     </script>
     <style>
-        /* Splash Screen Animations */
-        @keyframes slideInFromLeft {
-            from {
-                transform: translateX(-100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideInFromRight {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes fallDown {
-            from {
-                transform: translateY(-100px) scale(0.5);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0) scale(1);
-                opacity: 1;
-            }
-        }
-
-        @keyframes fadeOutSplash {
-            from {
-                opacity: 1;
-            }
-            to {
-                opacity: 0;
-            }
-        }
-
-        @keyframes fadeInContent {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
-        #splashScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            flex-direction: column;
-        }
-
-        .splash-container {
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .splash-logo-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0;
-            font-size: 4rem;
-            font-weight: 800;
-            letter-spacing: -2px;
-        }
-
-        .splash-jamb {
-            color: #2563eb;
-            animation: slideInFromLeft 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-
-        .splash-genius {
-            color: #f97316;
-            animation: slideInFromRight 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards;
-            opacity: 0;
-        }
-
-        .splash-cap {
-            font-size: 3rem;
-            animation: fallDown 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s forwards;
-            opacity: 0;
+        /* Profile Popup Styles */
+        .profile-popup {
             position: absolute;
-            top: 120px;
-        }
-
-        .splash-tagline {
-            font-size: 1rem;
-            color: #64748b;
-            font-weight: 500;
-            margin-top: 10px;
+            right: 0;
+            top: 100%;
+            width: 280px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            border: 1px solid #e5e7eb;
+            z-index: 100;
+            transform-origin: top right;
             opacity: 0;
-            animation: fadeInContent 0.6s ease-in 1.2s forwards;
-        }
-
-        #mainContent {
-            opacity: 1;
-            transition: opacity 0.3s ease-in-out;
+            transform: scale(0.95);
+            pointer-events: none;
+            transition: all 0.2s ease;
         }
         
-        #mainContent.splash-hidden {
-            opacity: 0;
+        .profile-popup.active {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
         }
-
-        @media (max-width: 768px) {
-            .splash-logo-container {
-                font-size: 2.5rem;
-            }
-
-            .splash-cap {
-                font-size: 2rem;
-                top: 80px;
-            }
-
-            .splash-tagline {
-                font-size: 0.875rem;
-            }
+        
+        /* Modern animations */
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+            animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+        .bg-grid-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         }
     </style>
      <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <script src="config.js"></script>
     <script src="custom-modal.js"></script>
     <script src="content-protection.js"></script>
@@ -190,7 +94,6 @@
     <script src="app-detection.js"></script>
     <script src="footer-hide.js"></script>
     <script src="notification-manager.js"></script>
-    <script src="splash-screen.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -206,20 +109,6 @@
     </script>
 </head>
 <body class="bg-gray-50 font-sans">
-    <!-- Splash Screen -->
-    <div id="splashScreen" style="display: none;">
-        <div class="splash-container">
-            <div style="position: relative; height: 120px; display: flex; align-items: center; justify-content: center;">
-                <span class="splash-cap">🎓</span>
-                <div class="splash-logo-container">
-                    <span class="splash-jamb">JAMB</span>
-                    <span class="splash-genius">Genius</span>
-                </div>
-            </div>
-            <p class="splash-tagline">Master Your JAMB UTME</p>
-        </div>
-    </div>
-
     <!-- Offline Indicator -->
     <div id="offline-indicator" class="hidden fixed top-0 left-0 right-0 bg-amber-500 text-white px-4 py-2 flex items-center justify-center space-x-2 z-[60]" style="display: none;">
         <i class="fas fa-wifi-off"></i>
@@ -251,12 +140,41 @@
                     <a href="#exam" class="hidden md:block bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-2 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all font-bold shadow-lg hover:shadow-xl transform hover:scale-105">
                         <i class="fas fa-trophy mr-2"></i>Take Mock Exam
                     </a>
-                    <div id="userInfo" class="hidden items-center space-x-3">
-                        <img id="userAvatar" src="" alt="User" class="w-8 h-8 rounded-full">
-                        <span id="userName" class="text-gray-700 font-medium"></span>
-                        <button id="signOutBtn" class="text-gray-500 hover:text-gray-700">
-                            <i class="fas fa-sign-out-alt"></i>
+                    <div id="userInfo" class="hidden items-center space-x-3 relative">
+                        <button id="profileMenuBtn" class="flex items-center space-x-2 hover:bg-gray-100 rounded-lg px-2 py-1 transition-colors">
+                            <img id="userAvatar" src="" alt="User" class="w-8 h-8 rounded-full">
+                            <span id="userName" class="text-gray-700 font-medium hidden sm:inline"></span>
                         </button>
+                        <div id="profileDropdown" class="hidden absolute right-0 top-12 bg-white rounded-xl shadow-xl border border-gray-200 w-64 z-50">
+                            <div class="p-4 border-b border-gray-200">
+                                <div class="flex items-center gap-3">
+                                    <img id="dropdownAvatar" src="" alt="User" class="w-12 h-12 rounded-full">
+                                    <div>
+                                        <p id="dropdownName" class="font-semibold text-gray-900"></p>
+                                        <p id="dropdownEmail" class="text-sm text-gray-500 truncate"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="py-2">
+                                <a href="profile.html" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 text-gray-700">
+                                    <i class="fas fa-user w-5 text-center"></i>
+                                    <span>My Profile</span>
+                                </a>
+                                <a href="notifications.html" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 text-gray-700">
+                                    <i class="fas fa-bell w-5 text-center"></i>
+                                    <span>Notifications</span>
+                                </a>
+                                <a href="analytics.html" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 text-gray-700">
+                                    <i class="fas fa-chart-line w-5 text-center"></i>
+                                    <span>My Analytics</span>
+                                </a>
+                                <hr class="my-2">
+                                <button id="dropdownSignOut" class="flex items-center gap-3 px-4 py-2 hover:bg-red-50 text-red-600 w-full">
+                                    <i class="fas fa-sign-out-alt w-5 text-center"></i>
+                                    <span>Sign Out</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     <button id="signInBtn" class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium">
                         Sign In
@@ -269,7 +187,7 @@
         </div>
         
         <!-- Mobile Menu -->
-        <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-200">
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-200 max-h-[80vh] overflow-y-auto">
             <div class="px-4 py-3 space-y-3">
                 <a href="#home" class="block text-gray-700 hover:text-primary-600 font-medium py-2">
                     <i class="fas fa-home mr-2"></i>Home
@@ -281,23 +199,35 @@
                     <i class="fas fa-chart-line mr-2"></i>Analytics
                 </a>
                 <a href="daily-challenge.html" class="block text-orange-600 hover:text-orange-700 font-bold py-2 bg-orange-50 rounded-lg px-3">
-                    <i class="fas fa-trophy mr-2"></i>🔥 Daily Challenge
+                    <i class="fas fa-trophy mr-2"></i>Daily Challenge
                 </a>
                 <a href="chat.html" class="block text-purple-600 hover:text-purple-700 font-bold py-2 bg-purple-50 rounded-lg px-3">
-                    <i class="fas fa-robot mr-2"></i>✨ AI Tutor
+                    <i class="fas fa-robot mr-2"></i>AI Tutor
+                </a>
+                <a href="chatroom.html" class="block text-gray-700 hover:text-primary-600 font-medium py-2">
+                    <i class="fas fa-comments mr-2"></i>Community Chat
                 </a>
                 <a href="notifications.html" class="block text-gray-700 hover:text-primary-600 font-medium py-2">
                     <i class="fas fa-bell mr-2"></i>Notifications
                 </a>
+                <a href="study-tips.html" class="block text-gray-700 hover:text-primary-600 font-medium py-2">
+                    <i class="fas fa-lightbulb mr-2"></i>Study Tips
+                </a>
+                <a href="jamb-syllabus.html" class="block text-gray-700 hover:text-primary-600 font-medium py-2">
+                    <i class="fas fa-list mr-2"></i>JAMB Syllabus
+                </a>
                 <hr class="my-2 border-gray-200">
                 <a href="help-center.html" class="block text-gray-700 hover:text-primary-600 font-medium py-2">
-                    <i class="fas fa-question-circle mr-2"></i>FAQ
-                </a>
-                <a href="help-center.html" class="block text-gray-700 hover:text-primary-600 font-medium py-2">
-                    <i class="fas fa-info-circle mr-2"></i>About Us
+                    <i class="fas fa-question-circle mr-2"></i>Help Center
                 </a>
                 <a href="contact-us.html" class="block text-gray-700 hover:text-primary-600 font-medium py-2">
-                    <i class="fas fa-envelope mr-2"></i>Contact
+                    <i class="fas fa-envelope mr-2"></i>Contact Us
+                </a>
+                <a href="terms-of-service.html" class="block text-gray-700 hover:text-primary-600 font-medium py-2">
+                    <i class="fas fa-file-contract mr-2"></i>Terms of Service
+                </a>
+                <a href="privacy-policy.html" class="block text-gray-700 hover:text-primary-600 font-medium py-2">
+                    <i class="fas fa-shield-alt mr-2"></i>Privacy Policy
                 </a>
                 <hr class="my-2 border-gray-200">
                 <button onclick="appDetector.downloadApp()" class="w-full block bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold py-2 px-3 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all text-center">
@@ -311,42 +241,64 @@
     </nav>
 
     <!-- Hero Section -->
-    <section id="home" class="bg-gradient-to-br from-primary-50 to-blue-100 py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid lg:grid-cols-2 gap-12 items-center">
-                <div>
-                    <h1 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-                        Master Your <span class="text-primary-600">JAMB UTME</span> with Nigeria's #1 Mock Platform
+    <section id="home" class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8 sm:py-12 lg:py-16 relative overflow-hidden">
+        <div class="absolute inset-0 bg-grid-pattern opacity-5"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
+                <div class="text-center lg:text-left">
+                    <div class="inline-flex items-center bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium mb-3 sm:mb-4">
+                        <i class="fas fa-star mr-1.5 sm:mr-2 text-yellow-500"></i>Trusted by 10,000+ Students
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight">
+                        Ace Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">JAMB UTME</span> with Smart Prep
                     </h1>
-                    <p class="text-xl text-gray-600 mb-8">
-                        Practice with authentic questions, take timed exams, and track your progress. Join thousands of students achieving their university dreams.
+                    <p class="text-sm sm:text-base lg:text-lg text-gray-600 mb-5 sm:mb-6 leading-relaxed max-w-lg mx-auto lg:mx-0">
+                        Practice with real JAMB questions, take timed mock exams, and track your progress with detailed analytics.
                     </p>
-                    <div class="flex flex-col sm:flex-row gap-4">
-                      <button id="start-practice" class="bg-white border-2 border-primary-600 text-primary-600 px-8 py-4 rounded-lg hover:bg-primary-50 transition-colors font-semibold text-lg relative">
+                    <div class="flex flex-col sm:flex-row gap-3 mb-5 sm:mb-8 justify-center lg:justify-start">
+                      <button id="start-practice" class="w-full sm:w-auto bg-white border-2 border-blue-600 text-blue-600 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl hover:bg-blue-50 transition-all font-semibold relative group text-sm sm:text-base">
                         <span class="loading-spinner hidden absolute inset-0 flex items-center justify-center">
-                          <span class="animate-spin inline-block w-5 h-5 border-2 border-primary-600 border-t-transparent rounded-full"></span>
+                          <span class="animate-spin inline-block w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full"></span>
                         </span>
-                        <span class="button-text"><i class="fas fa-book-open mr-2"></i>Start Free Practice</span>
+                        <span class="button-text flex items-center justify-center"><i class="fas fa-book-open mr-2 group-hover:animate-pulse"></i>Start Free Practice</span>
                       </button>
-                      <button id="take-mock-exam" class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-4 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all font-bold text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 relative overflow-hidden">
+                      <button id="take-mock-exam" class="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-red-500 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl hover:from-orange-600 hover:to-red-600 transition-all font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 relative overflow-hidden text-sm sm:text-base">
                         <span class="loading-spinner hidden absolute inset-0 flex items-center justify-center">
                           <span class="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full"></span>
                         </span>
                         <span class="absolute top-0 right-0 bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded-bl-lg">₦1,000</span>
-                        <span class="button-text"><i class="fas fa-trophy mr-2"></i>Take Mock Exam</span>
+                        <span class="button-text flex items-center justify-center"><i class="fas fa-trophy mr-2"></i>Take Mock Exam</span>
                       </button>
                     </div>
+                    <div class="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500 justify-center lg:justify-start">
+                        <div class="flex items-center justify-center lg:justify-start"><i class="fas fa-check-circle text-green-500 mr-1.5 sm:mr-2"></i>No registration needed</div>
+                        <div class="flex items-center justify-center lg:justify-start"><i class="fas fa-check-circle text-green-500 mr-1.5 sm:mr-2"></i>All subjects covered</div>
+                        <div class="flex items-center justify-center lg:justify-start"><i class="fas fa-check-circle text-green-500 mr-1.5 sm:mr-2"></i>Updated 2025 syllabus</div>
+                    </div>
                 </div>
-                <div class="relative">
-                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" alt="Students studying together" class="rounded-2xl shadow-2xl">
-                    <div class="absolute -bottom-6 -left-6 bg-white p-6 rounded-xl shadow-lg">
+                <div class="relative hidden lg:block">
+                    <div class="absolute -top-4 -right-4 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+                    <div class="absolute -bottom-8 -left-4 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" alt="Students studying together" class="rounded-2xl shadow-2xl relative z-10">
+                    <div class="absolute -bottom-4 -left-4 bg-white p-4 rounded-xl shadow-lg z-20">
                         <div class="flex items-center space-x-3">
-                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-check text-green-600 text-xl"></i>
+                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-check text-green-600"></i>
                             </div>
                             <div>
-                                <div class="font-semibold text-gray-900">Real JAMB Format</div>
-                                <div class="text-sm text-gray-600">180 Questions • 2 Hours</div>
+                                <div class="font-semibold text-gray-900 text-sm">Real JAMB Format</div>
+                                <div class="text-xs text-gray-500">180 Questions • 2 Hours</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute top-4 -right-2 bg-white p-3 rounded-xl shadow-lg z-20">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-fire text-orange-500 text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-gray-900 text-sm">4.9/5</div>
+                                <div class="text-xs text-gray-500">Rating</div>
                             </div>
                         </div>
                     </div>
@@ -354,45 +306,69 @@
             </div>
         </div>
     </section>
+    
+    <!-- Stats Section -->
+    <section class="py-6 sm:py-8 bg-white border-b border-gray-100">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 text-center">
+                <div class="p-3 sm:p-0">
+                    <div class="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600">10K+</div>
+                    <div class="text-xs sm:text-sm text-gray-500">Active Students</div>
+                </div>
+                <div class="p-3 sm:p-0">
+                    <div class="text-xl sm:text-2xl lg:text-3xl font-bold text-green-600">50K+</div>
+                    <div class="text-xs sm:text-sm text-gray-500">Questions</div>
+                </div>
+                <div class="p-3 sm:p-0">
+                    <div class="text-xl sm:text-2xl lg:text-3xl font-bold text-orange-600">15+</div>
+                    <div class="text-xs sm:text-sm text-gray-500">Subjects</div>
+                </div>
+                <div class="p-3 sm:p-0">
+                    <div class="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-600">95%</div>
+                    <div class="text-xs sm:text-sm text-gray-500">Success Rate</div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Mode Selection Dashboard -->
-    <section id="dashboard" class="py-16 bg-white">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">Choose Your Study Mode</h2>
-                <p class="text-lg text-gray-600">Practice freely or take a full mock exam experience</p>
+    <section id="dashboard" class="py-8 sm:py-12 bg-gray-50">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-6 sm:mb-8">
+                <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">Choose Your Study Mode</h2>
+                <p class="text-sm sm:text-base text-gray-600">Practice freely or take a full mock exam</p>
             </div>
-            <div class="grid md:grid-cols-2 gap-8">
+            <div class="grid md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
                 <!-- Practice Mode Card -->
-                <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 border border-green-100 hover:shadow-lg transition-shadow">
-                    <div class="flex items-center mb-6">
-                        <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center mr-4">
-                            <i class="fas fa-book-open text-white text-xl"></i>
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8 border border-green-100 hover:shadow-lg transition-shadow">
+                    <div class="flex items-center mb-4 sm:mb-6">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-500 rounded-lg sm:rounded-xl flex items-center justify-center mr-3 sm:mr-4">
+                            <i class="fas fa-book-open text-white text-lg sm:text-xl"></i>
                         </div>
                         <div>
-                            <h3 class="text-2xl font-bold text-gray-900">Practice Mode</h3>
-                            <span class="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">FREE</span>
+                            <h3 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Practice Mode</h3>
+                            <span class="bg-green-100 text-green-800 text-xs sm:text-sm font-medium px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">FREE</span>
                         </div>
                     </div>
-                    <ul class="space-y-3 mb-8">
+                    <ul class="space-y-2 sm:space-y-3 mb-5 sm:mb-8 text-sm sm:text-base">
                         <li class="flex items-center text-gray-700">
-                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <i class="fas fa-check text-green-500 mr-2 sm:mr-3 text-sm"></i>
                             100 questions per subject
                         </li>
                         <li class="flex items-center text-gray-700">
-                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <i class="fas fa-check text-green-500 mr-2 sm:mr-3 text-sm"></i>
                             Detailed explanations
                         </li>
                         <li class="flex items-center text-gray-700">
-                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <i class="fas fa-check text-green-500 mr-2 sm:mr-3 text-sm"></i>
                             Immediate feedback
                         </li>
                         <li class="flex items-center text-gray-700">
-                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <i class="fas fa-check text-green-500 mr-2 sm:mr-3 text-sm"></i>
                             No time pressure
                         </li>
                     </ul>
-                    <button id="startPracticeBtn" class="w-full bg-green-500 text-white py-3 rounded-xl hover:bg-green-600 transition-colors font-semibold relative">
+                    <button id="startPracticeBtn" class="w-full bg-green-500 text-white py-2.5 sm:py-3 rounded-lg sm:rounded-xl hover:bg-green-600 transition-colors font-semibold relative text-sm sm:text-base">
                         <span class="loading-spinner hidden absolute inset-0 flex items-center justify-center">
                           <span class="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full"></span>
                         </span>
@@ -401,42 +377,42 @@
                 </div>
 
                 <!-- Exam Mode Card -->
-                <div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl p-8 border-2 border-orange-200 hover:shadow-2xl transition-all transform hover:scale-105 relative">
-                    <div class="absolute -top-3 -right-3 bg-yellow-400 text-black text-sm font-bold px-4 py-2 rounded-lg shadow-lg transform rotate-12">
+                <div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8 border-2 border-orange-200 hover:shadow-2xl transition-all sm:transform sm:hover:scale-105 relative">
+                    <div class="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 bg-yellow-400 text-black text-xs sm:text-sm font-bold px-2 sm:px-4 py-1 sm:py-2 rounded-lg shadow-lg transform rotate-12">
                         ₦1,000
                     </div>
-                    <div class="flex items-center mb-6">
-                        <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center mr-4">
-                            <i class="fas fa-trophy text-white text-xl"></i>
+                    <div class="flex items-center mb-4 sm:mb-6">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg sm:rounded-xl flex items-center justify-center mr-3 sm:mr-4">
+                            <i class="fas fa-trophy text-white text-lg sm:text-xl"></i>
                         </div>
                         <div>
-                            <h3 class="text-2xl font-bold text-gray-900">Mock Exam Mode</h3>
-                            <span class="bg-orange-100 text-orange-800 text-sm font-medium px-3 py-1 rounded-full">PREMIUM - UNLOCK NOW</span>
+                            <h3 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Mock Exam Mode</h3>
+                            <span class="bg-orange-100 text-orange-800 text-xs sm:text-sm font-medium px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">PREMIUM</span>
                         </div>
                     </div>
-                    <ul class="space-y-3 mb-8">
+                    <ul class="space-y-2 sm:space-y-3 mb-5 sm:mb-8 text-sm sm:text-base">
                         <li class="flex items-center text-gray-700">
-                            <i class="fas fa-check text-orange-500 mr-3"></i>
+                            <i class="fas fa-check text-orange-500 mr-2 sm:mr-3 text-sm"></i>
                             Full JAMB simulation (180 questions)
                         </li>
                         <li class="flex items-center text-gray-700">
-                            <i class="fas fa-check text-orange-500 mr-3"></i>
+                            <i class="fas fa-check text-orange-500 mr-2 sm:mr-3 text-sm"></i>
                             2-hour timed exam
                         </li>
                         <li class="flex items-center text-gray-700">
-                            <i class="fas fa-check text-orange-500 mr-3"></i>
+                            <i class="fas fa-check text-orange-500 mr-2 sm:mr-3 text-sm"></i>
                             Real CBT interface
                         </li>
                         <li class="flex items-center text-gray-700">
-                            <i class="fas fa-check text-orange-500 mr-3"></i>
+                            <i class="fas fa-check text-orange-500 mr-2 sm:mr-3 text-sm"></i>
                             Performance analytics
                         </li>
                         <li class="flex items-center text-gray-700">
-                            <i class="fas fa-check text-orange-500 mr-3"></i>
+                            <i class="fas fa-check text-orange-500 mr-2 sm:mr-3 text-sm"></i>
                             Detailed score report
                         </li>
                     </ul>
-                    <button id="startExamBtn" class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-4 rounded-xl hover:from-orange-600 hover:to-red-600 transition-all font-bold shadow-lg hover:shadow-xl text-lg relative">
+                    <button id="startExamBtn" class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-2.5 sm:py-3 lg:py-4 rounded-lg sm:rounded-xl hover:from-orange-600 hover:to-red-600 transition-all font-bold shadow-lg hover:shadow-xl text-sm sm:text-base lg:text-lg relative">
                         <span class="loading-spinner hidden absolute inset-0 flex items-center justify-center">
                           <span class="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full"></span>
                         </span>
@@ -649,57 +625,57 @@
 
 
     <!-- Community Chat Section -->
-    <section class="py-16 bg-gradient-to-r from-blue-600 to-purple-600">
+    <section class="py-8 sm:py-12 lg:py-16 bg-gradient-to-r from-blue-600 to-purple-600">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <div class="bg-white rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden">
                 <div class="grid md:grid-cols-2 gap-0">
-                    <div class="p-8 md:p-12 flex flex-col justify-center">
-                        <div class="inline-flex items-center bg-blue-100 text-blue-700 px-4 py-2 rounded-full mb-4 w-fit">
+                    <div class="p-5 sm:p-8 md:p-12 flex flex-col justify-center">
+                        <div class="inline-flex items-center bg-blue-100 text-blue-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-3 sm:mb-4 w-fit text-sm sm:text-base">
                             <i class="fas fa-comments mr-2"></i>
                             <span class="font-semibold">New Feature!</span>
                         </div>
-                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">💬 Join Our Community Chat</h2>
-                        <p class="text-lg text-gray-600 mb-6">Connect with thousands of JAMB candidates just like you! Ask questions, share study tips, motivate each other, and celebrate your wins together.</p>
-                        <div class="space-y-3 mb-8">
+                        <h2 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">💬 Join Our Community Chat</h2>
+                        <p class="text-sm sm:text-base lg:text-lg text-gray-600 mb-4 sm:mb-6">Connect with thousands of JAMB candidates just like you! Ask questions, share study tips, motivate each other, and celebrate your wins together.</p>
+                        <div class="space-y-2 sm:space-y-3 mb-5 sm:mb-8">
                             <div class="flex items-start">
-                                <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
-                                <p class="text-gray-700">Get instant help from fellow students</p>
+                                <i class="fas fa-check-circle text-green-500 mt-0.5 sm:mt-1 mr-2 sm:mr-3 text-sm"></i>
+                                <p class="text-sm sm:text-base text-gray-700">Get instant help from fellow students</p>
                             </div>
                             <div class="flex items-start">
-                                <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
-                                <p class="text-gray-700">Share and discover study resources</p>
+                                <i class="fas fa-check-circle text-green-500 mt-0.5 sm:mt-1 mr-2 sm:mr-3 text-sm"></i>
+                                <p class="text-sm sm:text-base text-gray-700">Share and discover study resources</p>
                             </div>
                             <div class="flex items-start">
-                                <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
-                                <p class="text-gray-700">Stay motivated with exam preparation partners</p>
+                                <i class="fas fa-check-circle text-green-500 mt-0.5 sm:mt-1 mr-2 sm:mr-3 text-sm"></i>
+                                <p class="text-sm sm:text-base text-gray-700">Stay motivated with exam preparation partners</p>
                             </div>
                         </div>
-                        <a href="chatroom.html" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all font-bold text-center shadow-lg hover:shadow-xl transform hover:scale-105 inline-block">
+                        <a href="chatroom.html" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-5 sm:px-8 py-3 sm:py-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all font-bold text-center shadow-lg hover:shadow-xl transform hover:scale-105 inline-block text-sm sm:text-base">
                             <i class="fas fa-comments mr-2"></i>Enter Community Chat
                         </a>
                     </div>
-                    <div class="bg-gradient-to-br from-blue-50 to-purple-50 p-8 md:p-12 flex items-center justify-center">
-                        <div class="space-y-4 w-full">
-                            <div class="bg-white rounded-lg p-4 shadow-md transform -rotate-2">
-                                <div class="flex items-center mb-2">
-                                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">AO</div>
-                                    <span class="ml-2 font-semibold text-gray-900">Ada</span>
+                    <div class="bg-gradient-to-br from-blue-50 to-purple-50 p-5 sm:p-8 md:p-12 flex items-center justify-center">
+                        <div class="space-y-3 sm:space-y-4 w-full">
+                            <div class="bg-white rounded-lg p-3 sm:p-4 shadow-md transform -rotate-2">
+                                <div class="flex items-center mb-1.5 sm:mb-2">
+                                    <div class="w-6 h-6 sm:w-8 sm:h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm">AO</div>
+                                    <span class="ml-2 font-semibold text-gray-900 text-sm sm:text-base">Ada</span>
                                 </div>
-                                <p class="text-gray-700">"Just scored 310! Thanks for the math tips 🎉"</p>
+                                <p class="text-gray-700 text-xs sm:text-sm">"Just scored 310! Thanks for the math tips 🎉"</p>
                             </div>
-                            <div class="bg-white rounded-lg p-4 shadow-md transform rotate-1">
-                                <div class="flex items-center mb-2">
-                                    <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-sm">CM</div>
-                                    <span class="ml-2 font-semibold text-gray-900">Chidi</span>
+                            <div class="bg-white rounded-lg p-3 sm:p-4 shadow-md transform rotate-1">
+                                <div class="flex items-center mb-1.5 sm:mb-2">
+                                    <div class="w-6 h-6 sm:w-8 sm:h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm">CM</div>
+                                    <span class="ml-2 font-semibold text-gray-900 text-sm sm:text-base">Chidi</span>
                                 </div>
-                                <p class="text-gray-700">"Who else is writing JAMB next month? Let's study together! 📚"</p>
+                                <p class="text-gray-700 text-xs sm:text-sm">"Who else is writing JAMB next month? Let's study together! 📚"</p>
                             </div>
-                            <div class="bg-white rounded-lg p-4 shadow-md transform -rotate-1">
-                                <div class="flex items-center mb-2">
-                                    <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">FN</div>
-                                    <span class="ml-2 font-semibold text-gray-900">Funmi</span>
+                            <div class="bg-white rounded-lg p-3 sm:p-4 shadow-md transform -rotate-1">
+                                <div class="flex items-center mb-1.5 sm:mb-2">
+                                    <div class="w-6 h-6 sm:w-8 sm:h-8 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm">FN</div>
+                                    <span class="ml-2 font-semibold text-gray-900 text-sm sm:text-base">Funmi</span>
                                 </div>
-                                <p class="text-gray-700">"Can anyone explain this physics question? 🤔"</p>
+                                <p class="text-gray-700 text-xs sm:text-sm">"Can anyone explain this physics question? 🤔"</p>
                             </div>
                         </div>
                     </div>
@@ -709,33 +685,33 @@
     </section>
 
     <!-- Features Section -->
-    <section class="py-16 bg-gray-50">
+    <section class="py-8 sm:py-12 lg:py-16 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">Why Choose JambGenius ?</h2>
-                <p class="text-lg text-gray-600">Everything you need to excel in your JAMB UTME</p>
+            <div class="text-center mb-6 sm:mb-8 lg:mb-12">
+                <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 sm:mb-4">Why Choose JambGenius ?</h2>
+                <p class="text-sm sm:text-base lg:text-lg text-gray-600">Everything you need to excel in your JAMB UTME</p>
             </div>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-white rounded-xl p-6 shadow-sm">
-                    <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
-                        <i class="fas fa-question-circle text-primary-600 text-xl"></i>
+            <div class="grid md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+                <div class="bg-white rounded-xl p-4 sm:p-6 shadow-sm">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
+                        <i class="fas fa-question-circle text-primary-600 text-lg sm:text-xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Authentic Questions</h3>
-                    <p class="text-gray-600">Practice with real JAMB-style questions covering all major subjects</p>
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2">Authentic Questions</h3>
+                    <p class="text-sm sm:text-base text-gray-600">Practice with real JAMB-style questions covering all major subjects</p>
                 </div>
-                <div class="bg-white rounded-xl p-6 shadow-sm">
-                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                        <i class="fas fa-clock text-green-600 text-xl"></i>
+                <div class="bg-white rounded-xl p-4 sm:p-6 shadow-sm">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
+                        <i class="fas fa-clock text-green-600 text-lg sm:text-xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Timed Exams</h3>
-                    <p class="text-gray-600">Experience the real exam pressure with our 2-hour timed mock tests</p>
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2">Timed Exams</h3>
+                    <p class="text-sm sm:text-base text-gray-600">Experience the real exam pressure with our 2-hour timed mock tests</p>
                 </div>
-                <div class="bg-white rounded-xl p-6 shadow-sm">
-                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                        <i class="fas fa-chart-bar text-purple-600 text-xl"></i>
+                <div class="bg-white rounded-xl p-4 sm:p-6 shadow-sm">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
+                        <i class="fas fa-chart-bar text-purple-600 text-lg sm:text-xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Performance Tracking</h3>
-                    <p class="text-gray-600">Monitor your progress with detailed analytics and identify weak areas</p>
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2">Performance Tracking</h3>
+                    <p class="text-sm sm:text-base text-gray-600">Monitor your progress with detailed analytics and identify weak areas</p>
                 </div>
             </div>
         </div>
@@ -840,6 +816,37 @@
                 link.addEventListener('click', () => {
                     mobileMenu.classList.add('hidden');
                 });
+            });
+        }
+
+        // Profile Dropdown Toggle
+        const profileMenuBtn = document.getElementById('profileMenuBtn');
+        const profileDropdown = document.getElementById('profileDropdown');
+        const dropdownSignOut = document.getElementById('dropdownSignOut');
+        
+        if (profileMenuBtn && profileDropdown) {
+            profileMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('hidden');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!profileDropdown.contains(e.target) && !profileMenuBtn.contains(e.target)) {
+                    profileDropdown.classList.add('hidden');
+                }
+            });
+        }
+        
+        if (dropdownSignOut) {
+            dropdownSignOut.addEventListener('click', async () => {
+                const { signOut } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
+                const { auth } = await import('./firebase-init.js');
+                const confirmed = await customModal.confirm('Are you sure you want to sign out?', 'Sign Out');
+                if (confirmed) {
+                    await signOut(auth);
+                    window.location.reload();
+                }
             });
         }
 

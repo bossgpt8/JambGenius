@@ -32,7 +32,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <script src="config.js"></script>
     <script src="custom-modal.js"></script>
     <script src="content-protection.js"></script>
@@ -71,12 +71,9 @@
                     <a href="profile.html" class="profile-link hidden text-gray-700 hover:text-primary-600 font-medium transition-colors">
                         <i class="fas fa-user-circle mr-1"></i>Profile
                     </a>
-                    <div id="userSection" class="hidden items-center space-x-3">
+                    <div id="userSection" class="hidden items-center space-x-3 cursor-pointer" onclick="window.location.href='profile.html'" title="Go to profile">
                         <img id="userAvatar" src="" alt="User" class="w-8 h-8 rounded-full">
-                        <div id="userSection" class="hidden items-center space-x-4 cursor-pointer" onclick="window.location.href='profile.html'" title="Go to profile"><div class="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold hover:bg-primary-700 transition-colors"><span id="userInitial">U</span></div><span id="userName" class="text-gray-700 font-medium hover:text-primary-600 transition-colors"></span>
-                        <button id="signOutBtn" class="text-gray-500 hover:text-gray-700">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </button>
+                        <span id="userName" class="text-gray-700 font-medium hover:text-primary-600 transition-colors"></span>
                     </div>
                     <button id="authBtn" class="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium">
                         Sign In
@@ -149,39 +146,33 @@
                         </div>
                     </div>
 
-                    <!-- Message Input Form -->
-                    <form id="messageForm" class="flex-shrink-0 border-t border-gray-200 bg-white p-3 sm:p-4 rounded-b-2xl">
-                        <div class="flex gap-2 mb-2">
-                            <input 
-                                type="text" 
-                                id="messageInput" 
-                                placeholder="Type your message..." 
-                                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
-                            >
+                    <!-- Message Input Form - WhatsApp Style -->
+                    <form id="messageForm" class="flex-shrink-0 border-t border-gray-200 bg-white p-2 sm:p-3 rounded-b-2xl">
+                        <div class="flex items-center gap-2">
+                            <div class="flex-1 flex items-center bg-gray-100 rounded-full px-3 py-1.5">
+                                <label class="flex items-center justify-center w-8 h-8 text-gray-500 hover:text-primary-600 cursor-pointer transition-colors">
+                                    <i class="fas fa-image text-lg"></i>
+                                    <input type="file" id="imageInput" accept="image/*" class="hidden" />
+                                </label>
+                                
+                                <input 
+                                    type="text" 
+                                    id="messageInput" 
+                                    placeholder="Type your message..." 
+                                    class="flex-1 bg-transparent px-2 py-1.5 focus:outline-none text-sm"
+                                >
+                                
+                                <button id="voiceBtn" type="button" class="flex items-center justify-center w-8 h-8 text-gray-500 hover:text-green-600 transition-colors" title="Voice Note">
+                                    <i class="fas fa-microphone text-lg" id="voiceIcon"></i>
+                                </button>
+                            </div>
+                            
                             <button 
                                 type="submit" 
-                                class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium flex items-center gap-2 text-sm"
+                                class="bg-primary-600 text-white w-10 h-10 rounded-full hover:bg-primary-700 transition-colors flex items-center justify-center flex-shrink-0"
                             >
-                                <i class="fas fa-paper-plane"></i>Send
+                                <i class="fas fa-paper-plane"></i>
                             </button>
-                        </div>
-                        
-                        <!-- Media Buttons -->
-                        <div class="flex gap-2 mb-2">
-                            <label class="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer font-medium text-xs">
-                                <i class="fas fa-image text-sm"></i>Image
-                                <input type="file" id="imageInput" accept="image/*" class="hidden" />
-                            </label>
-                            
-                            <button id="voiceBtn" type="button" class="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors font-medium text-xs">
-                                <i class="fas fa-microphone text-sm"></i>
-                                <span id="voiceLabel">Voice Note</span>
-                            </button>
-                        </div>
-                        
-                        <div class="text-xs text-gray-500">
-                            <i class="fas fa-info-circle mr-1"></i>
-                            Press Enter to send • Send images (max 5MB) • Record voice notes • Type @boss for AI assistance
                         </div>
 
                         <!-- @ Mention Popup -->
