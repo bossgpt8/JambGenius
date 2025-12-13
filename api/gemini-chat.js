@@ -44,7 +44,7 @@ module.exports = async function handler(req, res) {
         'X-Title': 'JambGenius Boss'
       },
       body: JSON.stringify({
-        model: 'amazon/nova-2-lite-v1:free',
+        model: 'meta-llama/llama-3.3-70b-instruct:free',
         messages: messages
       })
     });
