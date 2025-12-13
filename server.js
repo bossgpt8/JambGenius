@@ -517,7 +517,7 @@ Be encouraging, supportive, and use markdown formatting for better readability w
         'X-Title': 'JambGenius AI'
       },
       body: JSON.stringify({
-        model: 'amazon/nova-2-lite-v1:free',
+        model: 'meta-llama/llama-3.3-70b-instruct:free',
         messages: messages
       })
     });
