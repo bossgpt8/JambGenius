@@ -1,34 +1,33 @@
-// Vercel Serverless Function for AI Answer Explanations using OpenRouter
+// Vercel Serverless Function for AI Answer Explanations using OpenRouter with Meta Llama 3.3
 module.exports = async function handler(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Added Authorization
-    res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Content-Type', 'application/json');
 
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
-    }
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
-    const { question, options, correctAnswer, userAnswer } = req.body;
+  const { question, options, correctAnswer, userAnswer } = req.body;
 
-    if (!question || !correctAnswer) {
-        return res.status(400).json({ error: 'Question and correctAnswer are required' });
-    }
+  if (!question || !correctAnswer) {
+    return res.status(400).json({ error: 'Question and correctAnswer are required' });
+  }
 
-    // --- CHANGE 1: Use OpenRouter API Key ---
-    const openRouterApiKey = process.env.OPENROUTER_API_KEY; 
-    if (!openRouterApiKey) {
-        console.error('OPENROUTER_API_KEY is not configured');
-        return res.status(500).json({ error: 'AI service not configured' });
-    }
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    console.error('OPENROUTER_API_KEY is not configured');
+    return res.status(500).json({ success: false, error: 'AI service not configured' });
+  }
 
-    try {
-        // Build the prompt as a single string for the Llama model
-        const prompt = `You are a JAMB exam tutor. A student is practicing for the JAMB UTME exam. 
+  try {
+    const prompt = `You are a JAMB exam tutor. A student is practicing for the JAMB UTME exam. 
+
 Question: ${question}
 
 Options:
@@ -43,59 +42,44 @@ Please provide a clear, concise explanation in 2-3 sentences:
 
 Keep it educational and encouraging.`;
 
-        // --- CHANGE 2 & 3: API URL and Headers ---
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                // --- CHANGE 4: Authorization Header ---
-                'Authorization': `Bearer ${openRouterApiKey}`, 
-                // Optional headers for OpenRouter visibility
-                'HTTP-Referer': 'https://your-jamb-app.vercel.app', // Replace with your domain
-                'X-Title': 'JAMB Genius Tutor' 
-            },
-            // --- CHANGE 5: Request Body Format (OpenAI/OpenRouter Style) ---
-            body: JSON.stringify({
-                // --- CHANGE 6: Model Name ---
-                model: 'meta-llama/llama-3.3-70b-instruct:free',
-                messages: [
-                    {
-                        // The entire prompt goes into the user message content
-                        role: 'user',
-                        content: prompt
-                    }
-                ],
-                // Generation settings are applied to the body
-                temperature: 0.7,
-                max_tokens: 200 // Note: Changed to max_tokens for consistency with OpenAI/OpenRouter
-            })
-        });
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'X-Title': 'JambGenius AI'
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-3.3-8b-instruct:free',
+        messages: [
+          { role: 'user', content: prompt }
+        ]
+      })
+    });
 
-        if (!response.ok) {
-            const errorData = await response.text();
-            console.error('OpenRouter API error:', response.status, errorData);
-            return res.status(response.status).json({ error: 'Failed to generate explanation from AI service' });
-        }
+    const data = await response.json();
 
-        const data = await response.json();
-
-        // --- CHANGE 7: Response Parsing ---
-        if (data.choices && data.choices[0] && data.choices[0].message) {
-            const explanation = data.choices[0].message.content;
-            return res.status(200).json({
-                success: true,
-                explanation: explanation
-            });
-        }
-
-        console.error('No explanation generated by Llama model:', JSON.stringify(data));
-        return res.status(200).json({
-            success: false,
-            error: 'No explanation generated'
-        });
-
-    } catch (error) {
-        console.error('Error calling OpenRouter API:', error);
-        return res.status(500).json({ error: 'Internal server error' });
+    if (data.error) {
+      console.error('OpenRouter API error:', data.error);
+      return res.status(500).json({ success: false, error: 'AI service error: ' + (data.error.message || 'Unknown error') });
     }
+
+    const explanation = data?.choices?.[0]?.message?.content;
+    
+    if (explanation) {
+      return res.status(200).json({
+        success: true,
+        explanation: explanation
+      });
+    }
+
+    return res.status(200).json({
+      success: false,
+      error: 'No explanation generated'
+    });
+
+  } catch (error) {
+    console.error('Error calling OpenRouter API:', error);
+    return res.status(500).json({ success: false, error: 'Internal server error' });
+  }
 };
